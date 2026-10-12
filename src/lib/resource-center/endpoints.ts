@@ -8,3 +8,4 @@ export const resourceCenterEndpoints = {
   download: (id: string) => `/library/resources/${id}/download`,
   view: (id: string) => `/library/resources/${id}/view`,
 } as const;
+

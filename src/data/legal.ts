@@ -23,7 +23,7 @@ export const legalDocuments: Record<LegalDocument["slug"], LegalDocument> = {
     slug: "privacy",
     title: "Privacy Policy",
     summary:
-      "How YourCBSE collects, uses and protects the information of students, teachers and school administrators.",
+      "How YourTeacher collects, uses and protects the information of students, teachers and school administrators.",
     updatedAt: "1 July 2026",
     sections: [
       {
@@ -64,7 +64,7 @@ export const legalDocuments: Record<LegalDocument["slug"], LegalDocument> = {
         id: "your-rights",
         heading: "Your rights",
         paragraphs: [
-          "You may access, correct, export or delete your personal data. Write to privacy@yourcbse.com and we will respond within 30 days.",
+          "You may access, correct, export or delete your personal data. Write to privacy@yourteacher.co.in and we will respond within 30 days.",
         ],
       },
     ],
@@ -73,14 +73,14 @@ export const legalDocuments: Record<LegalDocument["slug"], LegalDocument> = {
     slug: "terms",
     title: "Terms & Conditions",
     summary:
-      "The rules for using YourCBSE, including account responsibilities, acceptable use and content ownership.",
+      "The rules for using YourTeacher, including account responsibilities, acceptable use and content ownership.",
     updatedAt: "1 July 2026",
     sections: [
       {
         id: "acceptance",
         heading: "Acceptance of terms",
         paragraphs: [
-          "By creating an account or using YourCBSE you agree to these terms. If you use the platform on behalf of a school, you confirm you are authorised to accept them for that institution.",
+          "By creating an account or using YourTeacher you agree to these terms. If you use the platform on behalf of a school, you confirm you are authorised to accept them for that institution.",
         ],
       },
       {
@@ -104,7 +104,7 @@ export const legalDocuments: Record<LegalDocument["slug"], LegalDocument> = {
         id: "content",
         heading: "Content and intellectual property",
         paragraphs: [
-          "Notes, videos, worksheets and interactive apps remain the property of YourCBSE or the teachers who publish them. You receive a personal, non-transferable licence to use them for study.",
+          "Notes, videos, worksheets and interactive apps remain the property of YourTeacher or the teachers who publish them. You receive a personal, non-transferable licence to use them for study.",
         ],
       },
       {
@@ -119,7 +119,7 @@ export const legalDocuments: Record<LegalDocument["slug"], LegalDocument> = {
   cookies: {
     slug: "cookies",
     title: "Cookie Policy",
-    summary: "The cookies YourCBSE uses, why they exist, and how you can control them.",
+    summary: "The cookies YourTeacher uses, why they exist, and how you can control them.",
     updatedAt: "1 July 2026",
     sections: [
       {
@@ -162,7 +162,7 @@ export const faqItems: FaqItem[] = [
   {
     id: "faq-1",
     category: "Getting started",
-    question: "Who can use YourCBSE?",
+    question: "Who can use YourTeacher?",
     answer:
       "Any CBSE student from Class 6 to Class 12, along with their teachers and school administrators. Each role gets a dedicated portal after signing in.",
   },
@@ -213,7 +213,7 @@ export const faqItems: FaqItem[] = [
     category: "Technical",
     question: "Which devices and browsers are supported?",
     answer:
-      "YourCBSE works on desktops, laptops, tablets and phones using the latest versions of Chrome, Safari, Edge and Firefox.",
+      "YourTeacher works on desktops, laptops, tablets and phones using the latest versions of Chrome, Safari, Edge and Firefox.",
   },
   {
     id: "faq-9",
@@ -238,21 +238,21 @@ export const supportChannels: SupportChannel[] = [
     id: "email",
     title: "Email support",
     description: "Best for account, billing and content questions.",
-    action: "support@yourcbse.com",
+    action: "support@yourteacher.co.in",
     detail: "Replies within one working day",
   },
   {
     id: "schools",
     title: "School onboarding",
     description: "Set up classes, teachers and bulk student accounts.",
-    action: "schools@yourcbse.com",
+    action: "schools@yourteacher.co.in",
     detail: "Dedicated onboarding specialist",
   },
   {
     id: "report",
     title: "Report a content issue",
     description: "Spotted an error in a chapter, question or solution?",
-    action: "content@yourcbse.com",
+    action: "content@yourteacher.co.in",
     detail: "Reviewed by the subject team",
   },
 ];
@@ -291,3 +291,4 @@ export const helpTopics: HelpTopic[] = [
     to: "/faq",
   },
 ];
+

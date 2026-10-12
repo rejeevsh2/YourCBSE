@@ -45,3 +45,4 @@ export interface AssistantService {
     feedback: AssistantFeedback,
   ): Promise<AssistantResult<null>>;
 }
+

@@ -18,13 +18,13 @@ import { useNotificationCenter } from "@/hooks/use-notification-center";
 export const Route = createFileRoute("/student/notification-center")({
   head: () => ({
     meta: [
-      { title: "Notification Center — YourCBSE" },
+      { title: "Notification Center — YourTeacher" },
       {
         name: "description",
         content:
-          "Learning updates, assignment deadlines, AI suggestions, achievements and reminders in one place.",
+          "Learning updates, assignment deadlines, achievements and reminders in one place.",
       },
-      { property: "og:title", content: "Notification Center — YourCBSE" },
+      { property: "og:title", content: "Notification Center — YourTeacher" },
       {
         property: "og:description",
         content: "Every update, reminder and achievement from your CBSE study workspace.",
@@ -43,10 +43,14 @@ function NotificationCenterPage() {
       portalLabel="Student Portal"
       portalPath="/student"
       title="Notification Center"
-      description={`${center.unreadCount} unread update${center.unreadCount === 1 ? "" : "s"} across learning, assignments and achievements.`}
+      description={`${center.unreadCount} unread update${center.unreadCount === 1 ? "" : "s"} across learning, reminders and achievements.`}
       actions={
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" className="rounded-2xl" onClick={() => void center.markAllRead()}>
+          <Button
+            variant="outline"
+            className="rounded-2xl"
+            onClick={() => void center.markAllRead()}
+          >
             <CheckCheck className="size-4" /> Mark all read
           </Button>
           <Button asChild className="rounded-2xl">
@@ -104,9 +108,9 @@ function NotificationCenterPage() {
         <TabsContent value="reminders" className="space-y-4">
           <SectionHeading
             title="Reminders"
-            description="Goals, revision, quizzes, assignments and the exam countdown."
+            description="Study reminders, revision activity, quizzes and upcoming learning events."
           />
-          <ReminderGrid />
+          <ReminderGrid reminders={center.reminders} />
         </TabsContent>
 
         <TabsContent value="achievements" className="space-y-4">
@@ -114,7 +118,7 @@ function NotificationCenterPage() {
             title="Achievements"
             description="Streaks, completed chapters, perfect scores and new badges."
           />
-          <AchievementList />
+          <AchievementList achievements={center.achievements} />
         </TabsContent>
       </Tabs>
     </PortalPage>

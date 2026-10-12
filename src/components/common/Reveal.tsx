@@ -53,3 +53,4 @@ export function Reveal({ children, className, delay = 0, as: Tag = "div" }: Reve
     </Tag>
   );
 }
+

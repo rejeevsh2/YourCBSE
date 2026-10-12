@@ -9,3 +9,4 @@ export const assistantEndpoints = {
   feedback: (id: string, messageId: string) =>
     `/ai/conversations/${id}/messages/${messageId}/feedback`,
 } as const;
+

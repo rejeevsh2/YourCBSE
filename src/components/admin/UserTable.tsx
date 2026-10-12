@@ -108,3 +108,4 @@ export function UserTable({ rows, caption, createLabel = "Create user" }: UserTa
     </div>
   );
 }
+

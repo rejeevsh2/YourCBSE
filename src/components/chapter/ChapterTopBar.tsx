@@ -58,7 +58,12 @@ export function ChapterTopBar({ readingProgress, onOpenSidebar }: ChapterTopBarP
             <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem className="hidden lg:block">
               <BreadcrumbLink asChild>
-                <Link to="/subjects">{chapter.subject}</Link>
+                <Link
+  to="/subjects"
+  search={{ grade: "1" }}
+>
+  {chapter.subject}
+</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden lg:block" />
@@ -128,3 +133,4 @@ export function ChapterTopBar({ readingProgress, onOpenSidebar }: ChapterTopBarP
     </header>
   );
 }
+

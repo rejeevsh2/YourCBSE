@@ -1,447 +1,205 @@
+import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  Bell,
-  CalendarClock,
-  Download,
-  Flame,
-  History,
-  PlayCircle,
-  Sparkles,
-  Target,
-  TrendingUp,
-} from "lucide-react";
 import { PortalPage } from "@/components/layout/PortalPage";
-import { StudioPanel } from "@/components/teacher/StudioPanel";
-import { BarChart } from "@/components/admin/Charts";
-import { StreakHeatmap } from "@/components/student/StreakHeatmap";
-import { LaunchCard, LaunchGrid } from "@/components/student/LaunchCard";
-import { QuickActions } from "@/components/student/QuickActions";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
-import {
-  continueLearning,
-  downloadIcons,
-  downloads,
-  learner,
-  notificationIcons,
-  recentActivity,
-  recommendedChapters,
-  revisionTiles,
-  streakCalendar,
-  studentNotifications,
-  upcomingTests,
-  weekLabels,
-  weeklyMinutes,
-} from "@/data/student";
-import { difficultyTone, libraryChapters, studentCourses } from "@/data/student-library";
+import { StatGrid } from "@/components/common/StatCard";
+import { apiRequest } from "@/lib/auth/http";
+import { getStoredUser } from "@/lib/auth";
 
-
+type Notice = { id: string; data: { title?: string; message?: string }; read: boolean };
+type Dashboard = {
+  stats: {
+    totalLessons: number;
+    completedLessons: number;
+    inProgressLessons: number;
+    percentage: number;
+  };
+  progress: { lesson: { id: number; title: string }; is_completed: boolean } | null;
+  activities: { id: number; lesson: string; chapter: string; completed: boolean; time: string }[];
+  notifications: Notice[];
+  unreadCount: number;
+};
 export const Route = createFileRoute("/student/")({
   head: () => ({
     meta: [
-      { title: "Student Dashboard — YourCBSE" },
-      { name: "description", content: "Your daily goal, streak, recommendations and upcoming tests." },
+      { title: "Student Dashboard — YourTeacher.co.in" },
       { name: "robots", content: "noindex" },
     ],
   }),
   component: StudentDashboard,
 });
-
-const activityTone = {
-  primary: "bg-accent text-accent-foreground",
-  success: "bg-success/12 text-success",
-  warning: "bg-warning/12 text-warning",
-} as const;
-
-/* Derived from static placeholder data — computed once, not on every render.
-   These become memoised selectors over API data during Laravel integration. */
-const goalPercent = Math.round((learner.minutesToday / learner.dailyGoalMinutes) * 100);
-const xpPercent = Math.round((learner.xp / learner.nextLevelXp) * 100);
-const unread = studentNotifications.filter((item) => item.unread).length;
-const overall = Math.round(
-  studentCourses.reduce((sum, course) => sum + course.progress, 0) / studentCourses.length,
-);
-const weeklyTotal = weeklyMinutes.reduce((sum, minutes) => sum + minutes, 0);
-const recentChapters = libraryChapters.filter((chapter) => chapter.lastOpened).slice(0, 4);
-const recentDownloads = downloads.slice(0, 4);
-const notificationPreview = studentNotifications.slice(0, 4);
-
 function StudentDashboard() {
-
-
-
+  const [data, setData] = useState<Dashboard | null>(null);
+  const [name, setName] = useState("Student");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState<string | null>(null);
+  const load = useCallback(async () => {
+    setError("");
+    const [stats, progress, activity, notices] = await Promise.all([
+      apiRequest<Dashboard["stats"]>("/dashboard/stats", { method: "GET" }),
+      apiRequest<{ progress: Dashboard["progress"] }>("/lesson-progress/continue", {
+        method: "GET",
+      }),
+      apiRequest<{ activities: Dashboard["activities"] }>("/recent-activity", { method: "GET" }),
+      apiRequest<{ notifications: Notice[]; unreadCount: number }>("/notifications", {
+        method: "GET",
+      }),
+    ]);
+    if (!stats.ok || !progress.ok || !activity.ok || !notices.ok) {
+      setError(
+        [stats, progress, activity, notices].find((r) => !r.ok)?.message ??
+          "Could not load dashboard.",
+      );
+      return;
+    }
+    if (stats.data && progress.data && activity.data && notices.data)
+      setData({
+        stats: stats.data,
+        progress: progress.data.progress,
+        activities: activity.data.activities,
+        ...notices.data,
+      });
+  }, []);
+  useEffect(() => {
+    setName(getStoredUser()?.fullName || "Student");
+    void load();
+  }, [load]);
+  async function markRead(id: string) {
+    setBusy(id);
+    const r = await apiRequest<{ unreadCount: number }>(`/notifications/${id}/read`, {
+      method: "PATCH",
+    });
+    if (r.ok && r.data)
+      setData((d) =>
+        d
+          ? {
+              ...d,
+              unreadCount: r.data!.unreadCount,
+              notifications: d.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)),
+            }
+          : d,
+      );
+    else setError(r.message);
+    setBusy(null);
+  }
   return (
     <PortalPage
       portalLabel="Student Portal"
       portalPath="/student"
-      title={`Good evening, ${learner.name}`}
-      description={`${learner.grade} · ${learner.board} — you're ${learner.dailyGoalMinutes - learner.minutesToday} minutes away from today's goal.`}
+      title={`Welcome, ${name}`}
+      description="Your lessons, progress, and latest updates."
+      showNotice={false}
       actions={
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" className="rounded-2xl" asChild>
-            <Link to="/student/notifications">
-              <Bell className="size-4" /> Notifications
-              {unread ? (
-                <Badge variant="secondary" className="ml-1 rounded-full text-[10px]">
-                  {unread}
-                </Badge>
-              ) : null}
-            </Link>
-          </Button>
-          <Button className="rounded-2xl" asChild>
-            <Link to="/student/continue-learning">
-              <PlayCircle className="size-4" /> Resume learning
-            </Link>
-          </Button>
-        </div>
+        <Button asChild>
+          <Link to="/student/learning-hub">Browse lessons</Link>
+        </Button>
       }
     >
-      {/* Profile summary */}
-      <section className="tile flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:p-6">
-        <Avatar className="size-14">
-          <AvatarFallback className="bg-accent text-lg font-bold text-accent-foreground">
-            AS
-          </AvatarFallback>
-        </Avatar>
-        <div className="min-w-0 flex-1">
-          <h2 className="font-heading text-lg font-bold">Ananya Sharma</h2>
-          <p className="text-sm text-muted-foreground">
-            {learner.grade} · {learner.board} · Delhi Public School
-          </p>
-        </div>
-        <dl className="grid grid-cols-3 gap-4 text-center sm:gap-6">
-          <div>
-            <dt className="text-xs text-muted-foreground">Overall</dt>
-            <dd className="font-heading text-lg font-bold">{overall}%</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted-foreground">Streak</dt>
-            <dd className="font-heading text-lg font-bold">{learner.streak}d</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted-foreground">Level</dt>
-            <dd className="font-heading text-lg font-bold">{learner.level}</dd>
-          </div>
-        </dl>
-        <Button variant="outline" className="rounded-2xl" asChild>
-          <Link to="/student/profile">View profile</Link>
-        </Button>
-      </section>
-
-      {/* Quick actions */}
-      <section className="space-y-3" aria-label="Quick actions">
-        <h2 className="font-heading text-lg font-bold">Quick actions</h2>
-        <QuickActions />
-      </section>
-
-      {/* Goal · streak · level */}
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        <section className="tile space-y-4 p-5 sm:p-6">
-          <div className="flex items-center gap-2">
-            <Target className="size-4 text-primary" aria-hidden="true" />
-            <h2 className="font-heading text-base font-bold">Today's goal</h2>
-          </div>
-          <p className="font-heading text-4xl font-bold">
-            {learner.minutesToday}
-            <span className="text-lg text-muted-foreground"> / {learner.dailyGoalMinutes} min</span>
-          </p>
-          <Progress value={goalPercent} aria-label="Daily goal progress" />
-          <p className="text-sm text-muted-foreground">
-            {goalPercent}% complete — one more lesson closes it out.
-          </p>
-        </section>
-
-        <section className="tile space-y-4 p-5 sm:p-6">
-          <div className="flex items-center gap-2">
-            <Flame className="size-4 text-warning" aria-hidden="true" />
-            <h2 className="font-heading text-base font-bold">Study streak</h2>
-          </div>
-          <p className="font-heading text-4xl font-bold">
-            {learner.streak}
-            <span className="text-lg text-muted-foreground"> days</span>
-          </p>
-          <BarChart data={weeklyMinutes} labels={weekLabels} height="h-20" ariaLabel="Minutes studied this week" />
-          <p className="text-sm text-muted-foreground">Longest run: {learner.longestStreak} days.</p>
-        </section>
-
-        <section className="tile space-y-4 p-5 sm:p-6">
-          <div className="flex items-center gap-2">
-            <Sparkles className="size-4 text-primary" aria-hidden="true" />
-            <h2 className="font-heading text-base font-bold">Level {learner.level}</h2>
-          </div>
-          <p className="font-heading text-4xl font-bold">
-            {learner.xp.toLocaleString()}
-            <span className="text-lg text-muted-foreground"> XP</span>
-          </p>
-          <Progress value={xpPercent} aria-label="Level progress" />
-          <p className="text-sm text-muted-foreground">
-            {(learner.nextLevelXp - learner.xp).toLocaleString()} XP to level {learner.level + 1}.
-          </p>
-        </section>
-      </div>
-
-      {/* Continue learning */}
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-heading text-lg font-bold">Continue learning</h2>
-          <Button variant="ghost" size="sm" className="rounded-2xl" asChild>
-            <Link to="/student/continue-learning">
-              View all <ArrowRight className="size-4" />
-            </Link>
+      {error && (
+        <div role="alert" className="tile p-5">
+          {error}{" "}
+          <Button variant="outline" onClick={load}>
+            Retry
           </Button>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          {continueLearning.map((item) => (
-            <article key={item.id} className="tile tile-interactive space-y-4 p-5">
-              <div>
-                <p className="text-xs text-muted-foreground">{item.meta}</p>
-                <h3 className="font-heading text-base font-bold">{item.title}</h3>
-              </div>
-              <Progress value={item.progress} aria-label={`${item.title} progress`} />
-              <div className="flex items-baseline justify-between text-xs text-muted-foreground">
-                <span>{item.progress}% complete</span>
-                <span>{item.minutesLeft} min left</span>
-              </div>
-              <p className="text-sm">Next: {item.nextUp}</p>
-              <Button size="sm" className="w-full rounded-2xl">
-                <PlayCircle className="size-4" /> Resume
-              </Button>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        {/* Recommended */}
-        <section className="space-y-4 lg:col-span-2">
-          <h2 className="font-heading text-lg font-bold">Recommended for you</h2>
-          <ul className="grid gap-4 sm:grid-cols-2">
-            {recommendedChapters.map((chapter) => (
-              <li key={chapter.id} className="tile tile-interactive space-y-3 p-5">
-                <div className="flex items-start gap-2">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs text-muted-foreground">{chapter.subject}</p>
-                    <h3 className="font-heading text-sm font-bold">{chapter.title}</h3>
-                  </div>
-                  <Badge
-                    variant="outline"
-                    className={cn("shrink-0 rounded-full text-[11px]", difficultyTone[chapter.difficulty])}
-                  >
-                    {chapter.difficulty}
-                  </Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">{chapter.reason}</p>
-                <p className="text-xs text-muted-foreground">{chapter.minutes} min read</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <div className="space-y-4">
-          <StudioPanel title="Upcoming tests" icon={CalendarClock}>
-            <ul className="space-y-4">
-              {upcomingTests.map((test) => (
-                <li key={test.id} className="flex gap-3">
-                  <div className="flex size-12 shrink-0 flex-col items-center justify-center rounded-2xl bg-accent text-accent-foreground">
-                    <span className="font-heading text-sm font-bold">{test.date}</span>
-                    <span className="text-[10px] tracking-wide uppercase">{test.day}</span>
-                  </div>
-                  <div className="min-w-0 flex-1 space-y-1.5">
-                    <p className="truncate text-sm font-semibold">{test.title}</p>
-                    <p className="text-xs text-muted-foreground">{test.meta}</p>
-                    <Progress value={test.readiness} aria-label={`${test.title} readiness`} />
-                    <p className="text-[11px] text-muted-foreground">Readiness {test.readiness}%</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </StudioPanel>
-
-          <StudioPanel title="Study streak map" icon={Flame}>
-            <StreakHeatmap days={streakCalendar} />
-          </StudioPanel>
-        </div>
-      </div>
-
-      {/* Weekly + overall progress */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        <StudioPanel title="Weekly progress" icon={TrendingUp} className="lg:col-span-2">
-          <p className="text-sm text-muted-foreground">
-            {Math.floor(weeklyTotal / 60)} h {weeklyTotal % 60} m studied over the last seven days.
-          </p>
-          <BarChart
-            data={weeklyMinutes}
-            labels={weekLabels}
-            height="h-32"
-            ariaLabel="Minutes studied each day this week"
+      )}
+      {!data && !error && <p role="status">Loading your dashboard…</p>}
+      {data && (
+        <>
+          <StatGrid
+            items={[
+              {
+                label: "Available lessons",
+                value: String(data.stats.totalLessons),
+                tone: "primary",
+              },
+              { label: "Completed", value: String(data.stats.completedLessons), tone: "success" },
+              {
+                label: "In progress",
+                value: String(data.stats.inProgressLessons),
+                tone: "warning",
+              },
+              { label: "Overall completion", value: `${data.stats.percentage}%`, tone: "primary" },
+            ]}
           />
-        </StudioPanel>
-
-        <StudioPanel title="Overall progress" icon={Target}>
-          <p className="font-heading text-4xl font-bold">{overall}%</p>
-          <Progress value={overall} aria-label="Overall syllabus progress" />
-          <ul className="space-y-3">
-            {studentCourses.slice(0, 4).map((course) => (
-              <li key={course.id} className="space-y-1">
-                <div className="flex items-baseline justify-between text-xs">
-                  <span className="font-medium">{course.subject}</span>
-                  <span className="text-muted-foreground">{course.progress}%</span>
-                </div>
-                <Progress value={course.progress} aria-label={`${course.subject} progress`} />
-              </li>
+          <div className="grid gap-5 lg:grid-cols-2">
+            <section className="tile space-y-4 p-6">
+              <h2 className="text-xl font-bold">Continue learning</h2>
+              {data.progress ? (
+                <>
+                  <p>{data.progress.lesson.title}</p>
+                  <Button asChild>
+                    <Link
+                      to="/student/lesson/$lessonId"
+                      params={{ lessonId: String(data.progress.lesson.id) }}
+                    >
+                      Open lesson
+                    </Link>
+                  </Button>
+                </>
+              ) : (
+                <p>Open your first lesson to begin tracking progress.</p>
+              )}
+              <div className="flex flex-wrap gap-3 border-t pt-4">
+                <Button asChild variant="outline">
+                  <Link to="/student/practice">Practice</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/student/interactive-revision">Revise</Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link to="/student/bookmarks">Bookmarks</Link>
+                </Button>
+              </div>
+            </section>
+            <section className="tile space-y-4 p-6">
+              <h2 className="text-xl font-bold">
+                Notifications{" "}
+                {data.unreadCount > 0 && (
+                  <span className="text-primary">({data.unreadCount} unread)</span>
+                )}
+              </h2>
+              {!data.notifications.length && <p>No notifications yet.</p>}
+              {data.notifications.slice(0, 5).map((n) => (
+                <button
+                  key={n.id}
+                  disabled={!!busy || n.read}
+                  className="block w-full rounded-xl border p-3 text-left disabled:cursor-default"
+                  onClick={() => markRead(n.id)}
+                >
+                  <strong>
+                    {!n.read && (
+                      <span
+                        aria-label="Unread"
+                        className="mr-2 inline-block size-2 rounded-full bg-primary"
+                      />
+                    )}
+                    {n.data.title || "Update"}
+                  </strong>
+                  <p className="text-sm text-muted-foreground">{n.data.message}</p>
+                </button>
+              ))}
+              <Link className="text-primary underline" to="/student/notifications">
+                View all notifications
+              </Link>
+            </section>
+          </div>
+          <section className="tile space-y-4 p-6">
+            <h2 className="text-xl font-bold">Recent activity</h2>
+            {!data.activities.length && <p>Your learning activity will appear here.</p>}
+            {data.activities.map((a) => (
+              <div className="border-b pb-3" key={a.id}>
+                <p>
+                  {a.completed ? "Completed" : "Opened"}: {a.lesson}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {a.chapter} · {a.time}
+                </p>
+              </div>
             ))}
-          </ul>
-        </StudioPanel>
-      </div>
-
-      {/* Recently opened chapters */}
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-heading text-lg font-bold">Recently opened chapters</h2>
-          <Button variant="ghost" size="sm" className="rounded-2xl" asChild>
-            <Link to="/student/learning-hub">
-              Learning Hub <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        </div>
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {recentChapters.map((chapter) => (
-            <li key={chapter.id} className="tile tile-interactive space-y-3 p-5">
-              <p className="text-xs text-muted-foreground">{chapter.subject}</p>
-              <h3 className="font-heading text-sm font-bold">
-                <Link
-                  to="/student/chapter/$chapterSlug"
-                  params={{ chapterSlug: chapter.slug }}
-                  className="hover:underline focus-visible:underline focus-visible:outline-none"
-                >
-                  {chapter.title}
-                </Link>
-              </h3>
-              <Progress value={chapter.completion} aria-label={`${chapter.title} progress`} />
-              <p className="text-xs text-muted-foreground">
-                {chapter.completion}% · opened {chapter.lastOpened}
-              </p>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Quick revision */}
-
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-heading text-lg font-bold">Jump back in</h2>
-          <Button variant="ghost" size="sm" className="rounded-2xl" asChild>
-            <Link to="/student/revision">
-              Revision Hub <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        </div>
-        <LaunchGrid>
-          {revisionTiles.slice(0, 3).map((tile) => (
-            <LaunchCard key={tile.id} {...tile} />
-          ))}
-        </LaunchGrid>
-      </section>
-
-      {/* Downloads + notifications */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <StudioPanel
-          title="Recent downloads"
-          icon={Download}
-          action={
-            <Button variant="ghost" size="sm" className="rounded-2xl" asChild>
-              <Link to="/student/downloads">
-                All <ArrowRight className="size-4" />
-              </Link>
-            </Button>
-          }
-        >
-          <ul className="space-y-3">
-            {recentDownloads.map((item) => {
-              const Icon = downloadIcons[item.kind];
-              return (
-                <li key={item.id} className="flex items-center gap-3">
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
-                    <Icon className="size-4" aria-hidden="true" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {item.subject} · {item.size} · {item.downloadedOn}
-                    </p>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </StudioPanel>
-
-        <StudioPanel
-          title="Notifications"
-          icon={Bell}
-          action={
-            <Button variant="ghost" size="sm" className="rounded-2xl" asChild>
-              <Link to="/student/notifications">
-                All <ArrowRight className="size-4" />
-              </Link>
-            </Button>
-          }
-        >
-          <ul className="space-y-3">
-            {notificationPreview.map((item) => {
-              const Icon = notificationIcons[item.kind];
-              return (
-                <li key={item.id} className="flex items-start gap-3">
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
-                    <Icon className="size-4" aria-hidden="true" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">{item.time}</p>
-                  </div>
-                  {item.unread ? (
-                    <span className="mt-2 size-2 shrink-0 rounded-full bg-primary">
-                      <span className="sr-only">Unread</span>
-                    </span>
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
-        </StudioPanel>
-      </div>
-
-      {/* Activity */}
-      <StudioPanel title="Recent activity" icon={History}>
-
-        <ul className="space-y-4">
-          {recentActivity.map((entry) => {
-            const Icon = entry.icon;
-            return (
-              <li key={entry.id} className="flex items-start gap-3">
-                <span
-                  className={cn(
-                    "flex size-9 shrink-0 items-center justify-center rounded-2xl",
-                    activityTone[entry.tone],
-                  )}
-                >
-                  <Icon className="size-4" aria-hidden="true" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm">{entry.text}</p>
-                  <p className="text-xs text-muted-foreground">{entry.time}</p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </StudioPanel>
+          </section>
+        </>
+      )}
     </PortalPage>
   );
 }

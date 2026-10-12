@@ -60,3 +60,4 @@ export function ResourceTabPanel({ tab }: { tab: PlayerTab }) {
     </div>
   );
 }
+

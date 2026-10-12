@@ -166,3 +166,4 @@ export function useResourceSearch({ initial, bookmarks = [] }: UseResourceSearch
 
   return { query, results, loading, error, update, toggleValue, reset, activeFilterCount, setQuery };
 }
+

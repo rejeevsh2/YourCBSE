@@ -336,3 +336,4 @@ export function conversationTitleFrom(prompt: string): string {
   const clean = prompt.trim().replace(/\s+/g, " ");
   return clean.length > 42 ? `${clean.slice(0, 42)}…` : clean || "New chat";
 }
+

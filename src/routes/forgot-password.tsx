@@ -13,8 +13,8 @@ import { Button } from "@/components/ui/button";
 import { useAuthAction } from "@/hooks/use-auth-action";
 import { authService, mergeFieldErrors, validateEmail, type FieldErrors } from "@/lib/auth";
 
-const title = "Forgot Password — YourCBSE";
-const description = "Request a secure password reset link for your YourCBSE account.";
+const title = "Forgot Password — YourTeacher";
+const description = "Request a secure password reset link for your YourTeacher account.";
 
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({
@@ -64,14 +64,9 @@ function ForgotPasswordPage() {
         <div className="space-y-5">
           <AuthIllustration icon={KeyRound} />
           <SuccessAlert title="Reset link sent">
-            If an account exists for {email}, a password reset link is on its way. The link expires
-            in 30 minutes.
+            If an account exists for {email}, a password reset link is on its way. Use the link in that email to choose a new password.
           </SuccessAlert>
-          <Button asChild className="w-full">
-            <Link to="/reset-password" search={{ email }}>
-              Open reset form
-            </Link>
-          </Button>
+
         </div>
       ) : (
         <>
@@ -97,3 +92,4 @@ function ForgotPasswordPage() {
     </AuthShell>
   );
 }
+

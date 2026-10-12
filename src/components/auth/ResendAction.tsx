@@ -60,3 +60,4 @@ export function ResendAction({
     </SecondaryButton>
   );
 }
+

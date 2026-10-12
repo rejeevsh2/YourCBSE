@@ -13,8 +13,8 @@ import {
 import { authService } from "@/lib/auth";
 import { optionalEmailSearch } from "@/lib/auth/route-search";
 
-const title = "Verify Your Email — YourCBSE";
-const description = "Confirm your email address to activate your YourCBSE account.";
+const title = "Verify Your Email — YourTeacher";
+const description = "Confirm your email address to activate your YourTeacher account.";
 
 export const Route = createFileRoute("/verify-email")({
   validateSearch: optionalEmailSearch,
@@ -94,3 +94,4 @@ function VerifyEmailPage() {
     </AuthShell>
   );
 }
+

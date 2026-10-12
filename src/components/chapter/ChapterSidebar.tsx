@@ -159,3 +159,4 @@ export function ChapterSidebar({ onClose }: { onClose?: () => void }) {
     </div>
   );
 }
+

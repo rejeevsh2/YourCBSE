@@ -64,3 +64,16 @@ export function clearSession() {
     }
   }
 }
+
+/** Update profile fields without changing token or remember-me storage. */
+export function refreshStoredUser(patch: Partial<AuthSession["user"]>) {
+  if (typeof window === "undefined") return;
+  try {
+    for (const store of [window.localStorage, window.sessionStorage]) {
+      const raw = store.getItem(USER_KEY);
+      if (raw) store.setItem(USER_KEY, JSON.stringify({ ...JSON.parse(raw), ...patch }));
+    }
+  } catch {
+    /* Storage can be unavailable in privacy mode. */
+  }
+}

@@ -86,10 +86,16 @@ export function GradeCard({ grade, className }: { grade: Grade; className?: stri
       />
 
       <Button asChild variant="outline" className="mt-auto w-full rounded-xl">
-        <Link to="/subjects">
-          Explore {grade.name}
-          <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-        </Link>
+        <Link
+  to="/subjects"
+  search={{ grade: grade.id }}
+>
+  Explore {grade.name}
+  <ArrowRight
+    className="size-4 transition-transform group-hover:translate-x-0.5"
+    aria-hidden="true"
+  />
+</Link>
       </Button>
     </article>
   );
@@ -126,11 +132,18 @@ export function SubjectCard({ subject, className }: { subject: Subject; classNam
       />
 
       <Button asChild variant="ghost" className="mt-auto w-full justify-between rounded-xl">
-        <Link to="/search">
-          Start {subject.name}
-          <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-        </Link>
+        <Link
+  to="/subject/$subjectId"
+  params={{ subjectId: subject.id }}
+>
+  Start {subject.name}
+  <ArrowRight
+    className="size-4 transition-transform group-hover:translate-x-0.5"
+    aria-hidden="true"
+  />
+</Link>
       </Button>
     </article>
   );
 }
+

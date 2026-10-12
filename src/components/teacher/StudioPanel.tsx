@@ -22,3 +22,4 @@ export function StudioPanel({ title, icon: Icon, action, className, children }: 
     </section>
   );
 }
+

@@ -11,3 +11,4 @@ export interface OptionalEmailSearch {
 export function optionalEmailSearch(search: Record<string, unknown>): OptionalEmailSearch {
   return typeof search.email === "string" && search.email ? { email: search.email } : {};
 }
+

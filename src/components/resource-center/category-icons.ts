@@ -58,3 +58,4 @@ export function categorySlug(category: ResourceCategory): string {
 export function categoryFromSlug(slug: string): ResourceCategory | undefined {
   return categoryMeta.find((item) => categorySlug(item.category) === slug)?.category;
 }
+

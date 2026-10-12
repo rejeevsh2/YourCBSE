@@ -20,11 +20,11 @@ import {
 } from "@/lib/auth";
 import { optionalEmailSearch } from "@/lib/auth/route-search";
 
-const title = "Reset Password — YourCBSE";
-const description = "Choose a new password for your YourCBSE account.";
+const title = "Reset Password — YourTeacher";
+const description = "Choose a new password for your YourTeacher account.";
 
 export const Route = createFileRoute("/reset-password")({
-  validateSearch: optionalEmailSearch,
+  validateSearch: (search: Record<string, unknown>) => ({ ...optionalEmailSearch(search), token: typeof search.token === "string" ? search.token : undefined }),
   head: () => ({
     meta: [
       { title },
@@ -39,7 +39,7 @@ export const Route = createFileRoute("/reset-password")({
 });
 
 function ResetPasswordPage() {
-  const { email } = Route.useSearch();
+  const { email, token } = Route.useSearch();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -49,6 +49,7 @@ function ResetPasswordPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (!token || !email) { setLocalErrors({ password: "Open the complete reset link from your email." }); return; }
     const nextErrors: FieldErrors = {
       password: validatePassword(password),
       confirm: validateMatch(password, confirm),
@@ -56,7 +57,7 @@ function ResetPasswordPage() {
     setLocalErrors(nextErrors);
     if (nextErrors.password || nextErrors.confirm) return;
 
-    const result = await run({ email, password, passwordConfirmation: confirm });
+    const result = await run({ email, token, password, passwordConfirmation: confirm });
     if (!result?.ok) return;
 
     toast.success("Password updated", { description: "Sign in with your new password." });
@@ -111,3 +112,4 @@ function ResetPasswordPage() {
     </AuthShell>
   );
 }
+

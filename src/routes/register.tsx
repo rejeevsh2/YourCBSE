@@ -32,8 +32,8 @@ import {
   type FieldErrors,
 } from "@/lib/auth";
 
-const title = "Create an Account — YourCBSE";
-const description = "Register for YourCBSE to access CBSE notes, videos and practice resources.";
+const title = "Create an Account — YourTeacher";
+const description = "Register for YourTeacher to access CBSE notes, videos and practice resources.";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -92,14 +92,14 @@ function RegisterPage() {
     });
     if (!result?.ok) return;
 
-    toast.success("Account created", { description: "Verify your email to finish setting up." });
-    navigate({ to: "/verify-email", search: { email: values.email } });
+    toast.success("Account created", { description: "You can now sign in to start learning." });
+    navigate({ to: "/login" });
   }
 
   return (
     <AuthShell
       title="Create your account"
-      description="Join YourCBSE and keep every chapter in one place."
+      description="Join YourTeacher and keep every chapter in one place."
       footer={
         <>
           Already registered?{" "}
@@ -157,7 +157,7 @@ function RegisterPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="student">Student</SelectItem>
-              <SelectItem value="teacher">Teacher</SelectItem>
+              
             </SelectContent>
           </Select>
         </div>
@@ -208,3 +208,4 @@ function RegisterPage() {
     </AuthShell>
   );
 }
+

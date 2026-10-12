@@ -7,7 +7,7 @@ const isErrorCode = (value: string): value is ErrorCode => value in errorPresets
 export const Route = createFileRoute("/error/$code")({
   head: ({ params }) => {
     const preset = isErrorCode(params.code) ? errorPresets[params.code] : undefined;
-    const title = preset ? `${preset.label} — YourCBSE` : "Page not found — YourCBSE";
+    const title = preset ? `${preset.label} — YourTeacher` : "Page not found — YourTeacher";
     const description = preset?.description ?? "The page you were looking for isn't here.";
 
     return {
@@ -32,3 +32,4 @@ function ErrorCodePage() {
 
   return <ErrorPageView code={code} />;
 }
+

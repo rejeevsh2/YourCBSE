@@ -119,3 +119,4 @@ export interface ResourceCenterService {
   removeDownload(id: string): Promise<LibraryResult<LibraryUserState>>;
   recordView(id: string): Promise<LibraryResult<LibraryUserState>>;
 }
+

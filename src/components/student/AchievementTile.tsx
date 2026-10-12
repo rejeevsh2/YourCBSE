@@ -49,3 +49,4 @@ export function AchievementTile({ badge }: { badge: AchievementBadge }) {
     </article>
   );
 }
+

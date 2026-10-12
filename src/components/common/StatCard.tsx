@@ -38,3 +38,4 @@ export function StatGrid({ items }: { items: StatItem[] }) {
     </div>
   );
 }
+

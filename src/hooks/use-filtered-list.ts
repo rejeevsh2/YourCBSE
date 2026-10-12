@@ -33,3 +33,4 @@ export function useFilteredList<TItem, TKind extends string>({
 
   return { query, setQuery, kind, setKind, results };
 }
+

@@ -10,6 +10,8 @@ import { authService } from "@/lib/auth";
 export function GoogleAuthButton({ label = "Continue with Google" }: { label?: string }) {
   const { loading, run } = useAuthAction(authService.signInWithGoogle);
 
+  if (import.meta.env.VITE_ENABLE_GOOGLE_AUTH !== "true") return null;
+
   return (
     <SocialLoginButton
       type="button"
@@ -25,3 +27,4 @@ export function GoogleAuthButton({ label = "Continue with Google" }: { label?: s
     </SocialLoginButton>
   );
 }
+

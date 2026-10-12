@@ -112,3 +112,4 @@ export const ChapterCard = memo(function ChapterCard({
     </article>
   );
 });
+

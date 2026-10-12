@@ -34,7 +34,7 @@ export function SearchBox({
         <Input
           type="search"
           placeholder={placeholder}
-          aria-label={rest["aria-label"] ?? "Search YourCBSE"}
+          aria-label={rest["aria-label"] ?? "Search YourTeacher"}
           className={cn("bg-card/70 pl-11", size === "lg" && "h-12 text-base")}
         />
       </div>
@@ -47,3 +47,4 @@ export function SearchBox({
 
   );
 }
+

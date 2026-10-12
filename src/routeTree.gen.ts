@@ -43,13 +43,14 @@ import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
-import { Route as AdminBackupRouteImport } from './routes/admin.backup'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminChaptersRouteImport } from './routes/admin.chapters'
 import { Route as AdminFlashcardsRouteImport } from './routes/admin.flashcards'
 import { Route as AdminGradesRouteImport } from './routes/admin.grades'
 import { Route as AdminIntegrationsRouteImport } from './routes/admin.integrations'
 import { Route as AdminInteractiveAppsRouteImport } from './routes/admin.interactive-apps'
+import { Route as AdminLessonContentsRouteImport } from './routes/admin.lesson-contents'
+import { Route as AdminLessonsRouteImport } from './routes/admin.lessons'
 import { Route as AdminLogsRouteImport } from './routes/admin.logs'
 import { Route as AdminMediaRouteImport } from './routes/admin.media'
 import { Route as AdminMindMapsRouteImport } from './routes/admin.mind-maps'
@@ -67,11 +68,15 @@ import { Route as AdminStudentsRouteImport } from './routes/admin.students'
 import { Route as AdminSubjectsRouteImport } from './routes/admin.subjects'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminTeachersRouteImport } from './routes/admin.teachers'
+import { Route as AdminUnitsRouteImport } from './routes/admin.units'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminVideosRouteImport } from './routes/admin.videos'
 import { Route as AdminWorksheetsRouteImport } from './routes/admin.worksheets'
+import { Route as BlogSlugRouteImport } from './routes/blog_.$slug'
+import { Route as ChapterChapterIdRouteImport } from './routes/chapter.$chapterId'
 import { Route as ErrorCodeRouteImport } from './routes/error.$code'
 import { Route as LearnChapterSlugRouteImport } from './routes/learn.$chapterSlug'
+import { Route as LessonLessonIdRouteImport } from './routes/lesson.$lessonId'
 import { Route as LibraryIndexRouteImport } from './routes/library.index'
 import { Route as LibraryDownloadsRouteImport } from './routes/library.downloads'
 import { Route as LibraryFavoritesRouteImport } from './routes/library.favorites'
@@ -89,6 +94,7 @@ import { Route as StudentContinueLearningRouteImport } from './routes/student.co
 import { Route as StudentCoursesRouteImport } from './routes/student.courses'
 import { Route as StudentDownloadsRouteImport } from './routes/student.downloads'
 import { Route as StudentHelpRouteImport } from './routes/student.help'
+import { Route as StudentInteractiveRevisionRouteImport } from './routes/student.interactive-revision'
 import { Route as StudentLearningHubRouteImport } from './routes/student.learning-hub'
 import { Route as StudentLearningPathRouteImport } from './routes/student.learning-path'
 import { Route as StudentNotificationCenterRouteImport } from './routes/student.notification-center'
@@ -101,6 +107,7 @@ import { Route as StudentProgressRouteImport } from './routes/student.progress'
 import { Route as StudentRevisionRouteImport } from './routes/student.revision'
 import { Route as StudentSearchRouteImport } from './routes/student.search'
 import { Route as StudentSettingsRouteImport } from './routes/student.settings'
+import { Route as SubjectSubjectIdRouteImport } from './routes/subject.$subjectId'
 import { Route as TeacherIndexRouteImport } from './routes/teacher.index'
 import { Route as TeacherAnalyticsRouteImport } from './routes/teacher.analytics'
 import { Route as TeacherAssignmentsRouteImport } from './routes/teacher.assignments'
@@ -111,6 +118,8 @@ import { Route as TeacherEditorRouteImport } from './routes/teacher.editor'
 import { Route as TeacherFlashcardsRouteImport } from './routes/teacher.flashcards'
 import { Route as TeacherGradesRouteImport } from './routes/teacher.grades'
 import { Route as TeacherInteractiveAppsRouteImport } from './routes/teacher.interactive-apps'
+import { Route as TeacherLessonContentsRouteImport } from './routes/teacher.lesson-contents'
+import { Route as TeacherLessonsRouteImport } from './routes/teacher.lessons'
 import { Route as TeacherLibraryRouteImport } from './routes/teacher.library'
 import { Route as TeacherMessagesRouteImport } from './routes/teacher.messages'
 import { Route as TeacherMindMapsRouteImport } from './routes/teacher.mind-maps'
@@ -123,11 +132,16 @@ import { Route as TeacherSettingsRouteImport } from './routes/teacher.settings'
 import { Route as TeacherStudentProgressRouteImport } from './routes/teacher.student-progress'
 import { Route as TeacherStudentsRouteImport } from './routes/teacher.students'
 import { Route as TeacherSubjectsRouteImport } from './routes/teacher.subjects'
+import { Route as TeacherUnitsRouteImport } from './routes/teacher.units'
 import { Route as TeacherVideosRouteImport } from './routes/teacher.videos'
 import { Route as TeacherWorksheetsRouteImport } from './routes/teacher.worksheets'
+import { Route as UnitUnitIdRouteImport } from './routes/unit.$unitId'
 import { Route as LibraryCategoryCategorySlugRouteImport } from './routes/library.category.$categorySlug'
 import { Route as LibraryResourceResourceIdRouteImport } from './routes/library.resource.$resourceId'
 import { Route as StudentChapterChapterSlugRouteImport } from './routes/student.chapter.$chapterSlug'
+import { Route as StudentLessonLessonIdRouteImport } from './routes/student.lesson.$lessonId'
+import { Route as StudentPracticeReviewAttemptIdRouteImport } from './routes/student.practice-review.$attemptId'
+import { Route as StudentPracticeSetPracticeSetIdRouteImport } from './routes/student.practice-set.$practiceSetId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -299,11 +313,6 @@ const AdminAuditRoute = AdminAuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminBackupRoute = AdminBackupRouteImport.update({
-  id: '/backup',
-  path: '/backup',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminBlogRoute = AdminBlogRouteImport.update({
   id: '/blog',
   path: '/blog',
@@ -332,6 +341,16 @@ const AdminIntegrationsRoute = AdminIntegrationsRouteImport.update({
 const AdminInteractiveAppsRoute = AdminInteractiveAppsRouteImport.update({
   id: '/interactive-apps',
   path: '/interactive-apps',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLessonContentsRoute = AdminLessonContentsRouteImport.update({
+  id: '/lesson-contents',
+  path: '/lesson-contents',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLessonsRoute = AdminLessonsRouteImport.update({
+  id: '/lessons',
+  path: '/lessons',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminLogsRoute = AdminLogsRouteImport.update({
@@ -419,6 +438,11 @@ const AdminTeachersRoute = AdminTeachersRouteImport.update({
   path: '/teachers',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminUnitsRoute = AdminUnitsRouteImport.update({
+  id: '/units',
+  path: '/units',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -434,6 +458,16 @@ const AdminWorksheetsRoute = AdminWorksheetsRouteImport.update({
   path: '/worksheets',
   getParentRoute: () => AdminRoute,
 } as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog_/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChapterChapterIdRoute = ChapterChapterIdRouteImport.update({
+  id: '/chapter/$chapterId',
+  path: '/chapter/$chapterId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ErrorCodeRoute = ErrorCodeRouteImport.update({
   id: '/error/$code',
   path: '/error/$code',
@@ -442,6 +476,11 @@ const ErrorCodeRoute = ErrorCodeRouteImport.update({
 const LearnChapterSlugRoute = LearnChapterSlugRouteImport.update({
   id: '/learn/$chapterSlug',
   path: '/learn/$chapterSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LessonLessonIdRoute = LessonLessonIdRouteImport.update({
+  id: '/lesson/$lessonId',
+  path: '/lesson/$lessonId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LibraryIndexRoute = LibraryIndexRouteImport.update({
@@ -529,6 +568,12 @@ const StudentHelpRoute = StudentHelpRouteImport.update({
   path: '/help',
   getParentRoute: () => StudentRoute,
 } as any)
+const StudentInteractiveRevisionRoute =
+  StudentInteractiveRevisionRouteImport.update({
+    id: '/interactive-revision',
+    path: '/interactive-revision',
+    getParentRoute: () => StudentRoute,
+  } as any)
 const StudentLearningHubRoute = StudentLearningHubRouteImport.update({
   id: '/learning-hub',
   path: '/learning-hub',
@@ -591,6 +636,11 @@ const StudentSettingsRoute = StudentSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => StudentRoute,
 } as any)
+const SubjectSubjectIdRoute = SubjectSubjectIdRouteImport.update({
+  id: '/subject/$subjectId',
+  path: '/subject/$subjectId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeacherIndexRoute = TeacherIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -639,6 +689,16 @@ const TeacherGradesRoute = TeacherGradesRouteImport.update({
 const TeacherInteractiveAppsRoute = TeacherInteractiveAppsRouteImport.update({
   id: '/interactive-apps',
   path: '/interactive-apps',
+  getParentRoute: () => TeacherRoute,
+} as any)
+const TeacherLessonContentsRoute = TeacherLessonContentsRouteImport.update({
+  id: '/lesson-contents',
+  path: '/lesson-contents',
+  getParentRoute: () => TeacherRoute,
+} as any)
+const TeacherLessonsRoute = TeacherLessonsRouteImport.update({
+  id: '/lessons',
+  path: '/lessons',
   getParentRoute: () => TeacherRoute,
 } as any)
 const TeacherLibraryRoute = TeacherLibraryRouteImport.update({
@@ -701,6 +761,11 @@ const TeacherSubjectsRoute = TeacherSubjectsRouteImport.update({
   path: '/subjects',
   getParentRoute: () => TeacherRoute,
 } as any)
+const TeacherUnitsRoute = TeacherUnitsRouteImport.update({
+  id: '/units',
+  path: '/units',
+  getParentRoute: () => TeacherRoute,
+} as any)
 const TeacherVideosRoute = TeacherVideosRouteImport.update({
   id: '/videos',
   path: '/videos',
@@ -710,6 +775,11 @@ const TeacherWorksheetsRoute = TeacherWorksheetsRouteImport.update({
   id: '/worksheets',
   path: '/worksheets',
   getParentRoute: () => TeacherRoute,
+} as any)
+const UnitUnitIdRoute = UnitUnitIdRouteImport.update({
+  id: '/unit/$unitId',
+  path: '/unit/$unitId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LibraryCategoryCategorySlugRoute =
   LibraryCategoryCategorySlugRouteImport.update({
@@ -727,6 +797,23 @@ const StudentChapterChapterSlugRoute =
   StudentChapterChapterSlugRouteImport.update({
     id: '/chapter/$chapterSlug',
     path: '/chapter/$chapterSlug',
+    getParentRoute: () => StudentRoute,
+  } as any)
+const StudentLessonLessonIdRoute = StudentLessonLessonIdRouteImport.update({
+  id: '/lesson/$lessonId',
+  path: '/lesson/$lessonId',
+  getParentRoute: () => StudentRoute,
+} as any)
+const StudentPracticeReviewAttemptIdRoute =
+  StudentPracticeReviewAttemptIdRouteImport.update({
+    id: '/practice-review/$attemptId',
+    path: '/practice-review/$attemptId',
+    getParentRoute: () => StudentRoute,
+  } as any)
+const StudentPracticeSetPracticeSetIdRoute =
+  StudentPracticeSetPracticeSetIdRouteImport.update({
+    id: '/practice-set/$practiceSetId',
+    path: '/practice-set/$practiceSetId',
     getParentRoute: () => StudentRoute,
   } as any)
 
@@ -764,13 +851,14 @@ export interface FileRoutesByFullPath {
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
-  '/admin/backup': typeof AdminBackupRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/chapters': typeof AdminChaptersRoute
   '/admin/flashcards': typeof AdminFlashcardsRoute
   '/admin/grades': typeof AdminGradesRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/interactive-apps': typeof AdminInteractiveAppsRoute
+  '/admin/lesson-contents': typeof AdminLessonContentsRoute
+  '/admin/lessons': typeof AdminLessonsRoute
   '/admin/logs': typeof AdminLogsRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/mind-maps': typeof AdminMindMapsRoute
@@ -788,11 +876,15 @@ export interface FileRoutesByFullPath {
   '/admin/subjects': typeof AdminSubjectsRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/teachers': typeof AdminTeachersRoute
+  '/admin/units': typeof AdminUnitsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/videos': typeof AdminVideosRoute
   '/admin/worksheets': typeof AdminWorksheetsRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/chapter/$chapterId': typeof ChapterChapterIdRoute
   '/error/$code': typeof ErrorCodeRoute
   '/learn/$chapterSlug': typeof LearnChapterSlugRoute
+  '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/library/downloads': typeof LibraryDownloadsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
   '/library/recent': typeof LibraryRecentRoute
@@ -808,6 +900,7 @@ export interface FileRoutesByFullPath {
   '/student/courses': typeof StudentCoursesRoute
   '/student/downloads': typeof StudentDownloadsRoute
   '/student/help': typeof StudentHelpRoute
+  '/student/interactive-revision': typeof StudentInteractiveRevisionRoute
   '/student/learning-hub': typeof StudentLearningHubRoute
   '/student/learning-path': typeof StudentLearningPathRoute
   '/student/notification-center': typeof StudentNotificationCenterRoute
@@ -820,6 +913,7 @@ export interface FileRoutesByFullPath {
   '/student/revision': typeof StudentRevisionRoute
   '/student/search': typeof StudentSearchRoute
   '/student/settings': typeof StudentSettingsRoute
+  '/subject/$subjectId': typeof SubjectSubjectIdRoute
   '/teacher/analytics': typeof TeacherAnalyticsRoute
   '/teacher/assignments': typeof TeacherAssignmentsRoute
   '/teacher/chapters': typeof TeacherChaptersRoute
@@ -829,6 +923,8 @@ export interface FileRoutesByFullPath {
   '/teacher/flashcards': typeof TeacherFlashcardsRoute
   '/teacher/grades': typeof TeacherGradesRoute
   '/teacher/interactive-apps': typeof TeacherInteractiveAppsRoute
+  '/teacher/lesson-contents': typeof TeacherLessonContentsRoute
+  '/teacher/lessons': typeof TeacherLessonsRoute
   '/teacher/library': typeof TeacherLibraryRoute
   '/teacher/messages': typeof TeacherMessagesRoute
   '/teacher/mind-maps': typeof TeacherMindMapsRoute
@@ -841,8 +937,10 @@ export interface FileRoutesByFullPath {
   '/teacher/student-progress': typeof TeacherStudentProgressRoute
   '/teacher/students': typeof TeacherStudentsRoute
   '/teacher/subjects': typeof TeacherSubjectsRoute
+  '/teacher/units': typeof TeacherUnitsRoute
   '/teacher/videos': typeof TeacherVideosRoute
   '/teacher/worksheets': typeof TeacherWorksheetsRoute
+  '/unit/$unitId': typeof UnitUnitIdRoute
   '/admin/': typeof AdminIndexRoute
   '/library/': typeof LibraryIndexRoute
   '/student/': typeof StudentIndexRoute
@@ -850,6 +948,9 @@ export interface FileRoutesByFullPath {
   '/library/category/$categorySlug': typeof LibraryCategoryCategorySlugRoute
   '/library/resource/$resourceId': typeof LibraryResourceResourceIdRoute
   '/student/chapter/$chapterSlug': typeof StudentChapterChapterSlugRoute
+  '/student/lesson/$lessonId': typeof StudentLessonLessonIdRoute
+  '/student/practice-review/$attemptId': typeof StudentPracticeReviewAttemptIdRoute
+  '/student/practice-set/$practiceSetId': typeof StudentPracticeSetPracticeSetIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -881,13 +982,14 @@ export interface FileRoutesByTo {
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
-  '/admin/backup': typeof AdminBackupRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/chapters': typeof AdminChaptersRoute
   '/admin/flashcards': typeof AdminFlashcardsRoute
   '/admin/grades': typeof AdminGradesRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/interactive-apps': typeof AdminInteractiveAppsRoute
+  '/admin/lesson-contents': typeof AdminLessonContentsRoute
+  '/admin/lessons': typeof AdminLessonsRoute
   '/admin/logs': typeof AdminLogsRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/mind-maps': typeof AdminMindMapsRoute
@@ -905,11 +1007,15 @@ export interface FileRoutesByTo {
   '/admin/subjects': typeof AdminSubjectsRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/teachers': typeof AdminTeachersRoute
+  '/admin/units': typeof AdminUnitsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/videos': typeof AdminVideosRoute
   '/admin/worksheets': typeof AdminWorksheetsRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/chapter/$chapterId': typeof ChapterChapterIdRoute
   '/error/$code': typeof ErrorCodeRoute
   '/learn/$chapterSlug': typeof LearnChapterSlugRoute
+  '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/library/downloads': typeof LibraryDownloadsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
   '/library/recent': typeof LibraryRecentRoute
@@ -925,6 +1031,7 @@ export interface FileRoutesByTo {
   '/student/courses': typeof StudentCoursesRoute
   '/student/downloads': typeof StudentDownloadsRoute
   '/student/help': typeof StudentHelpRoute
+  '/student/interactive-revision': typeof StudentInteractiveRevisionRoute
   '/student/learning-hub': typeof StudentLearningHubRoute
   '/student/learning-path': typeof StudentLearningPathRoute
   '/student/notification-center': typeof StudentNotificationCenterRoute
@@ -937,6 +1044,7 @@ export interface FileRoutesByTo {
   '/student/revision': typeof StudentRevisionRoute
   '/student/search': typeof StudentSearchRoute
   '/student/settings': typeof StudentSettingsRoute
+  '/subject/$subjectId': typeof SubjectSubjectIdRoute
   '/teacher/analytics': typeof TeacherAnalyticsRoute
   '/teacher/assignments': typeof TeacherAssignmentsRoute
   '/teacher/chapters': typeof TeacherChaptersRoute
@@ -946,6 +1054,8 @@ export interface FileRoutesByTo {
   '/teacher/flashcards': typeof TeacherFlashcardsRoute
   '/teacher/grades': typeof TeacherGradesRoute
   '/teacher/interactive-apps': typeof TeacherInteractiveAppsRoute
+  '/teacher/lesson-contents': typeof TeacherLessonContentsRoute
+  '/teacher/lessons': typeof TeacherLessonsRoute
   '/teacher/library': typeof TeacherLibraryRoute
   '/teacher/messages': typeof TeacherMessagesRoute
   '/teacher/mind-maps': typeof TeacherMindMapsRoute
@@ -958,8 +1068,10 @@ export interface FileRoutesByTo {
   '/teacher/student-progress': typeof TeacherStudentProgressRoute
   '/teacher/students': typeof TeacherStudentsRoute
   '/teacher/subjects': typeof TeacherSubjectsRoute
+  '/teacher/units': typeof TeacherUnitsRoute
   '/teacher/videos': typeof TeacherVideosRoute
   '/teacher/worksheets': typeof TeacherWorksheetsRoute
+  '/unit/$unitId': typeof UnitUnitIdRoute
   '/admin': typeof AdminIndexRoute
   '/library': typeof LibraryIndexRoute
   '/student': typeof StudentIndexRoute
@@ -967,6 +1079,9 @@ export interface FileRoutesByTo {
   '/library/category/$categorySlug': typeof LibraryCategoryCategorySlugRoute
   '/library/resource/$resourceId': typeof LibraryResourceResourceIdRoute
   '/student/chapter/$chapterSlug': typeof StudentChapterChapterSlugRoute
+  '/student/lesson/$lessonId': typeof StudentLessonLessonIdRoute
+  '/student/practice-review/$attemptId': typeof StudentPracticeReviewAttemptIdRoute
+  '/student/practice-set/$practiceSetId': typeof StudentPracticeSetPracticeSetIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1003,13 +1118,14 @@ export interface FileRoutesById {
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
   '/admin/audit': typeof AdminAuditRoute
-  '/admin/backup': typeof AdminBackupRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/chapters': typeof AdminChaptersRoute
   '/admin/flashcards': typeof AdminFlashcardsRoute
   '/admin/grades': typeof AdminGradesRoute
   '/admin/integrations': typeof AdminIntegrationsRoute
   '/admin/interactive-apps': typeof AdminInteractiveAppsRoute
+  '/admin/lesson-contents': typeof AdminLessonContentsRoute
+  '/admin/lessons': typeof AdminLessonsRoute
   '/admin/logs': typeof AdminLogsRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/mind-maps': typeof AdminMindMapsRoute
@@ -1027,11 +1143,15 @@ export interface FileRoutesById {
   '/admin/subjects': typeof AdminSubjectsRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/teachers': typeof AdminTeachersRoute
+  '/admin/units': typeof AdminUnitsRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/videos': typeof AdminVideosRoute
   '/admin/worksheets': typeof AdminWorksheetsRoute
+  '/blog_/$slug': typeof BlogSlugRoute
+  '/chapter/$chapterId': typeof ChapterChapterIdRoute
   '/error/$code': typeof ErrorCodeRoute
   '/learn/$chapterSlug': typeof LearnChapterSlugRoute
+  '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/library/downloads': typeof LibraryDownloadsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
   '/library/recent': typeof LibraryRecentRoute
@@ -1047,6 +1167,7 @@ export interface FileRoutesById {
   '/student/courses': typeof StudentCoursesRoute
   '/student/downloads': typeof StudentDownloadsRoute
   '/student/help': typeof StudentHelpRoute
+  '/student/interactive-revision': typeof StudentInteractiveRevisionRoute
   '/student/learning-hub': typeof StudentLearningHubRoute
   '/student/learning-path': typeof StudentLearningPathRoute
   '/student/notification-center': typeof StudentNotificationCenterRoute
@@ -1059,6 +1180,7 @@ export interface FileRoutesById {
   '/student/revision': typeof StudentRevisionRoute
   '/student/search': typeof StudentSearchRoute
   '/student/settings': typeof StudentSettingsRoute
+  '/subject/$subjectId': typeof SubjectSubjectIdRoute
   '/teacher/analytics': typeof TeacherAnalyticsRoute
   '/teacher/assignments': typeof TeacherAssignmentsRoute
   '/teacher/chapters': typeof TeacherChaptersRoute
@@ -1068,6 +1190,8 @@ export interface FileRoutesById {
   '/teacher/flashcards': typeof TeacherFlashcardsRoute
   '/teacher/grades': typeof TeacherGradesRoute
   '/teacher/interactive-apps': typeof TeacherInteractiveAppsRoute
+  '/teacher/lesson-contents': typeof TeacherLessonContentsRoute
+  '/teacher/lessons': typeof TeacherLessonsRoute
   '/teacher/library': typeof TeacherLibraryRoute
   '/teacher/messages': typeof TeacherMessagesRoute
   '/teacher/mind-maps': typeof TeacherMindMapsRoute
@@ -1080,8 +1204,10 @@ export interface FileRoutesById {
   '/teacher/student-progress': typeof TeacherStudentProgressRoute
   '/teacher/students': typeof TeacherStudentsRoute
   '/teacher/subjects': typeof TeacherSubjectsRoute
+  '/teacher/units': typeof TeacherUnitsRoute
   '/teacher/videos': typeof TeacherVideosRoute
   '/teacher/worksheets': typeof TeacherWorksheetsRoute
+  '/unit/$unitId': typeof UnitUnitIdRoute
   '/admin/': typeof AdminIndexRoute
   '/library/': typeof LibraryIndexRoute
   '/student/': typeof StudentIndexRoute
@@ -1089,6 +1215,9 @@ export interface FileRoutesById {
   '/library/category/$categorySlug': typeof LibraryCategoryCategorySlugRoute
   '/library/resource/$resourceId': typeof LibraryResourceResourceIdRoute
   '/student/chapter/$chapterSlug': typeof StudentChapterChapterSlugRoute
+  '/student/lesson/$lessonId': typeof StudentLessonLessonIdRoute
+  '/student/practice-review/$attemptId': typeof StudentPracticeReviewAttemptIdRoute
+  '/student/practice-set/$practiceSetId': typeof StudentPracticeSetPracticeSetIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1126,13 +1255,14 @@ export interface FileRouteTypes {
     | '/admin/announcements'
     | '/admin/approvals'
     | '/admin/audit'
-    | '/admin/backup'
     | '/admin/blog'
     | '/admin/chapters'
     | '/admin/flashcards'
     | '/admin/grades'
     | '/admin/integrations'
     | '/admin/interactive-apps'
+    | '/admin/lesson-contents'
+    | '/admin/lessons'
     | '/admin/logs'
     | '/admin/media'
     | '/admin/mind-maps'
@@ -1150,11 +1280,15 @@ export interface FileRouteTypes {
     | '/admin/subjects'
     | '/admin/support'
     | '/admin/teachers'
+    | '/admin/units'
     | '/admin/users'
     | '/admin/videos'
     | '/admin/worksheets'
+    | '/blog/$slug'
+    | '/chapter/$chapterId'
     | '/error/$code'
     | '/learn/$chapterSlug'
+    | '/lesson/$lessonId'
     | '/library/downloads'
     | '/library/favorites'
     | '/library/recent'
@@ -1170,6 +1304,7 @@ export interface FileRouteTypes {
     | '/student/courses'
     | '/student/downloads'
     | '/student/help'
+    | '/student/interactive-revision'
     | '/student/learning-hub'
     | '/student/learning-path'
     | '/student/notification-center'
@@ -1182,6 +1317,7 @@ export interface FileRouteTypes {
     | '/student/revision'
     | '/student/search'
     | '/student/settings'
+    | '/subject/$subjectId'
     | '/teacher/analytics'
     | '/teacher/assignments'
     | '/teacher/chapters'
@@ -1191,6 +1327,8 @@ export interface FileRouteTypes {
     | '/teacher/flashcards'
     | '/teacher/grades'
     | '/teacher/interactive-apps'
+    | '/teacher/lesson-contents'
+    | '/teacher/lessons'
     | '/teacher/library'
     | '/teacher/messages'
     | '/teacher/mind-maps'
@@ -1203,8 +1341,10 @@ export interface FileRouteTypes {
     | '/teacher/student-progress'
     | '/teacher/students'
     | '/teacher/subjects'
+    | '/teacher/units'
     | '/teacher/videos'
     | '/teacher/worksheets'
+    | '/unit/$unitId'
     | '/admin/'
     | '/library/'
     | '/student/'
@@ -1212,6 +1352,9 @@ export interface FileRouteTypes {
     | '/library/category/$categorySlug'
     | '/library/resource/$resourceId'
     | '/student/chapter/$chapterSlug'
+    | '/student/lesson/$lessonId'
+    | '/student/practice-review/$attemptId'
+    | '/student/practice-set/$practiceSetId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1243,13 +1386,14 @@ export interface FileRouteTypes {
     | '/admin/announcements'
     | '/admin/approvals'
     | '/admin/audit'
-    | '/admin/backup'
     | '/admin/blog'
     | '/admin/chapters'
     | '/admin/flashcards'
     | '/admin/grades'
     | '/admin/integrations'
     | '/admin/interactive-apps'
+    | '/admin/lesson-contents'
+    | '/admin/lessons'
     | '/admin/logs'
     | '/admin/media'
     | '/admin/mind-maps'
@@ -1267,11 +1411,15 @@ export interface FileRouteTypes {
     | '/admin/subjects'
     | '/admin/support'
     | '/admin/teachers'
+    | '/admin/units'
     | '/admin/users'
     | '/admin/videos'
     | '/admin/worksheets'
+    | '/blog/$slug'
+    | '/chapter/$chapterId'
     | '/error/$code'
     | '/learn/$chapterSlug'
+    | '/lesson/$lessonId'
     | '/library/downloads'
     | '/library/favorites'
     | '/library/recent'
@@ -1287,6 +1435,7 @@ export interface FileRouteTypes {
     | '/student/courses'
     | '/student/downloads'
     | '/student/help'
+    | '/student/interactive-revision'
     | '/student/learning-hub'
     | '/student/learning-path'
     | '/student/notification-center'
@@ -1299,6 +1448,7 @@ export interface FileRouteTypes {
     | '/student/revision'
     | '/student/search'
     | '/student/settings'
+    | '/subject/$subjectId'
     | '/teacher/analytics'
     | '/teacher/assignments'
     | '/teacher/chapters'
@@ -1308,6 +1458,8 @@ export interface FileRouteTypes {
     | '/teacher/flashcards'
     | '/teacher/grades'
     | '/teacher/interactive-apps'
+    | '/teacher/lesson-contents'
+    | '/teacher/lessons'
     | '/teacher/library'
     | '/teacher/messages'
     | '/teacher/mind-maps'
@@ -1320,8 +1472,10 @@ export interface FileRouteTypes {
     | '/teacher/student-progress'
     | '/teacher/students'
     | '/teacher/subjects'
+    | '/teacher/units'
     | '/teacher/videos'
     | '/teacher/worksheets'
+    | '/unit/$unitId'
     | '/admin'
     | '/library'
     | '/student'
@@ -1329,6 +1483,9 @@ export interface FileRouteTypes {
     | '/library/category/$categorySlug'
     | '/library/resource/$resourceId'
     | '/student/chapter/$chapterSlug'
+    | '/student/lesson/$lessonId'
+    | '/student/practice-review/$attemptId'
+    | '/student/practice-set/$practiceSetId'
   id:
     | '__root__'
     | '/'
@@ -1364,13 +1521,14 @@ export interface FileRouteTypes {
     | '/admin/announcements'
     | '/admin/approvals'
     | '/admin/audit'
-    | '/admin/backup'
     | '/admin/blog'
     | '/admin/chapters'
     | '/admin/flashcards'
     | '/admin/grades'
     | '/admin/integrations'
     | '/admin/interactive-apps'
+    | '/admin/lesson-contents'
+    | '/admin/lessons'
     | '/admin/logs'
     | '/admin/media'
     | '/admin/mind-maps'
@@ -1388,11 +1546,15 @@ export interface FileRouteTypes {
     | '/admin/subjects'
     | '/admin/support'
     | '/admin/teachers'
+    | '/admin/units'
     | '/admin/users'
     | '/admin/videos'
     | '/admin/worksheets'
+    | '/blog_/$slug'
+    | '/chapter/$chapterId'
     | '/error/$code'
     | '/learn/$chapterSlug'
+    | '/lesson/$lessonId'
     | '/library/downloads'
     | '/library/favorites'
     | '/library/recent'
@@ -1408,6 +1570,7 @@ export interface FileRouteTypes {
     | '/student/courses'
     | '/student/downloads'
     | '/student/help'
+    | '/student/interactive-revision'
     | '/student/learning-hub'
     | '/student/learning-path'
     | '/student/notification-center'
@@ -1420,6 +1583,7 @@ export interface FileRouteTypes {
     | '/student/revision'
     | '/student/search'
     | '/student/settings'
+    | '/subject/$subjectId'
     | '/teacher/analytics'
     | '/teacher/assignments'
     | '/teacher/chapters'
@@ -1429,6 +1593,8 @@ export interface FileRouteTypes {
     | '/teacher/flashcards'
     | '/teacher/grades'
     | '/teacher/interactive-apps'
+    | '/teacher/lesson-contents'
+    | '/teacher/lessons'
     | '/teacher/library'
     | '/teacher/messages'
     | '/teacher/mind-maps'
@@ -1441,8 +1607,10 @@ export interface FileRouteTypes {
     | '/teacher/student-progress'
     | '/teacher/students'
     | '/teacher/subjects'
+    | '/teacher/units'
     | '/teacher/videos'
     | '/teacher/worksheets'
+    | '/unit/$unitId'
     | '/admin/'
     | '/library/'
     | '/student/'
@@ -1450,6 +1618,9 @@ export interface FileRouteTypes {
     | '/library/category/$categorySlug'
     | '/library/resource/$resourceId'
     | '/student/chapter/$chapterSlug'
+    | '/student/lesson/$lessonId'
+    | '/student/practice-review/$attemptId'
+    | '/student/practice-set/$practiceSetId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1482,9 +1653,14 @@ export interface RootRouteChildren {
   VerifyEmailRoute: typeof VerifyEmailRoute
   VerifyOtpRoute: typeof VerifyOtpRoute
   WelcomeRoute: typeof WelcomeRoute
+  BlogSlugRoute: typeof BlogSlugRoute
+  ChapterChapterIdRoute: typeof ChapterChapterIdRoute
   ErrorCodeRoute: typeof ErrorCodeRoute
   LearnChapterSlugRoute: typeof LearnChapterSlugRoute
+  LessonLessonIdRoute: typeof LessonLessonIdRoute
   PlayerChapterSlugRoute: typeof PlayerChapterSlugRoute
+  SubjectSubjectIdRoute: typeof SubjectSubjectIdRoute
+  UnitUnitIdRoute: typeof UnitUnitIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1727,13 +1903,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuditRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/backup': {
-      id: '/admin/backup'
-      path: '/backup'
-      fullPath: '/admin/backup'
-      preLoaderRoute: typeof AdminBackupRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/blog': {
       id: '/admin/blog'
       path: '/blog'
@@ -1774,6 +1943,20 @@ declare module '@tanstack/react-router' {
       path: '/interactive-apps'
       fullPath: '/admin/interactive-apps'
       preLoaderRoute: typeof AdminInteractiveAppsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/lesson-contents': {
+      id: '/admin/lesson-contents'
+      path: '/lesson-contents'
+      fullPath: '/admin/lesson-contents'
+      preLoaderRoute: typeof AdminLessonContentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/lessons': {
+      id: '/admin/lessons'
+      path: '/lessons'
+      fullPath: '/admin/lessons'
+      preLoaderRoute: typeof AdminLessonsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/logs': {
@@ -1895,6 +2078,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTeachersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/units': {
+      id: '/admin/units'
+      path: '/units'
+      fullPath: '/admin/units'
+      preLoaderRoute: typeof AdminUnitsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/users': {
       id: '/admin/users'
       path: '/users'
@@ -1916,6 +2106,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminWorksheetsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/blog_/$slug': {
+      id: '/blog_/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chapter/$chapterId': {
+      id: '/chapter/$chapterId'
+      path: '/chapter/$chapterId'
+      fullPath: '/chapter/$chapterId'
+      preLoaderRoute: typeof ChapterChapterIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/error/$code': {
       id: '/error/$code'
       path: '/error/$code'
@@ -1928,6 +2132,13 @@ declare module '@tanstack/react-router' {
       path: '/learn/$chapterSlug'
       fullPath: '/learn/$chapterSlug'
       preLoaderRoute: typeof LearnChapterSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lesson/$lessonId': {
+      id: '/lesson/$lessonId'
+      path: '/lesson/$lessonId'
+      fullPath: '/lesson/$lessonId'
+      preLoaderRoute: typeof LessonLessonIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/library/': {
@@ -2049,6 +2260,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentHelpRouteImport
       parentRoute: typeof StudentRoute
     }
+    '/student/interactive-revision': {
+      id: '/student/interactive-revision'
+      path: '/interactive-revision'
+      fullPath: '/student/interactive-revision'
+      preLoaderRoute: typeof StudentInteractiveRevisionRouteImport
+      parentRoute: typeof StudentRoute
+    }
     '/student/learning-hub': {
       id: '/student/learning-hub'
       path: '/learning-hub'
@@ -2133,6 +2351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentSettingsRouteImport
       parentRoute: typeof StudentRoute
     }
+    '/subject/$subjectId': {
+      id: '/subject/$subjectId'
+      path: '/subject/$subjectId'
+      fullPath: '/subject/$subjectId'
+      preLoaderRoute: typeof SubjectSubjectIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/teacher/': {
       id: '/teacher/'
       path: '/'
@@ -2201,6 +2426,20 @@ declare module '@tanstack/react-router' {
       path: '/interactive-apps'
       fullPath: '/teacher/interactive-apps'
       preLoaderRoute: typeof TeacherInteractiveAppsRouteImport
+      parentRoute: typeof TeacherRoute
+    }
+    '/teacher/lesson-contents': {
+      id: '/teacher/lesson-contents'
+      path: '/lesson-contents'
+      fullPath: '/teacher/lesson-contents'
+      preLoaderRoute: typeof TeacherLessonContentsRouteImport
+      parentRoute: typeof TeacherRoute
+    }
+    '/teacher/lessons': {
+      id: '/teacher/lessons'
+      path: '/lessons'
+      fullPath: '/teacher/lessons'
+      preLoaderRoute: typeof TeacherLessonsRouteImport
       parentRoute: typeof TeacherRoute
     }
     '/teacher/library': {
@@ -2287,6 +2526,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherSubjectsRouteImport
       parentRoute: typeof TeacherRoute
     }
+    '/teacher/units': {
+      id: '/teacher/units'
+      path: '/units'
+      fullPath: '/teacher/units'
+      preLoaderRoute: typeof TeacherUnitsRouteImport
+      parentRoute: typeof TeacherRoute
+    }
     '/teacher/videos': {
       id: '/teacher/videos'
       path: '/videos'
@@ -2300,6 +2546,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/teacher/worksheets'
       preLoaderRoute: typeof TeacherWorksheetsRouteImport
       parentRoute: typeof TeacherRoute
+    }
+    '/unit/$unitId': {
+      id: '/unit/$unitId'
+      path: '/unit/$unitId'
+      fullPath: '/unit/$unitId'
+      preLoaderRoute: typeof UnitUnitIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/library/category/$categorySlug': {
       id: '/library/category/$categorySlug'
@@ -2322,6 +2575,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentChapterChapterSlugRouteImport
       parentRoute: typeof StudentRoute
     }
+    '/student/lesson/$lessonId': {
+      id: '/student/lesson/$lessonId'
+      path: '/lesson/$lessonId'
+      fullPath: '/student/lesson/$lessonId'
+      preLoaderRoute: typeof StudentLessonLessonIdRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/student/practice-review/$attemptId': {
+      id: '/student/practice-review/$attemptId'
+      path: '/practice-review/$attemptId'
+      fullPath: '/student/practice-review/$attemptId'
+      preLoaderRoute: typeof StudentPracticeReviewAttemptIdRouteImport
+      parentRoute: typeof StudentRoute
+    }
+    '/student/practice-set/$practiceSetId': {
+      id: '/student/practice-set/$practiceSetId'
+      path: '/practice-set/$practiceSetId'
+      fullPath: '/student/practice-set/$practiceSetId'
+      preLoaderRoute: typeof StudentPracticeSetPracticeSetIdRouteImport
+      parentRoute: typeof StudentRoute
+    }
   }
 }
 
@@ -2330,13 +2604,14 @@ interface AdminRouteChildren {
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
   AdminApprovalsRoute: typeof AdminApprovalsRoute
   AdminAuditRoute: typeof AdminAuditRoute
-  AdminBackupRoute: typeof AdminBackupRoute
   AdminBlogRoute: typeof AdminBlogRoute
   AdminChaptersRoute: typeof AdminChaptersRoute
   AdminFlashcardsRoute: typeof AdminFlashcardsRoute
   AdminGradesRoute: typeof AdminGradesRoute
   AdminIntegrationsRoute: typeof AdminIntegrationsRoute
   AdminInteractiveAppsRoute: typeof AdminInteractiveAppsRoute
+  AdminLessonContentsRoute: typeof AdminLessonContentsRoute
+  AdminLessonsRoute: typeof AdminLessonsRoute
   AdminLogsRoute: typeof AdminLogsRoute
   AdminMediaRoute: typeof AdminMediaRoute
   AdminMindMapsRoute: typeof AdminMindMapsRoute
@@ -2354,6 +2629,7 @@ interface AdminRouteChildren {
   AdminSubjectsRoute: typeof AdminSubjectsRoute
   AdminSupportRoute: typeof AdminSupportRoute
   AdminTeachersRoute: typeof AdminTeachersRoute
+  AdminUnitsRoute: typeof AdminUnitsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminVideosRoute: typeof AdminVideosRoute
   AdminWorksheetsRoute: typeof AdminWorksheetsRoute
@@ -2365,13 +2641,14 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAnnouncementsRoute: AdminAnnouncementsRoute,
   AdminApprovalsRoute: AdminApprovalsRoute,
   AdminAuditRoute: AdminAuditRoute,
-  AdminBackupRoute: AdminBackupRoute,
   AdminBlogRoute: AdminBlogRoute,
   AdminChaptersRoute: AdminChaptersRoute,
   AdminFlashcardsRoute: AdminFlashcardsRoute,
   AdminGradesRoute: AdminGradesRoute,
   AdminIntegrationsRoute: AdminIntegrationsRoute,
   AdminInteractiveAppsRoute: AdminInteractiveAppsRoute,
+  AdminLessonContentsRoute: AdminLessonContentsRoute,
+  AdminLessonsRoute: AdminLessonsRoute,
   AdminLogsRoute: AdminLogsRoute,
   AdminMediaRoute: AdminMediaRoute,
   AdminMindMapsRoute: AdminMindMapsRoute,
@@ -2389,6 +2666,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSubjectsRoute: AdminSubjectsRoute,
   AdminSupportRoute: AdminSupportRoute,
   AdminTeachersRoute: AdminTeachersRoute,
+  AdminUnitsRoute: AdminUnitsRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminVideosRoute: AdminVideosRoute,
   AdminWorksheetsRoute: AdminWorksheetsRoute,
@@ -2431,6 +2709,7 @@ interface StudentRouteChildren {
   StudentCoursesRoute: typeof StudentCoursesRoute
   StudentDownloadsRoute: typeof StudentDownloadsRoute
   StudentHelpRoute: typeof StudentHelpRoute
+  StudentInteractiveRevisionRoute: typeof StudentInteractiveRevisionRoute
   StudentLearningHubRoute: typeof StudentLearningHubRoute
   StudentLearningPathRoute: typeof StudentLearningPathRoute
   StudentNotificationCenterRoute: typeof StudentNotificationCenterRoute
@@ -2445,6 +2724,9 @@ interface StudentRouteChildren {
   StudentSettingsRoute: typeof StudentSettingsRoute
   StudentIndexRoute: typeof StudentIndexRoute
   StudentChapterChapterSlugRoute: typeof StudentChapterChapterSlugRoute
+  StudentLessonLessonIdRoute: typeof StudentLessonLessonIdRoute
+  StudentPracticeReviewAttemptIdRoute: typeof StudentPracticeReviewAttemptIdRoute
+  StudentPracticeSetPracticeSetIdRoute: typeof StudentPracticeSetPracticeSetIdRoute
 }
 
 const StudentRouteChildren: StudentRouteChildren = {
@@ -2458,6 +2740,7 @@ const StudentRouteChildren: StudentRouteChildren = {
   StudentCoursesRoute: StudentCoursesRoute,
   StudentDownloadsRoute: StudentDownloadsRoute,
   StudentHelpRoute: StudentHelpRoute,
+  StudentInteractiveRevisionRoute: StudentInteractiveRevisionRoute,
   StudentLearningHubRoute: StudentLearningHubRoute,
   StudentLearningPathRoute: StudentLearningPathRoute,
   StudentNotificationCenterRoute: StudentNotificationCenterRoute,
@@ -2472,6 +2755,9 @@ const StudentRouteChildren: StudentRouteChildren = {
   StudentSettingsRoute: StudentSettingsRoute,
   StudentIndexRoute: StudentIndexRoute,
   StudentChapterChapterSlugRoute: StudentChapterChapterSlugRoute,
+  StudentLessonLessonIdRoute: StudentLessonLessonIdRoute,
+  StudentPracticeReviewAttemptIdRoute: StudentPracticeReviewAttemptIdRoute,
+  StudentPracticeSetPracticeSetIdRoute: StudentPracticeSetPracticeSetIdRoute,
 }
 
 const StudentRouteWithChildren =
@@ -2487,6 +2773,8 @@ interface TeacherRouteChildren {
   TeacherFlashcardsRoute: typeof TeacherFlashcardsRoute
   TeacherGradesRoute: typeof TeacherGradesRoute
   TeacherInteractiveAppsRoute: typeof TeacherInteractiveAppsRoute
+  TeacherLessonContentsRoute: typeof TeacherLessonContentsRoute
+  TeacherLessonsRoute: typeof TeacherLessonsRoute
   TeacherLibraryRoute: typeof TeacherLibraryRoute
   TeacherMessagesRoute: typeof TeacherMessagesRoute
   TeacherMindMapsRoute: typeof TeacherMindMapsRoute
@@ -2499,6 +2787,7 @@ interface TeacherRouteChildren {
   TeacherStudentProgressRoute: typeof TeacherStudentProgressRoute
   TeacherStudentsRoute: typeof TeacherStudentsRoute
   TeacherSubjectsRoute: typeof TeacherSubjectsRoute
+  TeacherUnitsRoute: typeof TeacherUnitsRoute
   TeacherVideosRoute: typeof TeacherVideosRoute
   TeacherWorksheetsRoute: typeof TeacherWorksheetsRoute
   TeacherIndexRoute: typeof TeacherIndexRoute
@@ -2514,6 +2803,8 @@ const TeacherRouteChildren: TeacherRouteChildren = {
   TeacherFlashcardsRoute: TeacherFlashcardsRoute,
   TeacherGradesRoute: TeacherGradesRoute,
   TeacherInteractiveAppsRoute: TeacherInteractiveAppsRoute,
+  TeacherLessonContentsRoute: TeacherLessonContentsRoute,
+  TeacherLessonsRoute: TeacherLessonsRoute,
   TeacherLibraryRoute: TeacherLibraryRoute,
   TeacherMessagesRoute: TeacherMessagesRoute,
   TeacherMindMapsRoute: TeacherMindMapsRoute,
@@ -2526,6 +2817,7 @@ const TeacherRouteChildren: TeacherRouteChildren = {
   TeacherStudentProgressRoute: TeacherStudentProgressRoute,
   TeacherStudentsRoute: TeacherStudentsRoute,
   TeacherSubjectsRoute: TeacherSubjectsRoute,
+  TeacherUnitsRoute: TeacherUnitsRoute,
   TeacherVideosRoute: TeacherVideosRoute,
   TeacherWorksheetsRoute: TeacherWorksheetsRoute,
   TeacherIndexRoute: TeacherIndexRoute,
@@ -2564,9 +2856,14 @@ const rootRouteChildren: RootRouteChildren = {
   VerifyEmailRoute: VerifyEmailRoute,
   VerifyOtpRoute: VerifyOtpRoute,
   WelcomeRoute: WelcomeRoute,
+  BlogSlugRoute: BlogSlugRoute,
+  ChapterChapterIdRoute: ChapterChapterIdRoute,
   ErrorCodeRoute: ErrorCodeRoute,
   LearnChapterSlugRoute: LearnChapterSlugRoute,
+  LessonLessonIdRoute: LessonLessonIdRoute,
   PlayerChapterSlugRoute: PlayerChapterSlugRoute,
+  SubjectSubjectIdRoute: SubjectSubjectIdRoute,
+  UnitUnitIdRoute: UnitUnitIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

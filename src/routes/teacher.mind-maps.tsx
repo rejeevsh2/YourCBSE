@@ -1,28 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PortalPage } from "@/components/layout/PortalPage";
-import { ResourceManager } from "@/components/teacher/ResourceManager";
+import { TeacherLessonResources } from "@/components/teacher/TeacherLessonResources";
 
 export const Route = createFileRoute("/teacher/mind-maps")({
-  head: () => ({
-    meta: [
-      { title: "Mind Maps — Teacher Studio" },
-      { name: "description", content: "Upload and manage chapter mind maps." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
   component: MindMapsPage,
 });
 
 function MindMapsPage() {
   return (
-    <PortalPage
-      portalLabel="Teacher Studio"
-      portalPath="/teacher"
-      title="Mind maps"
-      description="Visual concept maps that summarise a full chapter at a glance."
-      showNotice={false}
-    >
-      <ResourceManager kinds={["Mind Map"]} uploadLabel="Mind maps" searchPlaceholder="Search mind maps…" />
-    </PortalPage>
+    <TeacherLessonResources
+      title="Mind Maps"
+      description="Manage visual mind-map resources for your lessons."
+      singularLabel="Mind Map"
+      contentType="image"
+      contentLabel="Description or supporting content"
+      contentPlaceholder="Describe the mind map or add supporting text..."
+      urlPlaceholder="https://... image or mind-map URL"
+    />
   );
 }

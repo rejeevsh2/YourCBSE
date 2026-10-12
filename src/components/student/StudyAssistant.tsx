@@ -81,3 +81,4 @@ export function StudyAssistant({ className }: { className?: string }) {
     </section>
   );
 }
+

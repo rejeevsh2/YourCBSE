@@ -216,3 +216,4 @@ export const quickResources = [
   { id: "qr2", label: "Chapter summary", meta: "PDF · 90 KB" },
   { id: "qr3", label: "NCERT textbook pages", meta: "PDF · 1.4 MB" },
 ];
+

@@ -43,3 +43,4 @@ export function Modal({ trigger, title, description, children, confirmLabel }: M
     </Dialog>
   );
 }
+

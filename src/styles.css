@@ -1,15 +1,15 @@
-@import "tailwindcss" source(none);
+﻿@import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 /*
- * YourCBSE design system.
+ * YourTeacher design system.
  *
  * Light (default): #F8FAFC canvas, #2563EB primary, #0F172A ink.
  * Dark ("Aurora"): deep slate canvas with translucent glass tiles.
- * Headings: Poppins · Body: Inter
+ * Headings: Poppins Â· Body: Inter
  *
  * All colours are semantic tokens. Never hardcode colour utilities in components.
  */
@@ -280,7 +280,7 @@
   }
 }
 
-/* Soft surface used across marketing pages — theme aware. */
+/* Soft surface used across marketing pages â€” theme aware. */
 @utility panel {
   border-radius: var(--radius-tile);
   border: 1px solid var(--border);
@@ -338,7 +338,7 @@
   color: transparent;
 }
 
-/* Legacy homepage scope — themes are now global, so this only sets typography. */
+/* Legacy homepage scope â€” themes are now global, so this only sets typography. */
 .theme-home {
   font-family: var(--font-sans);
 }
@@ -473,3 +473,4 @@
     transition: none !important;
   }
 }
+

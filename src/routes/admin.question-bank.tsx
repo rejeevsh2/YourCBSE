@@ -1,106 +1,186 @@
+import { useCallback, useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus, Upload } from "lucide-react";
 import { PortalPage } from "@/components/layout/PortalPage";
+import { apiRequest } from "@/lib/auth/http";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { DataTable, type Column } from "@/components/common/DataTable";
-import { StatCard } from "@/components/common/StatCard";
-import { StudioToolbar } from "@/components/teacher/StudioToolbar";
-import { StatusBadge } from "@/components/teacher/StatusBadge";
-import { RowActions } from "@/components/teacher/RowActions";
-import { adminQuestionGroups, type AdminQuestionGroup } from "@/data/admin";
-
-export const Route = createFileRoute("/admin/question-bank")({
-  head: () => ({
-    meta: [
-      { title: "Question Bank — YourCBSE Admin" },
-      { name: "description", content: "Manage question formats, coverage and review state." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: AdminQuestionBankPage,
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+type Question = { question_text: string; explanation: string; options: string[]; correct: number };
+const blank = (): Question => ({
+  question_text: "",
+  explanation: "",
+  options: ["", "", "", ""],
+  correct: 0,
 });
-
-const columns: Column<AdminQuestionGroup>[] = [
-  {
-    key: "type",
-    header: "Question type",
-    render: (row) => <span className="text-sm font-semibold">{row.type}</span>,
-  },
-  {
-    key: "count",
-    header: "Questions",
-    render: (row) => (
-      <Badge variant="secondary" className="rounded-full">
-        {row.count.toLocaleString()}
-      </Badge>
-    ),
-  },
-  {
-    key: "chapters",
-    header: "Chapters covered",
-    render: (row) => <span className="text-sm text-muted-foreground">{row.chapters}</span>,
-  },
-  { key: "status", header: "Status", render: (row) => <StatusBadge status={row.status} /> },
-  {
-    key: "lastUpdated",
-    header: "Updated",
-    render: (row) => <span className="text-sm text-muted-foreground">{row.lastUpdated}</span>,
-  },
-  {
-    key: "actions",
-    header: "",
-    className: "text-right",
-    render: (row) => (
-      <RowActions
-        label={row.type}
-        actions={[
-          { label: "Open bank" },
-          { label: "Bulk import" },
-          { label: "Export CSV" },
-          { label: "Archive", separatorBefore: true, destructive: true },
-        ]}
-      />
-    ),
-  },
-];
-
-function AdminQuestionBankPage() {
-  const total = adminQuestionGroups.reduce((sum, group) => sum + group.count, 0);
-
+type Data = {
+  sets: { id: number; title: string; is_published: boolean; questions_count: number }[];
+  subjects: { id: number; name: string; grade?: { name: string } }[];
+};
+export const Route = createFileRoute("/admin/question-bank")({ component: QuestionBank });
+function QuestionBank() {
+  const [data, setData] = useState<Data | null>(null);
+  const [title, setTitle] = useState("");
+  const [subject, setSubject] = useState("");
+  const [questions, setQuestions] = useState<Question[]>([blank()]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const load = useCallback(async () => {
+    const r = await apiRequest<Data>("/admin/practice-sets", { method: "GET" });
+    if (r.ok && r.data) setData(r.data);
+    else setError(r.message);
+  }, []);
+  useEffect(() => {
+    void load();
+  }, [load]);
+  function change(i: number, patch: Partial<Question>) {
+    setQuestions((q) => q.map((v, j) => (i === j ? { ...v, ...patch } : v)));
+  }
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+    const r = await apiRequest("/admin/practice-sets", {
+      body: { title, subject_id: Number(subject), is_published: false, questions },
+    });
+    if (r.ok) {
+      setTitle("");
+      setQuestions([blank()]);
+      await load();
+    } else setError(r.message);
+    setBusy(false);
+  }
+  async function publish(id: number, next: boolean) {
+    setBusy(true);
+    const r = await apiRequest(`/admin/practice-sets/${id}`, {
+      method: "PATCH",
+      body: { is_published: next },
+    });
+    if (r.ok) await load();
+    else setError(r.message);
+    setBusy(false);
+  }
   return (
     <PortalPage
       portalLabel="Admin"
       portalPath="/admin"
-      title="Question Bank"
-      description="Every question format across the curriculum, with coverage and review state."
+      title="Question bank & practice sets"
+      description="Create multiple-choice practice, then publish it for students."
+      showNotice={false}
     >
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total questions" value={total.toLocaleString()} hint="9 formats" tone="primary" />
-        <StatCard label="Chapters covered" value="312" hint="94% coverage" tone="success" />
-        <StatCard label="In review" value="1,340" hint="Needs approval" tone="warning" />
-        <StatCard label="Archived" value="1,010" tone="destructive" />
-      </div>
-
-      <StudioToolbar
-        searchPlaceholder="Search questions…"
-        filters={[
-          { id: "grade", label: "Grade", options: ["All grades", "Class 9", "Class 10", "Class 11", "Class 12"] },
-          { id: "difficulty", label: "Difficulty", options: ["All levels", "Easy", "Moderate", "Challenging"] },
-        ]}
-        actions={
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" className="rounded-2xl">
-              <Upload className="size-4" /> Bulk import
-            </Button>
-            <Button className="rounded-2xl">
-              <Plus className="size-4" /> New question
-            </Button>
-          </div>
-        }
-      />
-
-      <DataTable columns={columns} rows={adminQuestionGroups} caption="Question formats" />
+      {error && (
+        <p role="alert" className="tile p-4 text-destructive">
+          {error}
+        </p>
+      )}
+      <section className="tile space-y-3 p-5">
+        <h2 className="text-xl font-bold">Practice sets</h2>
+        {!data ? (
+          <p>Loading…</p>
+        ) : data.sets.length ? (
+          data.sets.map((s) => (
+            <div key={s.id} className="flex flex-wrap justify-between gap-3 border-b py-3">
+              <span>
+                {s.title} · {s.questions_count} questions · {s.is_published ? "Published" : "Draft"}
+              </span>
+              <Button
+                disabled={busy}
+                variant="outline"
+                onClick={() => publish(s.id, !s.is_published)}
+              >
+                {s.is_published ? "Unpublish" : "Publish"}
+              </Button>
+            </div>
+          ))
+        ) : (
+          <p>No practice sets yet.</p>
+        )}
+      </section>
+      <form onSubmit={save} className="tile space-y-5 p-6">
+        <h2 className="text-xl font-bold">New practice set</h2>
+        <label className="block">
+          Title
+          <Input
+            required
+            maxLength={255}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </label>
+        <label className="block">
+          Subject
+          <select
+            required
+            className="ml-3 rounded-lg border bg-background p-2"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+          >
+            <option value="">Choose subject</option>
+            {data?.subjects.map((s) => (
+              <option value={s.id} key={s.id}>
+                {s.grade?.name} · {s.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        {questions.map((q, i) => (
+          <fieldset className="space-y-3 rounded-xl border p-4" key={i}>
+            <legend>Question {i + 1}</legend>
+            <Textarea
+              required
+              aria-label={`Question ${i + 1}`}
+              value={q.question_text}
+              onChange={(e) => change(i, { question_text: e.target.value })}
+            />
+            {q.options.map((v, j) => (
+              <label className="flex items-center gap-3" key={j}>
+                <input
+                  type="radio"
+                  name={`correct-${i}`}
+                  checked={q.correct === j}
+                  onChange={() => change(i, { correct: j })}
+                  aria-label={`Option ${j + 1} is correct`}
+                />
+                <Input
+                  required
+                  aria-label={`Option ${j + 1}`}
+                  value={v}
+                  onChange={(e) =>
+                    change(i, { options: q.options.map((o, k) => (j === k ? e.target.value : o)) })
+                  }
+                />
+              </label>
+            ))}
+            <p className="text-sm text-muted-foreground">
+              Select the circle beside the correct answer.
+            </p>
+            <Textarea
+              placeholder="Explanation shown after submission"
+              value={q.explanation}
+              onChange={(e) => change(i, { explanation: e.target.value })}
+            />
+            {questions.length > 1 && (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setQuestions((v) => v.filter((_, j) => j !== i))}
+              >
+                Remove question
+              </Button>
+            )}
+          </fieldset>
+        ))}
+        <div className="flex gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={questions.length >= 100}
+            onClick={() => setQuestions((q) => [...q, blank()])}
+          >
+            Add question
+          </Button>
+          <Button disabled={busy}>{busy ? "Saving…" : "Save draft"}</Button>
+        </div>
+      </form>
     </PortalPage>
   );
 }

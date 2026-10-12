@@ -56,3 +56,4 @@ export const laravelAssistantService: AssistantService = {
       body: { feedback },
     }),
 };
+

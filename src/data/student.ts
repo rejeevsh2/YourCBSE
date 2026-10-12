@@ -543,3 +543,4 @@ export const studentNotifications: StudentNotification[] = [
   { id: "nt5", kind: "Study Reminder", title: "Your daily 7 PM session starts soon", body: "Continue with Lesson 4 — Euclid's division lemma.", time: "2 days ago", unread: false },
   { id: "nt6", kind: "New Chapter", title: "Carbon and its Compounds updated", body: "New mind map and 24 previous-year questions added.", time: "3 days ago", unread: false },
 ];
+

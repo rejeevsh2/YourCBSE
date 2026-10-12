@@ -56,3 +56,4 @@ export function usePlannerProgress() {
 
   return { done, toggleTask, totalMinutes, doneMinutes, goalPercent };
 }
+

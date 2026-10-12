@@ -24,13 +24,13 @@ function HomeBrand({ onNavigate }: { onNavigate?: () => void }) {
       to="/"
       onClick={onNavigate}
       className="flex items-center gap-2.5 rounded-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
-      aria-label="YourCBSE home"
+      aria-label="YourTeacher home"
     >
       <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
         <GraduationCap className="size-5" aria-hidden="true" />
       </span>
       <span className="font-heading text-lg font-bold tracking-tight text-foreground">
-        Your<span className="text-primary">CBSE</span>
+        Your<span className="text-primary">Teacher</span>
       </span>
     </Link>
   );
@@ -154,3 +154,4 @@ export function HomeHeader() {
     </header>
   );
 }
+

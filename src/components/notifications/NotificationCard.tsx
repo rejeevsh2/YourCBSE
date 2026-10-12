@@ -105,3 +105,4 @@ export const NotificationCard = memo(function NotificationCard({
     </article>
   );
 });
+

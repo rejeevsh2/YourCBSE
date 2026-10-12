@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Unit extends Model
+{
+    protected $fillable = [
+        'subject_id',
+        'title',
+        'code',
+        'unit_number',
+        'description',
+        'display_order',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'unit_number' => 'integer',
+        'display_order' => 'integer',
+        'is_active' => 'boolean',
+    ];
+
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class);
+    }
+
+    public function chapters()
+    {
+        return $this->hasMany(Chapter::class);
+    }
+}

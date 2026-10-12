@@ -37,7 +37,7 @@ export const ChatMessage = memo(function ChatMessage({
   };
 
   const share = async () => {
-    const shareData = { title: "YourCBSE — Cue", text: message.text };
+    const shareData = { title: "YourTeacher — Cue", text: message.text };
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share(shareData);
@@ -147,3 +147,4 @@ function IconAction({
     </Button>
   );
 }
+

@@ -57,3 +57,4 @@ export const moduleToneClass: Record<string, string> = {
   warning: "bg-warning/15 text-warning",
   danger: "bg-destructive/10 text-destructive",
 };
+

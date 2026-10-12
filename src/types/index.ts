@@ -1,5 +1,5 @@
 /**
- * Shared TypeScript interfaces for the YourCBSE frontend foundation.
+ * Shared TypeScript interfaces for the YourTeacher frontend foundation.
  * Phase 1: UI only — these shapes mirror the future Laravel + MySQL API.
  */
 
@@ -104,3 +104,4 @@ export interface PracticeSet {
   durationMinutes: number;
   difficulty: "Easy" | "Moderate" | "Challenging";
 }
+

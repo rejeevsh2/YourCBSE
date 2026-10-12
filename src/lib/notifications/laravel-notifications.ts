@@ -1,3 +1,4 @@
+import { Award, CalendarClock } from "lucide-react";
 /** Laravel-backed notification service (inactive while mock data is on). */
 
 import { apiRequest } from "@/lib/auth/http";
@@ -29,12 +30,18 @@ async function request<TData>(
 }
 
 export const laravelNotificationService: NotificationService = {
-  list: () => request<AppNotification[]>(notificationEndpoints.list),
-  markRead: (id) => request<null>(notificationEndpoints.read(id), { method: "POST" }),
-  markAllRead: () => request<null>(notificationEndpoints.readAll, { method: "POST" }),
+  list: () => request<AppNotification[]>("/notifications/center"),
+  markRead: (id) => request<null>(notificationEndpoints.read(id), { method: "PATCH" }),
+  markAllRead: () => request<null>(notificationEndpoints.readAll, { method: "PATCH" }),
   remove: (id) => request<null>(notificationEndpoints.item(id), { method: "DELETE" }),
-  reminders: () => request<StudyReminder[]>(notificationEndpoints.reminders),
-  achievements: () => request<AchievementNotification[]>(notificationEndpoints.achievements),
+  reminders: async () => {
+    const r = await request<StudyReminder[]>(notificationEndpoints.reminders);
+    return r.ok ? { ...r, data: r.data.map((item) => ({ ...item, icon: CalendarClock })) } : r;
+  },
+  achievements: async () => {
+    const r = await request<AchievementNotification[]>(notificationEndpoints.achievements);
+    return r.ok ? { ...r, data: r.data.map((item) => ({ ...item, icon: Award })) } : r;
+  },
   preferences: () => request<NotificationPreference[]>(notificationEndpoints.preferences),
   updatePreference: (id, enabled) =>
     request<null>(notificationEndpoints.preferences, {

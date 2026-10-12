@@ -71,3 +71,4 @@ export const laravelResourceCenterService: ResourceCenterService = {
   recordView: (id) =>
     request<LibraryUserState>(resourceCenterEndpoints.view(id), { method: "POST" }),
 };
+

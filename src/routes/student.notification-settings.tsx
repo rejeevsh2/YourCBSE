@@ -9,15 +9,15 @@ import { useNotificationCenter } from "@/hooks/use-notification-center";
 export const Route = createFileRoute("/student/notification-settings")({
   head: () => ({
     meta: [
-      { title: "Notification Settings — YourCBSE" },
+      { title: "Notification Settings — YourTeacher" },
       {
         name: "description",
         content: "Choose which study reminders, achievements and alerts reach you, and how.",
       },
-      { property: "og:title", content: "Notification Settings — YourCBSE" },
+      { property: "og:title", content: "Notification Settings — YourTeacher" },
       {
         property: "og:description",
-        content: "Control email, push, study reminders, achievements and system alerts.",
+        content: "Control in-app lesson updates and announcements.",
       },
       { name: "robots", content: "noindex" },
     ],
@@ -32,8 +32,9 @@ function NotificationSettingsPage() {
     <PortalPage
       portalLabel="Student Portal"
       portalPath="/student"
+      showNotice={false}
       title="Notification Settings"
-      description="Decide what reaches you and where — changes apply instantly in this preview."
+      description="Choose which in-app lesson updates and announcements you receive."
       actions={
         <Button asChild variant="outline" className="rounded-2xl">
           <Link to="/student/notification-center">

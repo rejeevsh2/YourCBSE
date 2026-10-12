@@ -8,3 +8,4 @@ export const notificationEndpoints = {
   achievements: "/notifications/achievements",
   preferences: "/notifications/preferences",
 } as const;
+

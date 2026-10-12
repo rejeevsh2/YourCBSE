@@ -125,3 +125,4 @@ export function authFailure(
 ): AuthFailure {
   return { ok: false, code, message: message ?? authErrorMessages[code], fieldErrors };
 }
+

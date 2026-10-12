@@ -26,3 +26,4 @@ export function useCountdown(seconds: number) {
 
   return { remaining, formatted, reset, expired: remaining <= 0 };
 }
+

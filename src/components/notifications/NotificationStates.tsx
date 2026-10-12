@@ -65,3 +65,4 @@ export function NotificationErrorState({
     </StateView>
   );
 }
+

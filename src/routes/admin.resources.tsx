@@ -1,60 +1,740 @@
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { PortalPage } from "@/components/layout/PortalPage";
-import { ContentManager } from "@/components/admin/ContentManager";
-import { StatCard } from "@/components/common/StatCard";
 import {
-  adminFlashcards,
-  adminMindMaps,
-  adminNotes,
-  adminVideos,
-  adminWorksheets,
-} from "@/data/admin";
+  ExternalLink,
+  FileText,
+  FolderOpen,
+  RefreshCw,
+  Search,
+  Trash2,
+  Video,
+} from "lucide-react";
+import { toast } from "sonner";
+
+import { PortalPage } from "@/components/layout/PortalPage";
+import { StatCard } from "@/components/common/StatCard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { apiRequest } from "@/lib/auth/http";
 
 export const Route = createFileRoute("/admin/resources")({
   head: () => ({
     meta: [
-      { title: "Resource Library — YourCBSE Admin" },
-      { name: "description", content: "Every learning resource across formats in one library." },
-      { name: "robots", content: "noindex" },
+      {
+        title: "Resource Library — YourTeacher Admin",
+      },
+      {
+        name: "description",
+        content:
+          "Manage real learning resources stored in lesson content.",
+      },
+      {
+        name: "robots",
+        content: "noindex",
+      },
     ],
   }),
   component: AdminResourcesPage,
 });
 
-const allResources = [
-  ...adminVideos,
-  ...adminNotes,
-  ...adminWorksheets,
-  ...adminFlashcards,
-  ...adminMindMaps,
-];
+type Lesson = {
+  id: number;
+  title: string;
+};
+
+type LessonContent = {
+  id: number;
+  lesson_id: number;
+  title: string;
+  content_type: string;
+  content: string | null;
+  file_path: string | null;
+  external_url: string | null;
+  display_order: number | null;
+  is_free: boolean;
+  is_active: boolean;
+  created_at?: string | null;
+  updated_at?: string | null;
+  lesson?: Lesson | null;
+};
+
+function formatType(value: string) {
+  return value
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (letter) =>
+      letter.toUpperCase(),
+    );
+}
+
+function formatDate(value?: string | null) {
+  if (!value) {
+    return "—";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getResourceUrl(
+  item: LessonContent,
+) {
+  return (
+    item.file_path ||
+    item.external_url ||
+    null
+  );
+}
+
+function getSourceLabel(
+  item: LessonContent,
+) {
+  if (item.file_path) {
+    return "Uploaded file";
+  }
+
+  if (item.external_url) {
+    return "External";
+  }
+
+  return "Inline";
+}
 
 function AdminResourcesPage() {
+  const [items, setItems] = useState<
+    LessonContent[]
+  >([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [deletingId, setDeletingId] =
+    useState<number | null>(null);
+
+  const [search, setSearch] =
+    useState("");
+
+  const [typeFilter, setTypeFilter] =
+    useState("all");
+
+  const [statusFilter, setStatusFilter] =
+    useState("all");
+
+  const [sourceFilter, setSourceFilter] =
+    useState("all");
+
+  async function loadResources() {
+    setLoading(true);
+
+    try {
+      const result =
+        await apiRequest<LessonContent[]>(
+          "/lesson-contents",
+          {
+            method: "GET",
+          },
+        );
+
+      if (!result.ok) {
+        throw new Error(
+          result.message ||
+            "Could not load resources.",
+        );
+      }
+
+      setItems(
+        Array.isArray(result.data)
+          ? result.data
+          : [],
+      );
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Could not load resources.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void loadResources();
+  }, []);
+
+  const resourceTypes = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          items
+            .map(
+              (item) =>
+                item.content_type,
+            )
+            .filter(Boolean),
+        ),
+      ).sort(),
+    [items],
+  );
+
+  const filteredItems = useMemo(() => {
+    const query =
+      search.trim().toLowerCase();
+
+    return items.filter((item) => {
+      const lessonTitle =
+        item.lesson?.title ?? "";
+
+      const matchesSearch =
+        !query ||
+        item.title
+          .toLowerCase()
+          .includes(query) ||
+        lessonTitle
+          .toLowerCase()
+          .includes(query) ||
+        item.content_type
+          .toLowerCase()
+          .includes(query);
+
+      const matchesType =
+        typeFilter === "all" ||
+        item.content_type ===
+          typeFilter;
+
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "active" &&
+          item.is_active) ||
+        (statusFilter === "inactive" &&
+          !item.is_active);
+
+      const source =
+        item.file_path
+          ? "uploaded"
+          : item.external_url
+            ? "external"
+            : "inline";
+
+      const matchesSource =
+        sourceFilter === "all" ||
+        sourceFilter === source;
+
+      return (
+        matchesSearch &&
+        matchesType &&
+        matchesStatus &&
+        matchesSource
+      );
+    });
+  }, [
+    items,
+    search,
+    typeFilter,
+    statusFilter,
+    sourceFilter,
+  ]);
+
+  const videoCount =
+    items.filter(
+      (item) =>
+        item.content_type ===
+        "video",
+    ).length;
+
+  const uploadedFileCount =
+    items.filter(
+      (item) =>
+        Boolean(item.file_path),
+    ).length;
+
+  const activeCount =
+    items.filter(
+      (item) => item.is_active,
+    ).length;
+
+  function openResource(
+    item: LessonContent,
+  ) {
+    const url = getResourceUrl(item);
+
+    if (!url) {
+      toast.info(
+        "This resource has no file or external URL.",
+      );
+      return;
+    }
+
+    window.open(
+      url,
+      "_blank",
+      "noopener,noreferrer",
+    );
+  }
+
+  function manageResource(
+    item: LessonContent,
+  ) {
+    window.location.assign(
+      `/admin/lesson-contents?lesson=${item.lesson_id}`,
+    );
+  }
+
+  function addResource() {
+    window.location.assign(
+      "/admin/lesson-contents",
+    );
+  }
+
+  async function deleteResource(
+    item: LessonContent,
+  ) {
+    const confirmed =
+      window.confirm(
+        `Delete "${item.title}"?\n\nThis will permanently delete this lesson content and its locally uploaded file, if one exists.`,
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingId(item.id);
+
+    try {
+      const result =
+        await apiRequest(
+          `/lesson-contents/${item.id}`,
+          {
+            method: "DELETE",
+          },
+        );
+
+      if (!result.ok) {
+        throw new Error(
+          result.message ||
+            "Could not delete resource.",
+        );
+      }
+
+      setItems((current) =>
+        current.filter(
+          (resource) =>
+            resource.id !== item.id,
+        ),
+      );
+
+      toast.success(
+        "Resource deleted.",
+      );
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Could not delete resource.",
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
-    <PortalPage
-      portalLabel="Admin"
-      portalPath="/admin"
-      title="Resource Library"
-      description="Videos, notes, worksheets, flashcards and mind maps in a single catalogue."
-    >
+   <PortalPage
+  portalLabel="Admin"
+  portalPath="/admin"
+  title="Resource Library"
+  description="Real learning resources from Lesson Content, including uploaded files, external links and inline material."
+  showNotice={false}
+>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total resources" value="3,412" hint="+96 this week" tone="success" />
-        <StatCard label="Videos" value="912" tone="primary" />
-        <StatCard label="Documents" value="1,684" tone="primary" />
-        <StatCard label="Awaiting review" value="38" hint="Needs action" tone="warning" />
+        <StatCard
+          label="Total resources"
+          value={String(items.length)}
+          hint="Real lesson content"
+          tone="primary"
+        />
+
+        <StatCard
+          label="Videos"
+          value={String(videoCount)}
+          hint="Video resources"
+          tone="primary"
+        />
+
+        <StatCard
+          label="Uploaded files"
+          value={String(
+            uploadedFileCount,
+          )}
+          hint="Stored files"
+          tone="success"
+        />
+
+        <StatCard
+          label="Active"
+          value={String(activeCount)}
+          hint={`${items.length - activeCount} inactive`}
+          tone="success"
+        />
       </div>
 
-      <ContentManager
-        items={allResources}
-        caption="All resources"
-        createLabel="Add resource"
-        searchPlaceholder="Search all resources…"
-        showUpload
-        filters={[
-          { id: "type", label: "Type", options: ["All types", "Video", "Notes", "Worksheet", "Flashcards", "Mind Map"] },
-          { id: "status", label: "Status", options: ["All statuses", "Published", "Draft", "In review", "Archived"] },
-        ]}
-      />
+      <section className="space-y-4">
+        <div className="flex flex-col gap-3 rounded-3xl border bg-card p-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-1 flex-col gap-3 md:flex-row">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+
+              <Input
+                value={search}
+                onChange={(event) =>
+                  setSearch(
+                    event.target.value,
+                  )
+                }
+                placeholder="Search resources or lessons..."
+                className="pl-9"
+              />
+            </div>
+
+            <select
+              value={typeFilter}
+              onChange={(event) =>
+                setTypeFilter(
+                  event.target.value,
+                )
+              }
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="all">
+                All types
+              </option>
+
+              {resourceTypes.map(
+                (type) => (
+                  <option
+                    key={type}
+                    value={type}
+                  >
+                    {formatType(type)}
+                  </option>
+                ),
+              )}
+            </select>
+
+            <select
+              value={statusFilter}
+              onChange={(event) =>
+                setStatusFilter(
+                  event.target.value,
+                )
+              }
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="all">
+                All statuses
+              </option>
+
+              <option value="active">
+                Active
+              </option>
+
+              <option value="inactive">
+                Inactive
+              </option>
+            </select>
+
+            <select
+              value={sourceFilter}
+              onChange={(event) =>
+                setSourceFilter(
+                  event.target.value,
+                )
+              }
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="all">
+                All sources
+              </option>
+
+              <option value="uploaded">
+                Uploaded file
+              </option>
+
+              <option value="external">
+                External
+              </option>
+
+              <option value="inline">
+                Inline
+              </option>
+            </select>
+          </div>
+
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() =>
+                void loadResources()
+              }
+              disabled={loading}
+            >
+              <RefreshCw
+                className={
+                  loading
+                    ? "size-4 animate-spin"
+                    : "size-4"
+                }
+              />
+
+              Refresh
+            </Button>
+
+            <Button
+              onClick={addResource}
+            >
+              <FileText className="size-4" />
+              Add resource
+            </Button>
+          </div>
+        </div>
+
+        <div className="overflow-hidden rounded-3xl border bg-card">
+          <div className="flex items-center justify-between border-b px-5 py-4">
+            <div>
+              <h2 className="font-semibold">
+                All resources
+              </h2>
+
+              <p className="text-sm text-muted-foreground">
+                {filteredItems.length} of{" "}
+                {items.length} resources
+              </p>
+            </div>
+
+            <FolderOpen className="size-5 text-muted-foreground" />
+          </div>
+
+          {loading ? (
+            <div className="flex min-h-48 items-center justify-center text-sm text-muted-foreground">
+              Loading resources...
+            </div>
+          ) : filteredItems.length ===
+            0 ? (
+            <div className="flex min-h-48 flex-col items-center justify-center gap-3 px-4 text-center">
+              <FileText className="size-8 text-muted-foreground" />
+
+              <div>
+                <p className="font-medium">
+                  No resources found
+                </p>
+
+                <p className="text-sm text-muted-foreground">
+                  Adjust the filters or add
+                  lesson content.
+                </p>
+              </div>
+
+              <Button
+                onClick={addResource}
+              >
+                Add resource
+              </Button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="border-b bg-muted/30 text-xs uppercase tracking-wide text-muted-foreground">
+                  <tr>
+                    <th className="px-5 py-3">
+                      Resource
+                    </th>
+
+                    <th className="px-5 py-3">
+                      Type
+                    </th>
+
+                    <th className="px-5 py-3">
+                      Source
+                    </th>
+
+                    <th className="px-5 py-3">
+                      Access
+                    </th>
+
+                    <th className="px-5 py-3">
+                      Status
+                    </th>
+
+                    <th className="px-5 py-3">
+                      Updated
+                    </th>
+
+                    <th className="px-5 py-3 text-right">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {filteredItems.map(
+                    (item) => {
+                      const resourceUrl =
+                        getResourceUrl(
+                          item,
+                        );
+
+                      return (
+                        <tr
+                          key={item.id}
+                          className="border-b last:border-b-0 hover:bg-muted/20"
+                        >
+                          <td className="px-5 py-4">
+                            <div className="min-w-48">
+                              <p className="font-medium">
+                                {
+                                  item.title
+                                }
+                              </p>
+
+                              <p className="mt-1 text-xs text-muted-foreground">
+                                {item
+                                  .lesson
+                                  ?.title ??
+                                  `Lesson ${item.lesson_id}`}
+                              </p>
+                            </div>
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <Badge variant="outline">
+                              {item.content_type ===
+                              "video" ? (
+                                <Video className="mr-1 size-3" />
+                              ) : (
+                                <FileText className="mr-1 size-3" />
+                              )}
+
+                              {formatType(
+                                item.content_type,
+                              )}
+                            </Badge>
+                          </td>
+
+                          <td className="px-5 py-4 text-muted-foreground">
+                            {getSourceLabel(
+                              item,
+                            )}
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <Badge
+                              variant={
+                                item.is_free
+                                  ? "secondary"
+                                  : "outline"
+                              }
+                            >
+                              {item.is_free
+                                ? "Free"
+                                : "Paid"}
+                            </Badge>
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <Badge
+                              variant={
+                                item.is_active
+                                  ? "secondary"
+                                  : "outline"
+                              }
+                            >
+                              {item.is_active
+                                ? "Active"
+                                : "Inactive"}
+                            </Badge>
+                          </td>
+
+                          <td className="px-5 py-4 whitespace-nowrap text-muted-foreground">
+                            {formatDate(
+                              item.updated_at,
+                            )}
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                disabled={
+                                  !resourceUrl
+                                }
+                                onClick={() =>
+                                  openResource(
+                                    item,
+                                  )
+                                }
+                              >
+                                <ExternalLink className="size-4" />
+                                Open
+                              </Button>
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() =>
+                                  manageResource(
+                                    item,
+                                  )
+                                }
+                              >
+                                Manage
+                              </Button>
+
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                disabled={
+                                  deletingId ===
+                                  item.id
+                                }
+                                onClick={() =>
+                                  void deleteResource(
+                                    item,
+                                  )
+                                }
+                                aria-label={`Delete ${item.title}`}
+                              >
+                                <Trash2 className="size-4" />
+
+                                {deletingId ===
+                                item.id
+                                  ? "Deleting..."
+                                  : "Delete"}
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    },
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </section>
     </PortalPage>
   );
 }

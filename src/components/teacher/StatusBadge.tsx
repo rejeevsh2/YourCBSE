@@ -37,3 +37,4 @@ export function DifficultyBadge({ level }: { level: string }) {
     </Badge>
   );
 }
+

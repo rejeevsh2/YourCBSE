@@ -69,3 +69,4 @@ export function hasErrors(errors: FieldErrors): boolean {
 export function mergeFieldErrors(local: FieldErrors, server?: FieldErrors): FieldErrors {
   return { ...local, ...(server ?? {}) };
 }
+

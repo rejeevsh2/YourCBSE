@@ -511,3 +511,4 @@ export const adminReports = [
   { id: "rp3", name: "Content coverage audit", period: "July 2026", format: "PDF", size: "2.2 MB", generated: "26 Jul 2026" },
   { id: "rp4", name: "Teacher contribution report", period: "July 2026", format: "CSV", size: "640 KB", generated: "25 Jul 2026" },
 ];
+

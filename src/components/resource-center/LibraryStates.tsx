@@ -31,7 +31,10 @@ export function NoFavorites() {
       description="Bookmark lessons, videos, notes, worksheets, flash cards and mind maps to build your own shelf."
     >
       <Button asChild className="rounded-2xl">
-        <Link to="/library/search">Find resources</Link>
+        <Link
+  to="/library/search"
+ search={{ q: "" }}
+>Find resources</Link>
       </Button>
     </StateView>
   );
@@ -59,7 +62,12 @@ export function NoRecentlyViewed() {
       description="Open any resource and it will appear here so you can pick up where you left off."
     >
       <Button asChild className="rounded-2xl">
-        <Link to="/library/search">Start searching</Link>
+       <Link
+  to="/library/search"
+  search={{ q: "" }}
+>
+  Start searching
+</Link>
       </Button>
     </StateView>
   );
@@ -85,3 +93,4 @@ export function SearchFailed({ message, onRetry }: { message?: string; onRetry?:
     </StateView>
   );
 }
+

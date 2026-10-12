@@ -91,3 +91,4 @@ export function LearningPathTimeline({ steps }: { steps: PathStep[] }) {
     </ol>
   );
 }
+

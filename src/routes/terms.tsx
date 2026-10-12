@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LegalPageView } from "@/components/common/LegalPageView";
 import { legalDocuments } from "@/data/legal";
 
-const title = "Terms & Conditions — YourCBSE";
+const title = "Terms & Conditions — YourTeacher";
 const description =
-  "The terms that govern accounts, acceptable use and content ownership on the YourCBSE learning platform.";
+  "The terms that govern accounts, acceptable use and content ownership on the YourTeacher learning platform.";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -19,3 +19,4 @@ export const Route = createFileRoute("/terms")({
   }),
   component: () => <LegalPageView document={legalDocuments.terms} />,
 });
+

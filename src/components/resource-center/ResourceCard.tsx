@@ -103,3 +103,4 @@ export const ResourceCard = memo(function ResourceCard({
     </article>
   );
 });
+

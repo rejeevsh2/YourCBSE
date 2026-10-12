@@ -9,3 +9,4 @@ export function AuthDivider({ label, className }: { label: string; className?: s
     </div>
   );
 }
+

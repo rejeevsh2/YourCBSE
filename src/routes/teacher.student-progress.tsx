@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 export const Route = createFileRoute("/teacher/student-progress")({
   head: () => ({
     meta: [
-      { title: "Student Progress — YourCBSE Teacher" },
+      { title: "Student Progress — YourTeacher Teacher" },
       { name: "description", content: "See how your classes are progressing chapter by chapter." },
       { name: "robots", content: "noindex" },
     ],
@@ -61,3 +61,4 @@ function StudentProgressPage() {
     </PortalPage>
   );
 }
+

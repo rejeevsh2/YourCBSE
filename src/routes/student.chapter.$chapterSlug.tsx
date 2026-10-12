@@ -1,179 +1,402 @@
+import { API_BASE_URL, authenticatedFetch } from "@/lib/auth/http";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  ArrowRight,
-  BookOpenCheck,
+  ArrowLeft,
+  BookOpen,
   CheckCircle2,
+  ChevronRight,
   Clock3,
-  GraduationCap,
-  ListChecks,
+  FileText,
+  Loader2,
   PlayCircle,
-  Sparkles,
+  RefreshCw,
 } from "lucide-react";
+
 import { PortalPage } from "@/components/layout/PortalPage";
-import { StudioPanel } from "@/components/teacher/StudioPanel";
-import { NotFoundView } from "@/components/common/NotFoundView";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
-import { difficultyTone, libraryChapters, type LibraryChapter } from "@/data/student-library";
+import { getAuthToken } from "@/lib/auth";
 
-const findChapter = (slug: string): LibraryChapter | undefined =>
-  libraryChapters.find((item) => item.slug === slug);
+const PUBLIC_API = `${API_BASE_URL}/public`;
+const AUTH_API = API_BASE_URL;
 
+type Lesson = {
+  id: number;
+  chapter_id: number;
+  title: string;
+  slug: string;
+  lesson_number: number;
+  summary: string | null;
+  duration: number | null;
+  display_order: number | null;
+  is_published: boolean;
+  is_active: boolean;
+};
+type ChapterProgress = {
+  chapter_id: number;
+  total_lessons: number;
+  started_lessons: number;
+  completed_lessons: number;
+  percentage: number;
+  lessons: {
+    lesson: Lesson;
+    is_started: boolean;
+    is_completed: boolean;
+    started_at: string | null;
+    last_opened_at: string | null;
+    completed_at: string | null;
+  }[];
+};
 export const Route = createFileRoute("/student/chapter/$chapterSlug")({
-  head: ({ params }) => {
-    const chapter = findChapter(params.chapterSlug);
-    return {
-      meta: [
-        { title: chapter ? `${chapter.title} — YourCBSE` : "Chapter — YourCBSE" },
-        {
-          name: "description",
-          content: chapter?.summary ?? "Chapter overview for YourCBSE students.",
-        },
-        { name: "robots", content: "noindex" },
-      ],
-    };
-  },
-  notFoundComponent: ChapterNotFound,
+  head: () => ({
+    meta: [
+      { title: "Chapter — YourTeacher" },
+      {
+        name: "description",
+        content: "View chapter lessons and learning content.",
+      },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: ChapterOverviewPage,
 });
 
-function ChapterNotFound() {
-  return <NotFoundView />;
-}
-
 function ChapterOverviewPage() {
   const { chapterSlug } = Route.useParams();
-  const chapter = findChapter(chapterSlug);
-  if (!chapter) return <NotFoundView />;
-  const Icon = chapter.icon;
+
+  const chapterId = chapterSlug;
+
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+const [chapterProgress, setChapterProgress] =
+  useState<ChapterProgress | null>(null);
+
+  async function loadLessons() {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await authenticatedFetch(
+        `${PUBLIC_API}/chapters/${chapterId}/lessons`,
+        {
+          headers: {
+            Accept: "application/json",
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Could not load lessons.");
+      }
+
+      const data: Lesson[] = await response.json();
+
+      setLessons(data);
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        "Unable to load the lessons for this chapter.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+  async function loadChapterProgress() {
+    const token = getAuthToken();
+
+    if (!token) {
+      setChapterProgress(null);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${AUTH_API}/chapters/${chapterId}/progress`,
+        {
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "Could not load chapter progress.",
+        );
+      }
+
+      const data: ChapterProgress =
+        await response.json();
+
+      setChapterProgress(data);
+    } catch (err) {
+      console.error(
+        "Chapter progress error:",
+        err,
+      );
+
+      setChapterProgress(null);
+    }
+  }
+
+  useEffect(() => {
+  void loadLessons();
+  void loadChapterProgress();
+}, [chapterId]);
+
+function getLessonProgress(lessonId: number) {
+  return chapterProgress?.lessons.find(
+    (item) => item.lesson.id === lessonId,
+  );
+}
 
   return (
     <PortalPage
       portalLabel="Student Portal"
       portalPath="/student"
-      title={chapter.title}
-      description={`${chapter.grade} · ${chapter.subject} · ${chapter.lessons} lessons`}
+      title="Chapter Lessons"
+      description="Choose a lesson below to start learning."
+      showNotice={false}
       actions={
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" className="rounded-2xl" asChild>
-            <Link to="/student/learning-hub">Back to hub</Link>
-          </Button>
-          <Button className="rounded-2xl" asChild>
-            <Link to="/learn/$chapterSlug" params={{ chapterSlug: chapter.slug }}>
-              <PlayCircle className="size-4" /> Quick start
-            </Link>
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          className="rounded-2xl"
+          asChild
+        >
+          <Link to="/student/learning-hub">
+            <ArrowLeft className="size-4" />
+            Back to Learning Hub
+          </Link>
+        </Button>
       }
     >
-      <section
-        className={cn(
-          "tile flex flex-col gap-5 bg-gradient-to-br p-5 sm:p-6 lg:flex-row lg:items-center",
-          chapter.cover,
-        )}
-      >
-        <span className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-card/70">
-          <Icon className="size-8 text-foreground/70" aria-hidden="true" />
-        </span>
-        <div className="min-w-0 flex-1 space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className={cn("rounded-full", difficultyTone[chapter.difficulty])}>
-              {chapter.difficulty}
-            </Badge>
-            <Badge variant="secondary" className="gap-1 rounded-full">
-              <Clock3 className="size-3" aria-hidden="true" /> {chapter.minutes} min
-            </Badge>
-            <Badge variant="secondary" className="gap-1 rounded-full">
-              <GraduationCap className="size-3" aria-hidden="true" /> {chapter.grade}
-            </Badge>
+      <div className="space-y-5">
+
+        <section className="tile p-5 sm:p-6">
+          <div className="flex items-start gap-4">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
+              <BookOpen className="size-6" />
+            </span>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+                Chapter
+              </p>
+
+              <h2 className="mt-1 font-heading text-xl font-bold">
+                Learning materials
+              </h2>
+
+              <p className="mt-1 text-sm text-muted-foreground">
+                Work through the lessons in order or choose
+                the lesson you want to study.
+              </p>
+            </div>
           </div>
-          <p className="max-w-3xl text-sm text-muted-foreground">{chapter.summary}</p>
-          <div className="max-w-md space-y-1.5">
-            <Progress value={chapter.completion} aria-label="Chapter progress" />
-            <p className="text-xs text-muted-foreground">
-              {chapter.completion}% complete · {Math.round((chapter.lessons * chapter.completion) / 100)} of{" "}
-              {chapter.lessons} lessons
-            </p>
-          </div>
-        </div>
-      </section>
+         </section>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="space-y-4 lg:col-span-2">
-          <StudioPanel title="Learning objectives" icon={ListChecks}>
-            <ul className="space-y-3">
-              {chapter.objectives.map((objective) => (
-                <li key={objective} className="flex items-start gap-3 text-sm">
-                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />
-                  <span>{objective}</span>
-                </li>
-              ))}
-            </ul>
-          </StudioPanel>
+        {chapterProgress ? (
+          <section className="tile p-5 sm:p-6">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="font-heading text-lg font-bold">
+                  Chapter Progress
+                </h2>
 
-          <StudioPanel title="Resources included" icon={BookOpenCheck}>
-            <ul className="grid gap-3 sm:grid-cols-2">
-              {chapter.resources.map((resource) => {
-                const ResourceIcon = resource.icon;
-                return (
-                  <li
-                    key={resource.label}
-                    className="flex items-center gap-3 rounded-2xl border border-border/70 p-3"
-                  >
-                    <span className="flex size-9 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
-                      <ResourceIcon className="size-4" aria-hidden="true" />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold">{resource.label}</p>
-                      <p className="text-xs text-muted-foreground">{resource.count} items</p>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </StudioPanel>
-        </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {chapterProgress.completed_lessons} of{" "}
+                  {chapterProgress.total_lessons} lessons completed
+                </p>
+              </div>
 
-        <div className="space-y-4">
-          <StudioPanel title="Prerequisites" icon={GraduationCap}>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              {chapter.prerequisites.map((item) => (
-                <li key={item} className="rounded-2xl bg-accent/40 px-3 py-2 text-accent-foreground">
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </StudioPanel>
+              <span className="font-heading text-2xl font-bold text-primary">
+                {chapterProgress.percentage}%
+              </span>
+            </div>
 
-          <StudioPanel title="Skills you'll learn" icon={Sparkles}>
-            <ul className="flex flex-wrap gap-2">
-              {chapter.skills.map((skill) => (
-                <li key={skill}>
-                  <Badge variant="secondary" className="rounded-full">
-                    {skill}
-                  </Badge>
-                </li>
-              ))}
-            </ul>
-          </StudioPanel>
+            <Progress
+              value={chapterProgress.percentage}
+              className="mt-4"
+            />
+          </section>
+        ) : null}
 
-          <StudioPanel title="Estimated duration" icon={Clock3}>
-            <p className="font-heading text-3xl font-bold">
-              {chapter.minutes}
-              <span className="text-base text-muted-foreground"> min</span>
-            </p>
+        {loading ? (
+          <section className="tile flex items-center justify-center gap-3 p-10">
+            <Loader2 className="size-5 animate-spin" />
+
             <p className="text-sm text-muted-foreground">
-              Across {chapter.lessons} lessons — about three focused sessions.
+              Loading lessons...
             </p>
-            <Button asChild variant="outline" className="w-full rounded-2xl">
-              <Link to="/player/$chapterSlug" params={{ chapterSlug: chapter.slug }}>
-                Open player <ArrowRight className="size-4" />
-              </Link>
+          </section>
+        ) : null}
+
+        {!loading && error ? (
+          <section className="tile p-8 text-center">
+            <p className="font-semibold text-destructive">
+              {error}
+            </p>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-4 rounded-2xl"
+              onClick={loadLessons}
+            >
+              <RefreshCw className="size-4" />
+              Try again
             </Button>
-          </StudioPanel>
-        </div>
+          </section>
+        ) : null}
+
+        {!loading && !error && lessons.length === 0 ? (
+          <section className="tile p-10 text-center">
+            <FileText className="mx-auto size-10 text-muted-foreground" />
+
+            <h2 className="mt-3 font-heading text-lg font-bold">
+              No published lessons yet
+            </h2>
+
+            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+              This chapter does not currently contain any
+              published lessons.
+            </p>
+
+            <p className="mx-auto mt-2 max-w-md text-xs text-muted-foreground">
+              Lessons must be both Active and Published in
+              the Admin Portal before students can see them.
+            </p>
+          </section>
+        ) : null}
+
+        {!loading && !error && lessons.length > 0 ? (
+          <section className="space-y-4">
+            <div>
+              <h2 className="font-heading text-xl font-bold">
+                Lessons
+              </h2>
+
+              <p className="text-sm text-muted-foreground">
+                {lessons.length} lesson
+                {lessons.length === 1 ? "" : "s"} available
+              </p>
+            </div>
+
+            <div className="grid gap-4">
+              {lessons.map((lesson, index) => (
+                <article
+                  key={lesson.id}
+                  className="tile flex flex-col gap-4 p-5 sm:flex-row sm:items-center"
+                >
+                  <div className="flex min-w-0 flex-1 items-start gap-4">
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-accent font-heading font-bold text-accent-foreground">
+                      {lesson.lesson_number ?? index + 1}
+                    </span>
+
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-heading text-lg font-bold">
+                          {lesson.title}
+                        </h3>
+
+                       {(() => {
+  const progress = getLessonProgress(lesson.id);
+
+  if (progress?.is_completed) {
+    return (
+      <Badge className="rounded-full">
+        <CheckCircle2 className="mr-1 size-3.5" />
+        Completed
+      </Badge>
+    );
+  }
+
+  if (progress?.is_started) {
+    return (
+      <Badge
+        variant="secondary"
+        className="rounded-full"
+      >
+        In Progress
+      </Badge>
+    );
+  }
+
+  return (
+    <Badge
+      variant="outline"
+      className="rounded-full"
+    >
+      Not Started
+    </Badge>
+  );
+})()}
+                      </div>
+
+                      {lesson.summary ? (
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {lesson.summary}
+                        </p>
+                      ) : (
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Open this lesson to view its learning
+                          content.
+                        </p>
+                      )}
+
+                      <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
+                        {lesson.duration ? (
+                          <span className="flex items-center gap-1">
+                            <Clock3 className="size-3.5" />
+                            {lesson.duration} min
+                          </span>
+                        ) : null}
+
+                        <span className="flex items-center gap-1">
+                          <PlayCircle className="size-3.5" />
+                          Lesson {lesson.lesson_number ?? index + 1}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                 {(() => {
+  const progress = getLessonProgress(lesson.id);
+
+  const buttonText = progress?.is_completed
+    ? "Review"
+    : progress?.is_started
+      ? "Resume"
+      : "Start Lesson";
+
+  return (
+    <Button
+      asChild
+      className="shrink-0 rounded-2xl"
+    >
+      <Link
+        to="/student/lesson/$lessonId"
+        params={{
+          lessonId: String(lesson.id),
+        }}
+      >
+        {buttonText}
+        <ChevronRight className="size-4" />
+      </Link>
+    </Button>
+  );
+})()}
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
     </PortalPage>
   );

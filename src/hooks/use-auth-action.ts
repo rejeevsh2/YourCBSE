@@ -43,3 +43,4 @@ export function useAuthAction<TArgs extends unknown[], TData>(
 
   return { loading, error, fieldErrors, setError, run, reset };
 }
+

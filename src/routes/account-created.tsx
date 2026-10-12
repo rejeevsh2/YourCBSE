@@ -5,8 +5,8 @@ import { AuthIllustration } from "@/components/auth/AuthIllustration";
 import { SuccessAlert } from "@/components/auth/AuthAlert";
 import { Button } from "@/components/ui/button";
 
-const title = "Account Created — YourCBSE";
-const description = "Your YourCBSE account is ready. Start learning right away.";
+const title = "Account Created — YourTeacher";
+const description = "Your YourTeacher account is ready. Start learning right away.";
 
 export const Route = createFileRoute("/account-created")({
   head: () => ({
@@ -32,7 +32,7 @@ function AccountCreatedPage() {
   return (
     <AuthShell
       title="You're all set!"
-      description="Your YourCBSE account has been created successfully."
+      description="Your YourTeacher account has been created successfully."
       footer={
         <>
           Not you?{" "}
@@ -69,3 +69,4 @@ function AccountCreatedPage() {
     </AuthShell>
   );
 }
+

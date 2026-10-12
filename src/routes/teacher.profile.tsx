@@ -5,7 +5,7 @@ import { ProfileForm } from "@/components/common/ProfileForm";
 export const Route = createFileRoute("/teacher/profile")({
   head: () => ({
     meta: [
-      { title: "Teacher Profile — YourCBSE" },
+      { title: "Teacher Profile — YourTeacher" },
       { name: "description", content: "Manage your teaching profile and subjects." },
       { name: "robots", content: "noindex" },
     ],
@@ -18,15 +18,11 @@ function TeacherProfilePage() {
     <PortalPage
       portalLabel="Teacher Portal"
       portalPath="/teacher"
+      showNotice={false}
       title="Profile"
       description="Your public teaching profile and contact details."
     >
-      <ProfileForm
-        name="Meera Iyer"
-        role="Science Teacher · Classes 9–12"
-        email="meera@yourcbse.com"
-        bioLabel="Teaching bio"
-      />
+      <ProfileForm />
     </PortalPage>
   );
 }

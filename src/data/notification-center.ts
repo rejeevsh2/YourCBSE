@@ -285,3 +285,4 @@ export function relativeTime(iso: string, now = base): string {
 export function clockTime(iso: string): string {
   return new Date(iso).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
 }
+

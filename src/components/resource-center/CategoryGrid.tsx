@@ -50,3 +50,4 @@ export function CategoryGrid({ className }: { className?: string }) {
     </ul>
   );
 }
+

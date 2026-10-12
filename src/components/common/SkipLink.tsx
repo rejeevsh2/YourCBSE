@@ -18,3 +18,4 @@ export function SkipLink({ className }: { className?: string }) {
     </a>
   );
 }
+

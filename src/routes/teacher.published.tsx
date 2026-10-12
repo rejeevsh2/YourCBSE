@@ -1,83 +1,246 @@
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Archive, Eye, RefreshCw } from "lucide-react";
-import { PortalPage } from "@/components/layout/PortalPage";
-import { StudioToolbar } from "@/components/teacher/StudioToolbar";
-import { StatusBadge } from "@/components/teacher/StatusBadge";
-import { RowActions } from "@/components/teacher/RowActions";
-import { DataTable, type Column } from "@/components/common/DataTable";
-import { Badge } from "@/components/ui/badge";
-import { studioChapters, studioResources } from "@/data/teacher";
+import {
+  BookOpen,
+  CheckCircle2,
+  Loader2,
+} from "lucide-react";
 
-export const Route = createFileRoute("/teacher/published")({
-  head: () => ({
-    meta: [
-      { title: "Published Content — Teacher Studio" },
-      { name: "description", content: "Everything currently live for students." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: PublishedPage,
+import { PortalPage } from "@/components/layout/PortalPage";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { apiRequest } from "@/lib/auth/http";
+
+type LessonContent = {
+  id: number;
+  title: string;
+  content_type: string;
+};
+
+type Chapter = {
+  id: number;
+  title: string;
+};
+
+type Lesson = {
+  id: number;
+  title: string;
+  summary?: string | null;
+  duration?: number | null;
+  is_published: boolean;
+  chapter?: Chapter | null;
+  contents?: LessonContent[];
+};
+
+type LessonResponse = {
+  lessons: Lesson[];
+};
+
+export const Route = createFileRoute(
+  "/teacher/published",
+)({
+  component: TeacherPublishedPage,
 });
 
-interface Row {
-  id: string;
-  title: string;
-  type: string;
-  meta: string;
-  updatedAt: string;
-}
+function TeacherPublishedPage() {
+  const [lessons, setLessons] =
+    useState<Lesson[]>([]);
 
-const columns: Column<Row>[] = [
-  { key: "title", header: "Content", render: (row) => <span className="font-semibold">{row.title}</span> },
-  { key: "type", header: "Type", render: (row) => <Badge variant="secondary" className="rounded-full text-[11px]">{row.type}</Badge> },
-  { key: "meta", header: "Placement", render: (row) => <span className="text-sm text-muted-foreground">{row.meta}</span> },
-  { key: "status", header: "Status", render: () => <StatusBadge status="Published" /> },
-  { key: "updatedAt", header: "Last updated", render: (row) => <span className="text-sm text-muted-foreground">{row.updatedAt}</span> },
-  {
-    key: "actions",
-    header: "Actions",
-    className: "text-right",
-    render: (row) => (
-      <div className="flex justify-end">
-        <RowActions
-          label={row.title}
-          actions={[
-            { label: "Preview", icon: Eye },
-            { label: "Publish update", icon: RefreshCw },
-            { label: "Archive", icon: Archive, destructive: true, separatorBefore: true },
-          ]}
-        />
-      </div>
-    ),
-  },
-];
+  const [loading, setLoading] =
+    useState(true);
 
-function PublishedPage() {
-  const rows: Row[] = [
-    ...studioChapters
-      .filter((c) => c.status === "Published")
-      .map((c) => ({ id: `c-${c.id}`, title: c.title, type: "Chapter", meta: `${c.grade} · ${c.subject}`, updatedAt: c.updatedAt })),
-    ...studioResources
-      .filter((r) => r.status === "Published")
-      .map((r) => ({ id: `r-${r.id}`, title: r.title, type: r.kind, meta: `${r.grade} · ${r.chapter}`, updatedAt: r.updatedAt })),
-  ];
+  const [error, setError] =
+    useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError("");
+
+      const result =
+        await apiRequest<LessonResponse>(
+          "/teacher/lessons",
+          {
+            method: "GET",
+          },
+        );
+
+      if (cancelled) {
+        return;
+      }
+
+      if (
+        result.ok &&
+        result.data
+      ) {
+        setLessons(
+          result.data.lessons,
+        );
+      } else {
+        setError(
+          result.message ??
+            "Unable to load published lessons.",
+        );
+      }
+
+      setLoading(false);
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const publishedLessons =
+    useMemo(
+      () =>
+        lessons.filter(
+          (lesson) =>
+            lesson.is_published,
+        ),
+      [lessons],
+    );
 
   return (
     <PortalPage
-      portalLabel="Teacher Studio"
+      portalLabel="Teacher"
       portalPath="/teacher"
-      title="Published content"
-      description="Live for students right now — review, update or archive."
+      title="Published Content"
+      description="View lessons that have been published by an administrator."
       showNotice={false}
     >
-      <StudioToolbar
-        searchPlaceholder="Search published content…"
-        filters={[
-          { id: "type", label: "Type", options: ["Chapter", "Video", "PDF Notes", "Worksheet"] },
-          { id: "grade", label: "Grade", options: ["Grade 9", "Grade 10", "Grade 12"] },
-        ]}
-      />
-      <DataTable columns={columns} rows={rows} caption="Published content" />
+      {loading ? (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin" />
+          Loading published lessons...
+        </div>
+      ) : error ? (
+        <Card>
+          <CardContent className="pt-6 text-sm text-destructive">
+            {error}
+          </CardContent>
+        </Card>
+      ) : publishedLessons.length ===
+        0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+            <CheckCircle2 className="size-8 text-muted-foreground" />
+
+            <div>
+              <p className="font-medium">
+                No published lessons yet
+              </p>
+
+              <p className="mt-1 text-sm text-muted-foreground">
+                When an administrator publishes one of your draft lessons,
+                it will appear here.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {publishedLessons.map(
+            (lesson) => (
+              <Card key={lesson.id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <BookOpen className="size-5" />
+                        {lesson.title}
+                      </CardTitle>
+
+                      {lesson.chapter && (
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          {
+                            lesson.chapter
+                              .title
+                          }
+                        </p>
+                      )}
+                    </div>
+
+                    <Badge>
+                      Published
+                    </Badge>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-4">
+                  {lesson.summary && (
+                    <p className="text-sm text-muted-foreground">
+                      {lesson.summary}
+                    </p>
+                  )}
+
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline">
+                      {
+                        lesson.contents
+                          ?.length ?? 0
+                      }{" "}
+                      content items
+                    </Badge>
+
+                    {lesson.duration && (
+                      <Badge variant="outline">
+                        {lesson.duration} min
+                      </Badge>
+                    )}
+                  </div>
+
+                  {(lesson.contents
+                    ?.length ?? 0) >
+                    0 && (
+                    <div className="space-y-2 border-t pt-3">
+                      {lesson.contents?.map(
+                        (content) => (
+                          <div
+                            key={
+                              content.id
+                            }
+                            className="flex items-center justify-between gap-3 text-sm"
+                          >
+                            <span>
+                              {
+                                content.title
+                              }
+                            </span>
+
+                            <Badge variant="secondary">
+                              {
+                                content.content_type
+                              }
+                            </Badge>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  )}
+
+                  <p className="text-xs text-muted-foreground">
+                    Published lessons are read-only for teachers.
+                  </p>
+                </CardContent>
+              </Card>
+            ),
+          )}
+        </div>
+      )}
     </PortalPage>
   );
 }

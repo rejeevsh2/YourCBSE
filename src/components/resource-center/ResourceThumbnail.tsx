@@ -41,3 +41,4 @@ export const ResourceThumbnail = memo(function ResourceThumbnail({
     </div>
   );
 });
+

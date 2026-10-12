@@ -75,3 +75,4 @@ export const ChatComposer = forwardRef<HTMLTextAreaElement, ChatComposerProps>(
     );
   },
 );
+

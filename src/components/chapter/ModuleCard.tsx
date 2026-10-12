@@ -60,3 +60,4 @@ export function ModuleCard({ module }: { module: LearningModule }) {
     </article>
   );
 }
+

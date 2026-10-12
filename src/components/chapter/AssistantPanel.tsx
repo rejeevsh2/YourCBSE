@@ -228,3 +228,4 @@ export function AssistantPanel({ className }: { className?: string }) {
     </div>
   );
 }
+

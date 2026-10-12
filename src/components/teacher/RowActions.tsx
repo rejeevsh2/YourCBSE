@@ -56,3 +56,4 @@ export function RowActions({ label, actions }: RowActionsProps) {
     </DropdownMenu>
   );
 }
+

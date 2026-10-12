@@ -49,7 +49,7 @@ export function PageLoader({ label = "Preparing your page…" }: { label?: strin
         </span>
       </div>
       <div className="space-y-1 text-center">
-        <p className="font-heading text-base font-semibold text-foreground">YourCBSE</p>
+        <p className="font-heading text-base font-semibold text-foreground">YourTeacher</p>
         <p className="text-sm text-muted-foreground">{label}</p>
       </div>
       <div className="h-1 w-48 overflow-hidden rounded-full bg-secondary" aria-hidden="true">
@@ -58,3 +58,4 @@ export function PageLoader({ label = "Preparing your page…" }: { label?: strin
     </div>
   );
 }
+

@@ -1,76 +1,431 @@
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { BarChart3, Flame } from "lucide-react";
+import {
+  BadgeCheck,
+  BarChart3,
+  BookOpen,
+  FileStack,
+  Loader2,
+} from "lucide-react";
+
 import { PortalPage } from "@/components/layout/PortalPage";
-import { StatGrid } from "@/components/common/StatCard";
-import { StudioPanel } from "@/components/teacher/StudioPanel";
-import { Progress } from "@/components/ui/progress";
-import { studioAnalytics, topChapters } from "@/data/teacher";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { apiRequest } from "@/lib/auth/http";
+
+type LessonContent = {
+  id: number;
+  content_type: string;
+};
+
+type Chapter = {
+  id: number;
+  title: string;
+};
+
+type Lesson = {
+  id: number;
+  title: string;
+  is_published: boolean;
+  chapter?: Chapter | null;
+  contents?: LessonContent[];
+};
+
+type LessonResponse = {
+  lessons: Lesson[];
+};
 
 export const Route = createFileRoute("/teacher/analytics")({
-  head: () => ({
-    meta: [
-      { title: "Analytics — Teacher Studio" },
-      { name: "description", content: "Views, completion, study time and quiz attempts." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
-  component: AnalyticsPage,
+  component: TeacherAnalyticsPage,
 });
 
-function AnalyticsPage() {
+function TeacherAnalyticsPage() {
+  const [lessons, setLessons] =
+    useState<Lesson[]>([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError("");
+
+      const result =
+        await apiRequest<LessonResponse>(
+          "/teacher/lessons",
+          {
+            method: "GET",
+          },
+        );
+
+      if (cancelled) {
+        return;
+      }
+
+      if (
+        result.ok &&
+        result.data
+      ) {
+        setLessons(
+          result.data.lessons,
+        );
+      } else {
+        setError(
+          result.message ??
+            "Unable to load teacher analytics.",
+        );
+      }
+
+      setLoading(false);
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const analytics =
+    useMemo(() => {
+      const published =
+        lessons.filter(
+          (lesson) =>
+            lesson.is_published,
+        ).length;
+
+      const drafts =
+        lessons.length -
+        published;
+
+      const contentCount =
+        lessons.reduce(
+          (total, lesson) =>
+            total +
+            (lesson.contents
+              ?.length ?? 0),
+          0,
+        );
+
+      const averageContent =
+        lessons.length === 0
+          ? 0
+          : Math.round(
+              (contentCount /
+                lessons.length) *
+                10,
+            ) / 10;
+
+      const contentTypes =
+        new Map<string, number>();
+
+      const chapters =
+        new Map<
+          number,
+          {
+            id: number;
+            title: string;
+            lessons: number;
+            content: number;
+          }
+        >();
+
+      for (const lesson of lessons) {
+        for (
+          const item of
+          lesson.contents ?? []
+        ) {
+          const type =
+            item.content_type ||
+            "other";
+
+          contentTypes.set(
+            type,
+            (contentTypes.get(type) ??
+              0) + 1,
+          );
+        }
+
+        if (lesson.chapter?.id) {
+          const existing =
+            chapters.get(
+              lesson.chapter.id,
+            ) ?? {
+              id: lesson.chapter.id,
+              title:
+                lesson.chapter.title,
+              lessons: 0,
+              content: 0,
+            };
+
+          existing.lessons += 1;
+
+          existing.content +=
+            lesson.contents
+              ?.length ?? 0;
+
+          chapters.set(
+            lesson.chapter.id,
+            existing,
+          );
+        }
+      }
+
+      return {
+        totalLessons:
+          lessons.length,
+        published,
+        drafts,
+        contentCount,
+        averageContent,
+        contentTypes:
+          Array.from(
+            contentTypes.entries(),
+          )
+            .map(
+              ([type, count]) => ({
+                type,
+                count,
+              }),
+            )
+            .sort(
+              (a, b) =>
+                b.count -
+                a.count,
+            ),
+        chapters:
+          Array.from(
+            chapters.values(),
+          )
+            .sort(
+              (a, b) =>
+                b.lessons -
+                  a.lessons ||
+                b.content -
+                  a.content,
+            )
+            .slice(0, 8),
+      };
+    }, [lessons]);
+
   return (
     <PortalPage
-      portalLabel="Teacher Studio"
+      portalLabel="Teacher"
       portalPath="/teacher"
       title="Analytics"
-      description="How your content performs across grades and classes."
+      description="Real statistics from the lessons and learning content you have created."
       showNotice={false}
     >
-      <StatGrid items={studioAnalytics} />
+      {loading ? (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin" />
+          Loading analytics...
+        </div>
+      ) : error ? (
+        <Card>
+          <CardContent className="pt-6 text-sm text-destructive">
+            {error}
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+            <StatCard
+              title="Lessons"
+              value={
+                analytics.totalLessons
+              }
+              icon={BookOpen}
+            />
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <StudioPanel title="Top chapters" icon={Flame}>
-          <ul className="space-y-3">
-            {topChapters.map((chapter, index) => (
-              <li key={chapter.id} className="flex items-center gap-3 rounded-2xl border border-border/60 p-3">
-                <span className="font-heading flex size-8 shrink-0 items-center justify-center rounded-2xl bg-accent text-sm font-bold text-accent-foreground">
-                  {index + 1}
-                </span>
-                <div className="min-w-0 flex-1 space-y-1.5">
-                  <p className="truncate text-sm font-medium">{chapter.title}</p>
-                  <Progress
-                    value={chapter.completion}
-                    className="h-2"
-                    aria-label={`${chapter.title} completion`}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {chapter.views.toLocaleString()} views · {chapter.completion}% completion
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </StudioPanel>
+            <StatCard
+              title="Published"
+              value={
+                analytics.published
+              }
+              icon={BadgeCheck}
+            />
 
-        <StudioPanel title="Engagement trend" icon={BarChart3}>
-          <div
-            className="flex h-56 items-end gap-2 rounded-2xl bg-accent/30 p-4"
-            role="img"
-            aria-label="Placeholder engagement chart for the last twelve weeks"
-          >
-            {[38, 52, 44, 61, 58, 72, 66, 80, 74, 88, 82, 94].map((value, index) => (
-              <span
-                key={index}
-                className="flex-1 rounded-t-lg bg-primary/70 transition-all hover:bg-primary"
-                style={{ height: `${value}%` }}
-              />
-            ))}
+            <StatCard
+              title="Drafts"
+              value={
+                analytics.drafts
+              }
+              icon={FileStack}
+            />
+
+            <StatCard
+              title="Content items"
+              value={
+                analytics.contentCount
+              }
+              icon={BarChart3}
+            />
+
+            <StatCard
+              title="Avg. content / lesson"
+              value={
+                analytics.averageContent
+              }
+              icon={BarChart3}
+            />
           </div>
-          <p className="text-xs text-muted-foreground">
-            Placeholder visualisation — real metrics arrive with the Laravel integration.
-          </p>
-        </StudioPanel>
-      </div>
+
+          <div className="grid gap-5 lg:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  Content types
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent>
+                {analytics
+                  .contentTypes
+                  .length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    No lesson content has been added yet.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {analytics.contentTypes.map(
+                      (item) => (
+                        <div
+                          key={
+                            item.type
+                          }
+                          className="flex items-center justify-between gap-3 rounded-xl border p-3"
+                        >
+                          <span className="capitalize">
+                            {item.type.replace(
+                              /[-_]/g,
+                              " ",
+                            )}
+                          </span>
+
+                          <Badge variant="secondary">
+                            {
+                              item.count
+                            }
+                          </Badge>
+                        </div>
+                      ),
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  Chapter coverage
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent>
+                {analytics.chapters
+                  .length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    No chapter-linked lessons were found.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {analytics.chapters.map(
+                      (
+                        chapter,
+                        index,
+                      ) => (
+                        <div
+                          key={
+                            chapter.id
+                          }
+                          className="flex items-center justify-between gap-4 rounded-xl border p-3"
+                        >
+                          <div className="min-w-0">
+                            <p className="font-medium">
+                              {index +
+                                1}
+                              .{" "}
+                              {
+                                chapter.title
+                              }
+                            </p>
+
+                            <p className="text-sm text-muted-foreground">
+                              {
+                                chapter.content
+                              }{" "}
+                              content items
+                            </p>
+                          </div>
+
+                          <Badge variant="outline">
+                            {
+                              chapter.lessons
+                            }{" "}
+                            {chapter.lessons ===
+                            1
+                              ? "lesson"
+                              : "lessons"}
+                          </Badge>
+                        </div>
+                      ),
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </>
+      )}
     </PortalPage>
+  );
+}
+
+type IconType = React.ComponentType<{
+  className?: string;
+}>;
+
+function StatCard({
+  title,
+  value,
+  icon: Icon,
+}: {
+  title: string;
+  value: number;
+  icon: IconType;
+}) {
+  return (
+    <Card>
+      <CardContent className="flex items-center justify-between gap-4 pt-6">
+        <div>
+          <p className="text-sm text-muted-foreground">
+            {title}
+          </p>
+
+          <p className="mt-1 text-2xl font-bold">
+            {value}
+          </p>
+        </div>
+
+        <Icon className="size-6 text-muted-foreground" />
+      </CardContent>
+    </Card>
   );
 }

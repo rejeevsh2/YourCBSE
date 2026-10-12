@@ -1,28 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PortalPage } from "@/components/layout/PortalPage";
-import { ResourceManager } from "@/components/teacher/ResourceManager";
+import { TeacherLessonResources } from "@/components/teacher/TeacherLessonResources";
 
 export const Route = createFileRoute("/teacher/videos")({
-  head: () => ({
-    meta: [
-      { title: "Videos — Teacher Studio" },
-      { name: "description", content: "Upload and manage video lessons." },
-      { name: "robots", content: "noindex" },
-    ],
-  }),
   component: VideosPage,
 });
 
 function VideosPage() {
   return (
-    <PortalPage
-      portalLabel="Teacher Studio"
-      portalPath="/teacher"
+    <TeacherLessonResources
       title="Videos"
-      description="Video lessons mapped to chapters, with preview and replace controls."
-      showNotice={false}
-    >
-      <ResourceManager kinds={["Video"]} uploadLabel="Videos" searchPlaceholder="Search videos…" />
-    </PortalPage>
+      description="Manage video resources attached to your lessons."
+      singularLabel="Video"
+      contentType="video"
+      contentLabel="Video notes or embed details"
+      contentPlaceholder="Optional notes, transcript or embed details..."
+      urlPlaceholder="https://youtube.com/... or https://..."
+    />
   );
 }

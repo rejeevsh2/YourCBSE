@@ -42,3 +42,4 @@ export function TablePagination({ page = 1, totalPages = 5 }: TablePaginationPro
     </Pagination>
   );
 }
+

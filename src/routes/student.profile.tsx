@@ -5,7 +5,7 @@ import { ProfileForm } from "@/components/common/ProfileForm";
 export const Route = createFileRoute("/student/profile")({
   head: () => ({
     meta: [
-      { title: "Student Profile — YourCBSE" },
+      { title: "Student Profile — YourTeacher" },
       { name: "description", content: "Manage your student profile details." },
       { name: "robots", content: "noindex" },
     ],
@@ -18,10 +18,11 @@ function StudentProfilePage() {
     <PortalPage
       portalLabel="Student Portal"
       portalPath="/student"
+      showNotice={false}
       title="Profile"
       description="Your personal details and study preferences."
     >
-      <ProfileForm name="Ananya Sharma" role="Class 10 · Science stream" />
+      <ProfileForm />
     </PortalPage>
   );
 }

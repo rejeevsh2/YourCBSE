@@ -10,8 +10,9 @@ import { laravelAuthService } from "./laravel-auth";
 import { mockAuthService } from "./mock-auth";
 import type { AuthService } from "./types";
 
-const useMock = (import.meta.env.VITE_USE_MOCK_AUTH as string | undefined) !== "false";
+const useMock = (import.meta.env.VITE_USE_MOCK_AUTH as string | undefined) === "true";
 
 export const authService: AuthService = useMock ? mockAuthService : laravelAuthService;
 
 export const isMockAuth = useMock;
+

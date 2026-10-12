@@ -6,6 +6,8 @@ import {
   type AppNotification,
   type NotificationError,
   type NotificationPreference,
+  type StudyReminder,
+  type AchievementNotification,
 } from "@/lib/notifications";
 
 export type CategoryFilter = NotificationCategory | "All";
@@ -14,6 +16,8 @@ export type CategoryFilter = NotificationCategory | "All";
 export function useNotificationCenter() {
   const [items, setItems] = useState<AppNotification[]>([]);
   const [preferences, setPreferences] = useState<NotificationPreference[]>([]);
+  const [reminders, setReminders] = useState<StudyReminder[]>([]);
+  const [achievements, setAchievements] = useState<AchievementNotification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<NotificationError | null>(null);
   const [category, setCategory] = useState<CategoryFilter>("All");
@@ -22,9 +26,11 @@ export function useNotificationCenter() {
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const [list, prefs] = await Promise.all([
+    const [list, prefs, reminderData, achievementData] = await Promise.all([
       notificationService.list(),
       notificationService.preferences(),
+      notificationService.reminders(),
+      notificationService.achievements(),
     ]);
     if (!list.ok) {
       setError(list.error);
@@ -33,6 +39,8 @@ export function useNotificationCenter() {
     }
     setItems(list.data);
     if (prefs.ok) setPreferences(prefs.data);
+    if (reminderData.ok) setReminders(reminderData.data);
+    if (achievementData.ok) setAchievements(achievementData.data);
     setLoading(false);
   }, []);
 
@@ -41,35 +49,50 @@ export function useNotificationCenter() {
   }, [load]);
 
   const markRead = useCallback(async (id: string) => {
+    const result = await notificationService.markRead(id);
+    if (!result.ok) {
+      toast.error(result.error.message);
+      return;
+    }
     setItems((current) =>
       current.map((item) => (item.id === id ? { ...item, status: "read" as const } : item)),
     );
-    await notificationService.markRead(id);
   }, []);
 
   const markAllRead = useCallback(async () => {
+    const result = await notificationService.markAllRead();
+    if (!result.ok) {
+      toast.error(result.error.message);
+      return;
+    }
     setItems((current) => current.map((item) => ({ ...item, status: "read" as const })));
-    await notificationService.markAllRead();
     toast.success("All notifications marked as read");
   }, []);
 
-  const remove = useCallback(async (id: string) => {
-    const snapshot = items;
-    setItems((current) => current.filter((item) => item.id !== id));
-    const result = await notificationService.remove(id);
-    if (!result.ok) {
-      setItems(snapshot);
-      toast.error("Could not delete that notification");
-      return;
-    }
-    toast.success("Notification deleted");
-  }, [items]);
+  const remove = useCallback(
+    async (id: string) => {
+      const snapshot = items;
+      setItems((current) => current.filter((item) => item.id !== id));
+      const result = await notificationService.remove(id);
+      if (!result.ok) {
+        setItems(snapshot);
+        toast.error("Could not delete that notification");
+        return;
+      }
+      toast.success("Notification deleted");
+    },
+    [items],
+  );
 
   const togglePreference = useCallback(async (id: string, enabled: boolean) => {
+    const result = await notificationService.updatePreference(id, enabled);
+    if (!result.ok) {
+      toast.error(result.error.message);
+      return;
+    }
     setPreferences((current) =>
       current.map((item) => (item.id === id ? { ...item, enabled } : item)),
     );
-    await notificationService.updatePreference(id, enabled);
   }, []);
 
   const filtered = useMemo(() => {
@@ -92,6 +115,8 @@ export function useNotificationCenter() {
   const unreadCount = items.filter((item) => item.status === "unread").length;
 
   return {
+    reminders,
+    achievements,
     items,
     filtered,
     counts,

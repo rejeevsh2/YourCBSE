@@ -129,3 +129,4 @@ export function FloatingToolbar({ onFullscreen }: { onFullscreen?: () => void })
     </TooltipProvider>
   );
 }
+

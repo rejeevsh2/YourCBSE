@@ -23,6 +23,8 @@ interface SearchAutocompleteProps {
   showTrending?: boolean;
   /** Show the kind filter chips inside the suggestion panel. */
   showFilters?: boolean;
+  /** Where a submitted search should open. */
+  destination?: "/search" | "/student/search";
   "aria-label"?: string;
 }
 
@@ -61,6 +63,7 @@ export function SearchAutocomplete({
   withButton = false,
   showTrending = true,
   showFilters = true,
+  destination = "/search",
   ...rest
 }: SearchAutocompleteProps) {
   const navigate = useNavigate();
@@ -106,10 +109,33 @@ export function SearchAutocomplete({
   }, []);
 
   function submit(value: string) {
+    const trimmed = value.trim();
+
     setOpen(false);
-    setQuery(value);
-    remember(value);
-    navigate({ to: "/search" });
+    setQuery(trimmed);
+
+    if (!trimmed) {
+      return;
+    }
+
+    remember(trimmed);
+
+    if (destination === "/student/search") {
+      void navigate({
+        to: "/student/search",
+        search: {
+          q: trimmed,
+        },
+      });
+      return;
+    }
+
+    void navigate({
+      to: "/search",
+      search: {
+        q: trimmed,
+      },
+    });
   }
 
   function clearRecent() {
@@ -181,7 +207,7 @@ export function SearchAutocomplete({
             aria-expanded={open}
             aria-controls={listId}
             aria-autocomplete="list"
-            aria-label={rest["aria-label"] ?? "Search YourCBSE"}
+            aria-label={rest["aria-label"] ?? "Search YourTeacher"}
             autoComplete="off"
             placeholder={placeholder}
             value={query}
@@ -326,3 +352,4 @@ export function SearchAutocomplete({
     </div>
   );
 }
+

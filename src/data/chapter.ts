@@ -309,3 +309,4 @@ export const adjacentChapters = {
   previous: { title: "Course Overview", meta: "Getting started" },
   next: { title: "Polynomials", meta: "Chapter 2 · 52 min" },
 };
+

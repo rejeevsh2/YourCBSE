@@ -10,7 +10,7 @@ import { laravelStudentService } from "./laravel-student";
 import { mockStudentService } from "./mock-student";
 import type { StudentService } from "./types";
 
-const useMock = (import.meta.env.VITE_USE_MOCK_DATA as string | undefined) !== "false";
+const useMock = (import.meta.env.VITE_USE_MOCK_DATA as string | undefined) === "true";
 
 export const studentService: StudentService = useMock ? mockStudentService : laravelStudentService;
 
@@ -18,3 +18,4 @@ export const isMockStudentData = useMock;
 
 export { studentEndpoints } from "./endpoints";
 export * from "./types";
+

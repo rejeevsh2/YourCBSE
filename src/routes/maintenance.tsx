@@ -3,9 +3,9 @@ import { Clock, LifeBuoy, Mail, Wrench } from "lucide-react";
 import { Brand } from "@/components/common/Brand";
 import { Button } from "@/components/ui/button";
 
-const title = "Scheduled Maintenance — YourCBSE";
+const title = "Scheduled Maintenance — YourTeacher";
 const description =
-  "YourCBSE is briefly offline for scheduled maintenance. We'll be back shortly with a faster study experience.";
+  "YourTeacher is briefly offline for scheduled maintenance. We'll be back shortly with a faster study experience.";
 
 export const Route = createFileRoute("/maintenance")({
   head: () => ({
@@ -46,7 +46,7 @@ function MaintenancePage() {
             We're doing some maintenance
           </h1>
           <p className="mx-auto max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base">
-            YourCBSE is briefly offline while we upgrade the platform. Your progress and bookmarks
+            YourTeacher is briefly offline while we upgrade the platform. Your progress and bookmarks
             are safe — everything will be exactly where you left it.
           </p>
           <p className="inline-flex items-center gap-2 rounded-xl bg-secondary px-3 py-2 text-xs font-medium text-muted-foreground">
@@ -82,3 +82,4 @@ function MaintenancePage() {
     </main>
   );
 }
+

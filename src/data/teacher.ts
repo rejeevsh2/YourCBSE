@@ -230,3 +230,4 @@ export const studioGrades = [
   { id: "g10", name: "Grade 10", subjects: 6, chapters: 62, students: 81 },
   { id: "g12", name: "Grade 12", subjects: 4, chapters: 44, students: 35 },
 ];
+

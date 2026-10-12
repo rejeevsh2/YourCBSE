@@ -48,3 +48,4 @@ export function QuickActionBar({ onSelect, limit, className, layout = "row" }: Q
     </div>
   );
 }
+

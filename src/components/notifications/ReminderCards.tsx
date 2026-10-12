@@ -5,8 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
-  achievementNotices,
-  studyReminders,
   type AchievementNotice,
   type StudyReminder,
 } from "@/data/notification-center";
@@ -60,7 +58,7 @@ export function ReminderCard({ reminder }: { reminder: StudyReminder }) {
   );
 }
 
-export function ReminderGrid({ reminders = studyReminders }: { reminders?: StudyReminder[] }) {
+export function ReminderGrid({ reminders }: { reminders: StudyReminder[] }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {reminders.map((reminder, index) => (
@@ -90,9 +88,9 @@ export function AchievementCard({ achievement }: { achievement: AchievementNotic
 }
 
 export function AchievementList({
-  achievements = achievementNotices,
+  achievements,
 }: {
-  achievements?: AchievementNotice[];
+  achievements: AchievementNotice[];
 }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2">
@@ -104,3 +102,4 @@ export function AchievementList({
     </div>
   );
 }
+

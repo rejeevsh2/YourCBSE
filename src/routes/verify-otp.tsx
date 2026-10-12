@@ -6,16 +6,15 @@ import {
   AuthIllustration,
   AuthShell,
   ErrorAlert,
-  InfoAlert,
   OtpInput,
   PrimaryButton,
   ResendAction,
 } from "@/components/auth";
 import { useAuthAction } from "@/hooks/use-auth-action";
-import { authService, isMockAuth, saveSession } from "@/lib/auth";
+import { authService, saveSession } from "@/lib/auth";
 import { optionalEmailSearch } from "@/lib/auth/route-search";
 
-const title = "Verify Code — YourCBSE";
+const title = "Verify Code — YourTeacher";
 const description = "Enter the one-time verification code sent to your email or mobile number.";
 
 export const Route = createFileRoute("/verify-otp")({
@@ -95,11 +94,7 @@ function VerifyOtpPage() {
           error={activeError ? " " : undefined}
           disabled={loading}
         />
-        {isMockAuth ? (
-          <InfoAlert title="Demo code">
-            Use 123456 to continue, or 000000 to see an expired code.
-          </InfoAlert>
-        ) : null}
+
         <div className="space-y-3">
           <PrimaryButton type="submit" loading={loading} loadingText="Verifying…">
             Verify code
@@ -121,3 +116,4 @@ function VerifyOtpPage() {
     </AuthShell>
   );
 }
+

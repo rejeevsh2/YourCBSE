@@ -1,0 +1,10 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { TeacherWorkspace } from "@/components/teacher/TeacherWorkspace";
+
+export const Route = createFileRoute("/teacher/lessons")({
+  component: TeacherLessonsPage,
+});
+
+function TeacherLessonsPage() {
+  return <TeacherWorkspace />;
+}
