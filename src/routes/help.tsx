@@ -6,9 +6,9 @@ import { SectionHeading } from "@/components/common/SectionHeading";
 import { Card, CardContent } from "@/components/ui/card";
 import { helpTopics, supportChannels } from "@/data/legal";
 
-const title = "Help Center — YourTeacher Support";
+const title = "Help Center — YourSchool Support";
 const description =
-  "Guides, support channels and answers for students, teachers and schools using the YourTeacher platform.";
+  "Guides, support channels and answers for students, teachers and schools using the YourSchool platform.";
 
 export const Route = createFileRoute("/help")({
   head: () => ({
@@ -31,7 +31,7 @@ function HelpPage() {
         <PageHeader
           breadcrumbs={[{ label: "Home", to: "/" }, { label: "Help Center" }]}
           title="Help Center"
-          description="Find your way around YourTeacher, or reach a human when you need one."
+          description="Find your way around YourSchool, or reach a human when you need one."
         />
 
         <section className="space-y-6">

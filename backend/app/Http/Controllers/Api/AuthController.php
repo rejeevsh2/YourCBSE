@@ -169,7 +169,7 @@ class AuthController extends Controller
             $user
         );
 
-        $token = $user->createToken('YourTeacher')->plainTextToken;
+        $token = $user->createToken('YourSchool')->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful.',

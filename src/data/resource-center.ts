@@ -247,7 +247,7 @@ export const popularChapters = seeds.slice(0, 6).map((seed, index) => ({
 export const recommendationRails = [
   { id: "continue", title: "Continue learning", blurb: "Pick up exactly where you stopped." },
   { id: "recommended", title: "Recommended chapters", blurb: "Matched to your class and subjects." },
-  { id: "popular", title: "Popular resources", blurb: "Most opened across YourTeacher this month." },
+  { id: "popular", title: "Popular resources", blurb: "Most opened across YourSchool this month." },
   { id: "progress", title: "Based on your progress", blurb: "Strengthen the topics you scored lowest in." },
   { id: "trending", title: "Trending this week", blurb: "What Class 6–12 learners are studying now." },
 ] as const;

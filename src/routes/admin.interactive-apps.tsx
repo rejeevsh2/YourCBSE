@@ -128,7 +128,7 @@ const emptyForm: AppForm = {
 export const Route = createFileRoute("/admin/interactive-apps")({
   head: () => ({
     meta: [
-      { title: "Interactive Apps — YourTeacher Admin" },
+      { title: "Interactive Apps — YourSchool Admin" },
       {
         name: "description",
         content: "Create and manage interactive learning apps.",

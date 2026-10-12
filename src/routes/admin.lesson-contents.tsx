@@ -29,7 +29,7 @@ export const Route = createFileRoute("/admin/lesson-contents")({
 
   head: () => ({
     meta: [
-      { title: "Lesson Content — YourTeacher Admin" },
+      { title: "Lesson Content — YourSchool Admin" },
       {
         name: "description",
         content: "Create and manage lesson content.",

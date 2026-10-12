@@ -20,7 +20,7 @@ export const Route = createFileRoute("/admin/approvals")({
   head: () => ({
     meta: [
       {
-        title: "Approvals - YourTeacher Admin",
+        title: "Approvals - YourSchool Admin",
       },
       {
         name: "description",

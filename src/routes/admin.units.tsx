@@ -66,7 +66,7 @@ const emptyForm: UnitForm = {
 export const Route = createFileRoute("/admin/units")({
   head: () => ({
     meta: [
-      { title: "Units — YourTeacher Admin" },
+      { title: "Units — YourSchool Admin" },
       {
         name: "description",
         content: "Manage curriculum units.",

@@ -1,11 +1,11 @@
-﻿@import "tailwindcss" source(none);
+@import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 /*
- * YourTeacher design system.
+ * YourSchool design system.
  *
  * Light (default): #F8FAFC canvas, #2563EB primary, #0F172A ink.
  * Dark ("Aurora"): deep slate canvas with translucent glass tiles.

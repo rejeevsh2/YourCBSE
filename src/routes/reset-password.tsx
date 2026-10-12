@@ -20,8 +20,8 @@ import {
 } from "@/lib/auth";
 import { optionalEmailSearch } from "@/lib/auth/route-search";
 
-const title = "Reset Password — YourTeacher";
-const description = "Choose a new password for your YourTeacher account.";
+const title = "Reset Password — YourSchool";
+const description = "Choose a new password for your YourSchool account.";
 
 export const Route = createFileRoute("/reset-password")({
   validateSearch: (search: Record<string, unknown>) => ({ ...optionalEmailSearch(search), token: typeof search.token === "string" ? search.token : undefined }),

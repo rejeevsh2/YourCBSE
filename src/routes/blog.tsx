@@ -23,7 +23,7 @@ import {
 import { API_BASE_URL, authenticatedFetch } from "@/lib/auth/http";
 
 const title =
-  "YourTeacher Blog — Study Tips & Exam Strategy";
+  "YourSchool Blog — Study Tips & Exam Strategy";
 
 const description =
   "Practical CBSE study guides, revision plans and classroom ideas for students and teachers.";
@@ -201,7 +201,7 @@ function BlogPage() {
             },
           ]}
           title="Blog"
-          description="Study strategy, revision techniques and teaching ideas from the YourTeacher team."
+          description="Study strategy, revision techniques and teaching ideas from the YourSchool team."
         />
 
         {categories.length > 0 ? (

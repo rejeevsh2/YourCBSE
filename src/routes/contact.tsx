@@ -38,10 +38,10 @@ import {
 import { API_BASE_URL, authenticatedFetch } from "@/lib/auth/http";
 
 const title =
-  "Contact YourTeacher — Student & Teacher Support";
+  "Contact YourSchool — Student & Teacher Support";
 
 const description =
-  "Send a question, support request or content suggestion to the YourTeacher team.";
+  "Send a question, support request or content suggestion to the YourSchool team.";
 
 type ContactCategory =
   | "general"
@@ -159,7 +159,7 @@ function ContactPage() {
             { label: "Contact" },
           ]}
           title="Contact us"
-          description="Questions, feedback or support requests can be sent directly to the YourTeacher support team."
+          description="Questions, feedback or support requests can be sent directly to the YourSchool support team."
         />
 
         <div className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
@@ -356,7 +356,7 @@ function ContactPage() {
 
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   Messages submitted here are sent directly
-                  to the YourTeacher support system for
+                  to the YourSchool support system for
                   review by an administrator.
                 </p>
               </CardContent>

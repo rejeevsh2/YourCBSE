@@ -22,7 +22,7 @@ type Dashboard = {
 export const Route = createFileRoute("/student/")({
   head: () => ({
     meta: [
-      { title: "Student Dashboard — YourTeacher.co.in" },
+      { title: "Student Dashboard — YourSchool" },
       { name: "robots", content: "noindex" },
     ],
   }),

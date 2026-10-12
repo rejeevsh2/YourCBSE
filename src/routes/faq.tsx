@@ -11,9 +11,9 @@ import {
 } from "@/components/ui/accordion";
 import { faqItems } from "@/data/legal";
 
-const title = "FAQ — Answers About YourTeacher";
+const title = "FAQ — Answers About YourSchool";
 const description =
-  "Answers to common questions about YourTeacher accounts, study material, the AI assistant, downloads and supported devices.";
+  "Answers to common questions about YourSchool accounts, study material, the AI assistant, downloads and supported devices.";
 
 export const Route = createFileRoute("/faq")({
   head: () => ({
@@ -45,7 +45,7 @@ function FaqPage() {
         <PageHeader
           breadcrumbs={[{ label: "Home", to: "/" }, { label: "FAQ" }]}
           title="Frequently asked questions"
-          description="Quick answers about accounts, study material and how YourTeacher works day to day."
+          description="Quick answers about accounts, study material and how YourSchool works day to day."
         />
 
         <div

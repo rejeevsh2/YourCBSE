@@ -24,7 +24,7 @@ export const Route = createFileRoute("/admin/analytics")({
   head: () => ({
     meta: [
       {
-        title: "Analytics — YourTeacher Admin",
+        title: "Analytics — YourSchool Admin",
       },
       {
         name: "description",
@@ -285,7 +285,7 @@ function AdminAnalyticsPage() {
       Array<string | number>
     > = [
       [
-        "YourTeacher Admin Analytics",
+        "YourSchool Admin Analytics",
       ],
       [],
       ["Metric", "Value"],
@@ -463,7 +463,7 @@ function AdminAnalyticsPage() {
 
     link.href = url;
     link.download =
-      "yourteacher-admin-analytics.csv";
+      "yourschool-admin-analytics.csv";
 
     document.body.appendChild(
       link,

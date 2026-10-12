@@ -9,12 +9,12 @@ import { useNotificationCenter } from "@/hooks/use-notification-center";
 export const Route = createFileRoute("/student/notification-settings")({
   head: () => ({
     meta: [
-      { title: "Notification Settings — YourTeacher" },
+      { title: "Notification Settings — YourSchool" },
       {
         name: "description",
         content: "Choose which study reminders, achievements and alerts reach you, and how.",
       },
-      { property: "og:title", content: "Notification Settings — YourTeacher" },
+      { property: "og:title", content: "Notification Settings — YourSchool" },
       {
         property: "og:description",
         content: "Control in-app lesson updates and announcements.",

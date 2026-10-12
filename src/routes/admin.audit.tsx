@@ -32,7 +32,7 @@ export const Route = createFileRoute("/admin/audit")({
   head: () => ({
     meta: [
       {
-        title: "Audit Logs - YourTeacher Admin",
+        title: "Audit Logs - YourSchool Admin",
       },
       {
         name: "description",
@@ -583,7 +583,7 @@ function AdminAuditPage() {
     anchor.href = url;
 
     anchor.download =
-      `yourteacher-audit-trail-${
+      `yourschool-audit-trail-${
         new Date()
           .toISOString()
           .slice(0, 10)

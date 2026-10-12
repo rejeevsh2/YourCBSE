@@ -80,7 +80,7 @@ function getAuthorName(
     post.author?.fullName ||
     post.author?.name ||
     post.author?.email ||
-    "YourTeacher Team"
+    "YourSchool Team"
   );
 }
 

@@ -31,10 +31,10 @@ import {
   type FieldErrors,
 } from "@/lib/auth";
 
-const title = "Login — YourTeacher";
+const title = "Login — YourSchool";
 
 const description =
-  "Sign in to your YourTeacher student, teacher or admin portal.";
+  "Sign in to your YourSchool student, teacher or admin portal.";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -196,7 +196,7 @@ function LoginPage() {
       description="Sign in to continue learning."
       footer={
         <>
-          New to YourTeacher?{" "}
+          New to YourSchool?{" "}
           <Link
             to="/register"
             className="font-medium text-primary hover:underline"

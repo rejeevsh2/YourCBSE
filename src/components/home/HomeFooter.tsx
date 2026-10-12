@@ -52,7 +52,7 @@ export function HomeFooter() {
             <Link
               to="/"
               className="flex w-fit items-center gap-2.5"
-              aria-label="YourTeacher home"
+              aria-label="YourSchool home"
             >
               <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                 <GraduationCap
@@ -103,7 +103,7 @@ export function HomeFooter() {
 
         <div className="mt-10 flex flex-col gap-4 border-t border-border pt-6 text-xs text-muted-foreground lg:flex-row lg:items-center lg:justify-between">
           <p>
-            © {new Date().getFullYear()} YourTeacher.
+            © {new Date().getFullYear()} YourSchool.
             All rights reserved.
           </p>
 

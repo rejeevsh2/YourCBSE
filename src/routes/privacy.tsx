@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LegalPageView } from "@/components/common/LegalPageView";
 import { legalDocuments } from "@/data/legal";
 
-const title = "Privacy Policy — YourTeacher";
+const title = "Privacy Policy — YourSchool";
 const description =
-  "How YourTeacher collects, uses, stores and protects student, teacher and school data across the platform.";
+  "How YourSchool collects, uses, stores and protects student, teacher and school data across the platform.";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({

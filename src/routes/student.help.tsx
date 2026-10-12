@@ -30,7 +30,7 @@ export const Route =
       meta: [
         {
           title:
-            "Help & Support — YourTeacher",
+            "Help & Support — YourSchool",
         },
         {
           name: "description",

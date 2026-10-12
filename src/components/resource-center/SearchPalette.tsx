@@ -47,7 +47,7 @@ export function SearchPalette({ open, onOpenChange }: SearchPaletteProps) {
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <DialogTitle className="sr-only">Search YourTeacher</DialogTitle>
+      <DialogTitle className="sr-only">Search YourSchool</DialogTitle>
       <DialogDescription className="sr-only">
         Search grades, subjects, chapters, lessons, videos, notes, worksheets and more.
       </DialogDescription>

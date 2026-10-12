@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LegalPageView } from "@/components/common/LegalPageView";
 import { legalDocuments } from "@/data/legal";
 
-const title = "Cookie Policy — YourTeacher";
+const title = "Cookie Policy — YourSchool";
 const description =
-  "The cookies and local storage YourTeacher uses for sign-in, theme preferences and anonymised analytics.";
+  "The cookies and local storage YourSchool uses for sign-in, theme preferences and anonymised analytics.";
 
 export const Route = createFileRoute("/cookies")({
   head: () => ({

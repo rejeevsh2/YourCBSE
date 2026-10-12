@@ -7,7 +7,7 @@ import { GradeCard } from "@/components/common/BrowseCards";
 import { Reveal } from "@/components/common/Reveal";
 import type { Grade } from "@/types";
 
-const title = "CBSE Grades — Class 1 to Class 12 | YourTeacher";
+const title = "CBSE Grades — Class 1 to Class 12 | YourSchool";
 const description =
   "Browse the full CBSE syllabus by grade, with subjects, chapters and learning resources for each class.";
 

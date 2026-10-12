@@ -27,7 +27,7 @@ function AdminHome() {
     <PortalPage
       portalLabel="Admin"
       portalPath="/admin"
-      title="YourTeacher.co.in administration"
+      title="YourSchool administration"
       description="Manage accounts, curriculum, lessons, and practice."
       showNotice={false}
     >

@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const title =
-  "YourTeacher — CBSE Learning for Classes 6 to 12";
+  "YourSchool — CBSE Learning for Classes 6 to 12";
 
 const description =
   "Explore published CBSE lessons, resources, practice tools and study content organised by grade and subject.";
@@ -134,7 +134,7 @@ function HomePage() {
               </p>
 
               <h1 className="max-w-3xl font-heading text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                Learn CBSE chapter by chapter with YourTeacher
+                Learn CBSE chapter by chapter with YourSchool
               </h1>
 
               <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
@@ -223,7 +223,7 @@ function HomePage() {
           <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
             <div className="mx-auto max-w-2xl text-center">
               <p className="text-sm font-semibold uppercase tracking-wide text-primary">
-                Explore YourTeacher
+                Explore YourSchool
               </p>
 
               <h2 className="mt-2 font-heading text-3xl font-bold tracking-tight">
@@ -232,7 +232,7 @@ function HomePage() {
 
               <p className="mt-3 text-muted-foreground">
                 Public learning content is organised around the same curriculum
-                managed through the YourTeacher platform.
+                managed through the YourSchool platform.
               </p>
             </div>
 

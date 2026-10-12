@@ -8,7 +8,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 
-Artisan::command('yourteacher:admin {email}', function () {
+Artisan::command('yourschool:admin {email}', function () {
     $email = $this->argument('email');
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) { $this->error('Enter a valid email.'); return 1; }
     if (\App\Models\User::where('email', $email)->exists()) { $this->error('That account already exists. No changes made.'); return 1; }

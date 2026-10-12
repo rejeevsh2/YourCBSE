@@ -1,8 +1,8 @@
-# YourTeacher.co.in
+# yourschool.co.in
 
 React 19 / TypeScript / TanStack Start frontend with a Laravel 13 API.
 This source update continues the existing YourCBSE project. Keep the Windows
-folder name `C:\Projects\YourCBSE`; the public brand is YourTeacher.co.in.
+folder name `C:\Projects\YourCBSE`; the public brand is yourschool.co.in.
 
 ## Read this first
 
@@ -82,7 +82,7 @@ Set the database connection in `backend\.env`. Then:
 cd C:\Projects\YourCBSE\backend
 php artisan migrate
 php artisan db:seed
-php artisan yourteacher:admin your-email@example.com
+php artisan yourschool:admin your-email@example.com
 ```
 
 The seed creates the CBSE board and Classes 1–12 without a shared-password
@@ -131,7 +131,7 @@ it is not a static HTML-only upload.
 
 Use your server's actual frontend and API addresses. Set an **absolute HTTPS**
 `VITE_API_BASE_URL` before building so server-rendered loaders can reach the
-API. Configure `FRONTEND_URL=https://yourteacher.co.in` in Laravel (comma-separated
+API. Configure `FRONTEND_URL=https://yourschool.co.in` in Laravel (comma-separated
 origins are supported if both www and non-www are served). Set `APP_ENV=production`
 and `APP_DEBUG=false`. Point the PHP web root at `backend/public`, run migrations,
 and configure the web server and TLS. Run the built Node entry under a process

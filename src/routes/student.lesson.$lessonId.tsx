@@ -99,10 +99,10 @@ type LessonProgress = {
 export const Route = createFileRoute("/student/lesson/$lessonId")({
   head: () => ({
     meta: [
-      { title: "Lesson — YourTeacher" },
+      { title: "Lesson — YourSchool" },
       {
         name: "description",
-        content: "Study your YourTeacher lesson.",
+        content: "Study your YourSchool lesson.",
       },
       { name: "robots", content: "noindex" },
     ],

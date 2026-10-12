@@ -7,9 +7,9 @@ type PublicSearchParams = {
   q?: string;
 };
 
-const title = "Search CBSE Learning Resources | YourTeacher";
+const title = "Search CBSE Learning Resources | YourSchool";
 const description =
-  "Search published CBSE notes, worksheets, videos and other learning resources available on YourTeacher.";
+  "Search published CBSE notes, worksheets, videos and other learning resources available on YourSchool.";
 
 export const Route = createFileRoute("/search")({
   validateSearch: (

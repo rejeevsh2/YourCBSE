@@ -38,12 +38,12 @@ export const Route = createFileRoute("/admin/media")({
   head: () => ({
     meta: [
       {
-        title: "Media Library — YourTeacher Admin",
+        title: "Media Library — YourSchool Admin",
       },
       {
         name: "description",
         content:
-          "Upload and manage media assets used across YourTeacher.",
+          "Upload and manage media assets used across YourSchool.",
       },
       {
         name: "robots",
@@ -816,7 +816,7 @@ function AdminMediaPage() {
       portalLabel="Admin"
       portalPath="/admin"
       title="Media Library"
-      description="Upload and manage real YourTeacher media assets."
+      description="Upload and manage real YourSchool media assets."
       showNotice={false}
       actions={
         <Button

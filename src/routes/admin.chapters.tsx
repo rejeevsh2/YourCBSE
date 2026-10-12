@@ -77,7 +77,7 @@ const emptyForm: ChapterForm = {
 export const Route = createFileRoute("/admin/chapters")({
   head: () => ({
     meta: [
-      { title: "Chapters — YourTeacher Admin" },
+      { title: "Chapters — YourSchool Admin" },
       {
         name: "description",
         content: "Create and manage curriculum chapters.",

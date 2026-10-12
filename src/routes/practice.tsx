@@ -14,10 +14,10 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
 
 const title =
-  "CBSE Practice Center | YourTeacher";
+  "CBSE Practice Center | YourSchool";
 
 const description =
-  "Sign in to YourTeacher to access published practice sets, submit answers, review attempts and track practice history.";
+  "Sign in to YourSchool to access published practice sets, submit answers, review attempts and track practice history.";
 
 export const Route = createFileRoute("/practice")({
   head: () => ({

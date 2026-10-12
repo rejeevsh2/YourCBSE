@@ -27,7 +27,7 @@ export const Route = createFileRoute("/admin/flashcards")({
   head: () => ({
     meta: [
       {
-        title: "Flashcards — YourTeacher Admin",
+        title: "Flashcards — YourSchool Admin",
       },
       {
         name: "description",

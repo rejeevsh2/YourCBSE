@@ -28,7 +28,7 @@ export const Route = createFileRoute("/admin/blog")({
   head: () => ({
     meta: [
       {
-        title: "Blog — YourTeacher Admin",
+        title: "Blog — YourSchool Admin",
       },
       {
         name: "description",
@@ -961,7 +961,7 @@ function AdminBlogPage() {
 
                   <p className="text-sm text-muted-foreground">
                     Create your first real
-                    YourTeacher article.
+                    YourSchool article.
                   </p>
                 </div>
 

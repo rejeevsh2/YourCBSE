@@ -20,12 +20,12 @@ function delay(ms = 900) {
 
 /** Demo accounts that trigger specific error states in the UI. */
 const demoTriggers: Record<string, AuthErrorCode> = {
-  "unknown@yourteacher.co.in": "wrong-email",
-  "wrongpass@yourteacher.co.in": "wrong-password",
-  "unverified@yourteacher.co.in": "email-not-verified",
-  "locked@yourteacher.co.in": "account-locked",
-  "offline@yourteacher.co.in": "network-error",
-  "taken@yourteacher.co.in": "email-taken",
+  "unknown@yourschool.co.in": "wrong-email",
+  "wrongpass@yourschool.co.in": "wrong-password",
+  "unverified@yourschool.co.in": "email-not-verified",
+  "locked@yourschool.co.in": "account-locked",
+  "offline@yourschool.co.in": "network-error",
+  "taken@yourschool.co.in": "email-taken",
 };
 
 function demoSession(email: string, fullName = "Aarav Sharma"): AuthSession {

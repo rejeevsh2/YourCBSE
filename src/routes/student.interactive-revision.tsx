@@ -20,7 +20,7 @@ type Home = { due: number; recall_accuracy: number; sessions: Session[] };
 export const Route = createFileRoute("/student/interactive-revision")({
   head: () => ({
     meta: [
-      { title: "Interactive Revision — YourTeacher.co.in" },
+      { title: "Interactive Revision — YourSchool" },
       { name: "robots", content: "noindex" },
     ],
   }),

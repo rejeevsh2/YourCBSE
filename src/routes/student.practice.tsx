@@ -26,7 +26,7 @@ export const Route = createFileRoute("/student/practice")({
   head: () => ({
     meta: [
       {
-        title: "Practice Center — YourTeacher",
+        title: "Practice Center — YourSchool",
       },
       {
         name: "description",

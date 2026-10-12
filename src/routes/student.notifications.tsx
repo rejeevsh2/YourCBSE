@@ -58,7 +58,7 @@ export const Route = createFileRoute(
     meta: [
       {
         title:
-          "Notifications — YourTeacher.co.in",
+          "Notifications — YourSchool",
       },
       {
         name: "description",

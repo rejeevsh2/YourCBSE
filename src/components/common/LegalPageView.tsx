@@ -67,7 +67,7 @@ export function LegalPageView({ document }: LegalPageViewProps) {
 
               <p className="border-t border-border pt-5 text-sm text-muted-foreground">
                 Questions about this document? Email{" "}
-                <span className="font-medium text-foreground">legal@yourteacher.co.in</span>.
+                <span className="font-medium text-foreground">legal@yourschool.co.in</span>.
               </p>
             </CardContent>
           </Card>

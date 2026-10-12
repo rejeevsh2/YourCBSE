@@ -6,8 +6,8 @@ import { ErrorAlert } from "@/components/auth/AuthAlert";
 import { useCountdown } from "@/hooks/use-countdown";
 import { Button } from "@/components/ui/button";
 
-const title = "Account Locked — YourTeacher";
-const description = "Your YourTeacher account is temporarily locked after too many sign-in attempts.";
+const title = "Account Locked — YourSchool";
+const description = "Your YourSchool account is temporarily locked after too many sign-in attempts.";
 
 export const Route = createFileRoute("/account-locked")({
   head: () => ({

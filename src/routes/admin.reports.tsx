@@ -26,7 +26,7 @@ export const Route = createFileRoute("/admin/reports")({
   head: () => ({
     meta: [
       {
-        title: "Reports — YourTeacher Admin",
+        title: "Reports — YourSchool Admin",
       },
       {
         name: "description",
@@ -271,7 +271,7 @@ function makePlatformSummary(
 
   return [
     [
-      "YourTeacher Platform Summary",
+      "YourSchool Platform Summary",
     ],
     [],
     ["Metric", "Value"],
@@ -354,7 +354,7 @@ function makeUserReport(
 
   return [
     [
-      "YourTeacher User Summary",
+      "YourSchool User Summary",
     ],
     [],
     [
@@ -403,7 +403,7 @@ function makeCurriculumReport(
 
   const rows: CsvRow[] = [
     [
-      "YourTeacher Curriculum & Content Report",
+      "YourSchool Curriculum & Content Report",
     ],
     [],
     ["Metric", "Count"],
@@ -496,7 +496,7 @@ function makePublishingReport(
 
   return [
     [
-      "YourTeacher Publishing Report",
+      "YourSchool Publishing Report",
     ],
     [],
     [
@@ -547,7 +547,7 @@ function makeMediaReport(
 
   return [
     [
-      "YourTeacher Media & Storage Report",
+      "YourSchool Media & Storage Report",
     ],
     [],
     ["Metric", "Value"],
@@ -590,7 +590,7 @@ function makeFlashcardReport(
 
   return [
     [
-      "YourTeacher Flashcards Report",
+      "YourSchool Flashcards Report",
     ],
     [],
     ["Metric", "Value"],
@@ -628,7 +628,7 @@ function makeGrowthReport(
 
   const rows: CsvRow[] = [
     [
-      "YourTeacher Monthly Growth Report",
+      "YourSchool Monthly Growth Report",
     ],
     [],
     [
@@ -791,7 +791,7 @@ function AdminReportsPage() {
           description:
             "Users, curriculum, content and platform totals",
           filename:
-            "yourteacher-platform-summary.csv",
+            "yourschool-platform-summary.csv",
           rows:
             makePlatformSummary(
               analytics,
@@ -805,7 +805,7 @@ function AdminReportsPage() {
           description:
             "Student, teacher and administrator account totals",
           filename:
-            "yourteacher-user-summary.csv",
+            "yourschool-user-summary.csv",
           rows:
             makeUserReport(
               analytics,
@@ -819,7 +819,7 @@ function AdminReportsPage() {
           description:
             "Grades, subjects, chapters, lessons and content distribution",
           filename:
-            "yourteacher-curriculum-content.csv",
+            "yourschool-curriculum-content.csv",
           rows:
             makeCurriculumReport(
               analytics,
@@ -833,7 +833,7 @@ function AdminReportsPage() {
           description:
             "Published and unpublished lessons, blogs and flashcard decks",
           filename:
-            "yourteacher-publishing-report.csv",
+            "yourschool-publishing-report.csv",
           rows:
             makePublishingReport(
               analytics,
@@ -847,7 +847,7 @@ function AdminReportsPage() {
           description:
             "Media asset totals, active assets and storage usage",
           filename:
-            "yourteacher-media-storage.csv",
+            "yourschool-media-storage.csv",
           rows:
             makeMediaReport(
               analytics,
@@ -861,7 +861,7 @@ function AdminReportsPage() {
           description:
             "Deck publication and flashcard totals",
           filename:
-            "yourteacher-flashcards-report.csv",
+            "yourschool-flashcards-report.csv",
           rows:
             makeFlashcardReport(
               analytics,
@@ -875,7 +875,7 @@ function AdminReportsPage() {
           description:
             "Six-month user and content creation history",
           filename:
-            "yourteacher-monthly-growth.csv",
+            "yourschool-monthly-growth.csv",
           rows:
             makeGrowthReport(
               analytics,
@@ -1014,7 +1014,7 @@ function AdminReportsPage() {
     }
 
     downloadCsv(
-      "yourteacher-full-admin-report.csv",
+      "yourschool-full-admin-report.csv",
       makeFullReport(
         stats.analytics,
       ),
@@ -1034,7 +1034,7 @@ function AdminReportsPage() {
       portalLabel="Admin"
       portalPath="/admin"
       title="Reports"
-      description="Generate downloadable reports from live YourTeacher database records."
+      description="Generate downloadable reports from live YourSchool database records."
       showNotice={false}
       actions={
         <div className="flex gap-2">

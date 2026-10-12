@@ -31,12 +31,12 @@ export const Route = createFileRoute("/admin/seo")({
   head: () => ({
     meta: [
       {
-        title: "SEO Manager - YourTeacher Admin",
+        title: "SEO Manager - YourSchool Admin",
       },
       {
         name: "description",
         content:
-          "Manage search metadata for public YourTeacher pages.",
+          "Manage search metadata for public YourSchool pages.",
       },
       {
         name: "robots",
@@ -1010,7 +1010,7 @@ function AdminSeoPage() {
                     value={
                       activeDraft.canonical_url
                     }
-                    placeholder="https://yourteacher.co.in/page"
+                    placeholder="https://yourschool.co.in/page"
                     onChange={(event) =>
                       updateActiveDraft({
                         canonical_url:

@@ -545,7 +545,7 @@ export const helpFaqs = [
 export const supportChannels = [
   { id: "sp1", title: "Chat with support", meta: "Replies in under 5 minutes", icon: MessageCircleQuestion },
   { id: "sp2", title: "Ask the AI tutor", meta: "Instant answers, 24 × 7", icon: Sparkles },
-  { id: "sp3", title: "Email us", meta: "help@yourteacher.co.in", icon: FileText },
+  { id: "sp3", title: "Email us", meta: "help@yourschool.co.in", icon: FileText },
 ];
 
 /* ------------------------------------------------------------------ */

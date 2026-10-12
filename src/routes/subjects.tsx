@@ -7,7 +7,7 @@ import { SubjectCard } from "@/components/common/BrowseCards";
 import { Reveal } from "@/components/common/Reveal";
 import type { Subject } from "@/types";
 
-const title = "CBSE Subjects — Maths, Science, English & More | YourTeacher";
+const title = "CBSE Subjects — Maths, Science, English & More | YourSchool";
 const description =
   "Explore CBSE subjects by class, with chapter-wise notes, videos, worksheets and interactive practice.";
 

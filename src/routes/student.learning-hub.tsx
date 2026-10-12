@@ -20,7 +20,7 @@ import { authenticatedFetch } from "@/lib/auth/http";
 export const Route = createFileRoute("/student/learning-hub")({
   head: () => ({
     meta: [
-      { title: "Learning Hub — YourTeacher" },
+      { title: "Learning Hub — YourSchool" },
       {
         name: "description",
         content: "Browse your real CBSE curriculum and start learning.",
@@ -300,7 +300,7 @@ function LearningHubPage() {
   portalLabel="Student Portal"
   portalPath="/student"
   title="Learning Hub"
-  description="Browse your CBSE curriculum and open chapters from the real YourTeacher database."
+  description="Browse your CBSE curriculum and open chapters from the real YourSchool database."
   showNotice={false}
 >
       <div className="space-y-5">

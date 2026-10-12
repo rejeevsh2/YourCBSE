@@ -27,7 +27,7 @@ use App\Http\Controllers\BlogPostController;
 
 Route::get('/', function () {
     return response()->json([
-        'message' => 'YourTeacher API is running successfully.',
+        'message' => 'YourSchool API is running successfully.',
         'version' => '1.0'
     ]);
 });

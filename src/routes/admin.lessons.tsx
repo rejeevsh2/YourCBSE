@@ -109,7 +109,7 @@ const emptyForm: LessonForm = {
 export const Route = createFileRoute("/admin/lessons")({
   head: () => ({
     meta: [
-      { title: "Lessons — YourTeacher Admin" },
+      { title: "Lessons — YourSchool Admin" },
       {
         name: "description",
         content: "Create and manage curriculum lessons.",

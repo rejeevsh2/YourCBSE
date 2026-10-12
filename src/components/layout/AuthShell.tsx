@@ -51,7 +51,7 @@ export function AuthShell({ title, description, children, footer }: AuthShellPro
             ))}
           </ul>
         </div>
-        <p className="relative text-xs text-primary-foreground/90">yourteacher.co.in</p>
+        <p className="relative text-xs text-primary-foreground/90">yourschool.co.in</p>
       </aside>
 
       <main className="flex flex-col bg-background px-4 py-8 sm:px-6 sm:py-10">

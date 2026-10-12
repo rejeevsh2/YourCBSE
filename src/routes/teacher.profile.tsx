@@ -5,7 +5,7 @@ import { ProfileForm } from "@/components/common/ProfileForm";
 export const Route = createFileRoute("/teacher/profile")({
   head: () => ({
     meta: [
-      { title: "Teacher Profile — YourTeacher" },
+      { title: "Teacher Profile — YourSchool" },
       { name: "description", content: "Manage your teaching profile and subjects." },
       { name: "robots", content: "noindex" },
     ],

@@ -22,7 +22,7 @@ export const Route = createFileRoute("/admin/support")({
   head: () => ({
     meta: [
       {
-        title: "Support - YourTeacher Admin",
+        title: "Support - YourSchool Admin",
       },
       {
         name: "description",

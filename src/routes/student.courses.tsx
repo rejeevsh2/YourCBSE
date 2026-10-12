@@ -58,7 +58,7 @@ type CoursesResponse = {
 export const Route = createFileRoute("/student/courses")({
   head: () => ({
     meta: [
-      { title: "My Courses — YourTeacher" },
+      { title: "My Courses — YourSchool" },
       {
         name: "description",
         content:

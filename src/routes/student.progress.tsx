@@ -58,7 +58,7 @@ export const Route = createFileRoute("/student/progress")({
   head: () => ({
     meta: [
       {
-        title: "My Progress — YourTeacher",
+        title: "My Progress — YourSchool",
       },
       {
         name: "description",

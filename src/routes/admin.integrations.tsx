@@ -24,7 +24,7 @@ export const Route = createFileRoute("/admin/integrations")({
   head: () => ({
     meta: [
       {
-        title: "Integrations — YourTeacher Admin",
+        title: "Integrations — YourSchool Admin",
       },
       {
         name: "description",
@@ -134,7 +134,7 @@ const definitions: Record<string, IntegrationDefinition> = {
       {
         key: "bucket",
         label: "Bucket",
-        placeholder: "yourteacher-media",
+        placeholder: "yourschool-media",
       },
       {
         key: "endpoint",
@@ -196,12 +196,12 @@ const definitions: Record<string, IntegrationDefinition> = {
       {
         key: "from_address",
         label: "From address",
-        placeholder: "hello@yourteacher.co.in",
+        placeholder: "hello@yourschool.co.in",
       },
       {
         key: "from_name",
         label: "From name",
-        placeholder: "YourTeacher",
+        placeholder: "YourSchool",
       },
     ],
     credentials: [
@@ -615,7 +615,7 @@ function AdminIntegrationsPage() {
       portalLabel="Admin"
       portalPath="/admin"
       title="Integrations"
-      description="Configure external services connected to YourTeacher."
+      description="Configure external services connected to YourSchool."
       showNotice={false}
     >
       <div className="mb-5 flex items-center justify-between gap-3">

@@ -33,7 +33,7 @@ export function NotFoundView() {
           <SearchAutocomplete
             withButton
             placeholder="Search chapters, videos, worksheets…"
-            aria-label="Search YourTeacher from the 404 page"
+            aria-label="Search YourSchool from the 404 page"
           />
 
           <div className="flex flex-wrap gap-2">

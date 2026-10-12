@@ -30,7 +30,7 @@ export const errorPresets: Record<ErrorCode, ErrorPreset> = {
     label: "Error 400",
     title: "That request didn't look right",
     description:
-      "Something in the link or the form was malformed. Head back and try again — the rest of YourTeacher is working fine.",
+      "Something in the link or the form was malformed. Head back and try again — the rest of YourSchool is working fine.",
     tone: "warning",
   },
   "401": {
@@ -38,7 +38,7 @@ export const errorPresets: Record<ErrorCode, ErrorPreset> = {
     label: "Error 401",
     title: "Please sign in to continue",
     description:
-      "This page is part of your personal study space. Sign in with your YourTeacher account to pick up where you left off.",
+      "This page is part of your personal study space. Sign in with your YourSchool account to pick up where you left off.",
     tone: "warning",
     primary: { label: "Sign in", to: "/login" },
   },
@@ -64,7 +64,7 @@ export const errorPresets: Record<ErrorCode, ErrorPreset> = {
     label: "Connection lost",
     title: "You're offline",
     description:
-      "We can't reach YourTeacher right now. Anything you downloaded stays available while you wait for the connection.",
+      "We can't reach YourSchool right now. Anything you downloaded stays available while you wait for the connection.",
     tone: "warning",
   },
 };

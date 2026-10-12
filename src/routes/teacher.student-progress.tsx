@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 export const Route = createFileRoute("/teacher/student-progress")({
   head: () => ({
     meta: [
-      { title: "Student Progress — YourTeacher Teacher" },
+      { title: "Student Progress — YourSchool Teacher" },
       { name: "description", content: "See how your classes are progressing chapter by chapter." },
       { name: "robots", content: "noindex" },
     ],

@@ -1,5 +1,5 @@
 /**
- * Shared TypeScript interfaces for the YourTeacher frontend foundation.
+ * Shared TypeScript interfaces for the YourSchool frontend foundation.
  * Phase 1: UI only — these shapes mirror the future Laravel + MySQL API.
  */
 

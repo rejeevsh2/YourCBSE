@@ -52,10 +52,10 @@ const emptyForm: GradeForm = {
 export const Route = createFileRoute("/admin/grades")({
   head: () => ({
     meta: [
-      { title: "Grades — YourTeacher Admin" },
+      { title: "Grades — YourSchool Admin" },
       {
         name: "description",
-        content: "Manage grades stored in the YourTeacher Laravel backend.",
+        content: "Manage grades stored in the YourSchool Laravel backend.",
       },
       { name: "robots", content: "noindex" },
     ],

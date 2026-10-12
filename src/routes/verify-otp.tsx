@@ -14,7 +14,7 @@ import { useAuthAction } from "@/hooks/use-auth-action";
 import { authService, saveSession } from "@/lib/auth";
 import { optionalEmailSearch } from "@/lib/auth/route-search";
 
-const title = "Verify Code — YourTeacher";
+const title = "Verify Code — YourSchool";
 const description = "Enter the one-time verification code sent to your email or mobile number.";
 
 export const Route = createFileRoute("/verify-otp")({

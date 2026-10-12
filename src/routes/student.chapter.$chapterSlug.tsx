@@ -52,7 +52,7 @@ type ChapterProgress = {
 export const Route = createFileRoute("/student/chapter/$chapterSlug")({
   head: () => ({
     meta: [
-      { title: "Chapter — YourTeacher" },
+      { title: "Chapter — YourSchool" },
       {
         name: "description",
         content: "View chapter lessons and learning content.",

@@ -13,8 +13,8 @@ import { Button } from "@/components/ui/button";
 import { useAuthAction } from "@/hooks/use-auth-action";
 import { authService, mergeFieldErrors, validateEmail, type FieldErrors } from "@/lib/auth";
 
-const title = "Forgot Password — YourTeacher";
-const description = "Request a secure password reset link for your YourTeacher account.";
+const title = "Forgot Password — YourSchool";
+const description = "Request a secure password reset link for your YourSchool account.";
 
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({

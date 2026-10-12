@@ -123,7 +123,7 @@ export const Route =
         },
         {
           title:
-            "YourTeacher — Everything You Need to Succeed in CBSE",
+            "YourSchool — Everything You Need to Succeed in CBSE",
         },
         {
           name: "description",
@@ -132,7 +132,7 @@ export const Route =
         },
         {
           name: "author",
-          content: "YourTeacher",
+          content: "YourSchool",
         },
         {
           property: "og:type",
@@ -140,7 +140,7 @@ export const Route =
         },
         {
           property: "og:site_name",
-          content: "YourTeacher",
+          content: "YourSchool",
         },
         {
           name: "twitter:card",

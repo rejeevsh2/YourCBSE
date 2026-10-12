@@ -32,8 +32,8 @@ import {
   type FieldErrors,
 } from "@/lib/auth";
 
-const title = "Create an Account — YourTeacher";
-const description = "Register for YourTeacher to access CBSE notes, videos and practice resources.";
+const title = "Create an Account — YourSchool";
+const description = "Register for YourSchool to access CBSE notes, videos and practice resources.";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
@@ -99,7 +99,7 @@ function RegisterPage() {
   return (
     <AuthShell
       title="Create your account"
-      description="Join YourTeacher and keep every chapter in one place."
+      description="Join YourSchool and keep every chapter in one place."
       footer={
         <>
           Already registered?{" "}

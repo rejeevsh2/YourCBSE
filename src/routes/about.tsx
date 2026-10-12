@@ -5,9 +5,9 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { SectionHeading } from "@/components/common/SectionHeading";
 import { Card, CardContent } from "@/components/ui/card";
 
-const title = "About YourTeacher — Our Mission for CBSE Learners";
+const title = "About YourSchool — Our Mission for CBSE Learners";
 const description =
-  "YourTeacher brings CBSE notes, videos, worksheets and interactive practice into one organised, teacher-reviewed platform for Classes 6 to 12.";
+  "YourSchool brings CBSE notes, videos, worksheets and interactive practice into one organised, teacher-reviewed platform for Classes 6 to 12.";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -50,7 +50,7 @@ function AboutPage() {
       <PublicPageShell>
         <PageHeader
           breadcrumbs={[{ label: "Home", to: "/" }, { label: "About" }]}
-          title="About YourTeacher"
+          title="About YourSchool"
           description="We are building the study companion we wish we had — one calm, organised place covering every CBSE grade, subject and chapter."
         />
 
@@ -59,7 +59,7 @@ function AboutPage() {
             <CardContent className="space-y-3 p-6">
               <h2 className="font-heading text-xl font-semibold">Our mission</h2>
               <p className="text-sm leading-relaxed text-muted-foreground">
-                CBSE students juggle scattered PDFs, random videos and unverified notes. YourTeacher
+                CBSE students juggle scattered PDFs, random videos and unverified notes. YourSchool
                 replaces that with a single structured library where every chapter has notes,
                 lessons, practice and interactive activities in one place.
               </p>

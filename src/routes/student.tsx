@@ -52,7 +52,7 @@ export const Route = createFileRoute("/student")({
 
   head: () => ({
     meta: [
-      { title: "Student Portal — YourTeacher" },
+      { title: "Student Portal — YourSchool" },
       {
         name: "description",
         content:

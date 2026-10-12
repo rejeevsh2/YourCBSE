@@ -1,7 +1,7 @@
-# YourTeacher Production Deployment
+# YourSchool Production Deployment
 
 Primary website:
-https://yourteacher.co.in
+https://yourschool.co.in
 
 Frontend:
 TanStack Start / Node.js
@@ -11,7 +11,7 @@ node .output/server/index.mjs
 
 Backend:
 Laravel / PHP
-https://api.yourteacher.co.in
+https://api.yourschool.co.in
 
 Database:
 MySQL

@@ -61,7 +61,7 @@ interface BookmarkResponse {
 export const Route = createFileRoute("/student/bookmarks")({
   head: () => ({
     meta: [
-      { title: "Bookmark Centre — YourTeacher" },
+      { title: "Bookmark Centre — YourSchool" },
       {
         name: "description",
         content: "Your saved lessons in one place.",

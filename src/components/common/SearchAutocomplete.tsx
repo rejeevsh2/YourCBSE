@@ -207,7 +207,7 @@ export function SearchAutocomplete({
             aria-expanded={open}
             aria-controls={listId}
             aria-autocomplete="list"
-            aria-label={rest["aria-label"] ?? "Search YourTeacher"}
+            aria-label={rest["aria-label"] ?? "Search YourSchool"}
             autoComplete="off"
             placeholder={placeholder}
             value={query}

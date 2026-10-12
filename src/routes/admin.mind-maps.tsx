@@ -21,7 +21,7 @@ export const Route = createFileRoute("/admin/mind-maps")({
   head: () => ({
     meta: [
       {
-        title: "Mind Maps — YourTeacher Admin",
+        title: "Mind Maps — YourSchool Admin",
       },
       {
         name: "description",

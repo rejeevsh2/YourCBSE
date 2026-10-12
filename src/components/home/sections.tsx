@@ -161,7 +161,7 @@ export function GlobalSearch() {
             Search chapters, subjects and grades
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            One search across every note, video, worksheet and practice set on YourTeacher.
+            One search across every note, video, worksheet and practice set on YourSchool.
           </p>
 
           <div className="mt-6 text-left">
@@ -600,7 +600,7 @@ export function AiStudyAssistant() {
               <span className="flex size-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Bot className="size-4" />
               </span>
-              <span className="text-sm font-semibold text-foreground">YourTeacher Assistant</span>
+              <span className="text-sm font-semibold text-foreground">YourSchool Assistant</span>
               <span className="ml-auto rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-semibold text-warning">
                 Preview
               </span>
@@ -670,7 +670,7 @@ export function LearningStatistics() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Why choose YourTeacher                                                 */
+/* Why choose YourSchool                                                 */
 /* ------------------------------------------------------------------ */
 
 const benefits = [
@@ -703,7 +703,7 @@ export function WhyChooseUs() {
       <SectionHeading
         id="why-heading"
         align="center"
-        eyebrow="Why choose YourTeacher"
+        eyebrow="Why choose YourSchool"
         title="Built for real exam preparation"
         description="Structured content, honest practice and tools that respect a student's time."
       />
@@ -740,7 +740,7 @@ export function Testimonials() {
         id="testimonials-heading"
         align="center"
         eyebrow="Testimonials"
-        title="Students and teachers on YourTeacher"
+        title="Students and teachers on YourSchool"
       />
 
       <ul className="grid gap-4 lg:grid-cols-3">

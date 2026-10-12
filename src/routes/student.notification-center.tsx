@@ -18,13 +18,13 @@ import { useNotificationCenter } from "@/hooks/use-notification-center";
 export const Route = createFileRoute("/student/notification-center")({
   head: () => ({
     meta: [
-      { title: "Notification Center — YourTeacher" },
+      { title: "Notification Center — YourSchool" },
       {
         name: "description",
         content:
           "Learning updates, assignment deadlines, achievements and reminders in one place.",
       },
-      { property: "og:title", content: "Notification Center — YourTeacher" },
+      { property: "og:title", content: "Notification Center — YourSchool" },
       {
         property: "og:description",
         content: "Every update, reminder and achievement from your CBSE study workspace.",

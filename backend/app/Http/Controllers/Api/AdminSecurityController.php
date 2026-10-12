@@ -80,7 +80,7 @@ class AdminSecurityController extends Controller
 
                 /*
                  * MFA is intentionally reported as unavailable until
-                 * YourTeacher has a real MFA implementation.
+                 * YourSchool has a real MFA implementation.
                  */
                 'mfa_available' => false,
             ],

@@ -14,8 +14,8 @@ class AdminWebsiteSettingController extends Controller
         $settings = WebsiteSetting::query()->firstOrCreate(
             ['id' => 1],
             [
-                'site_name' => 'YourTeacher',
-                'site_domain' => 'yourteacher.co.in',
+                'site_name' => 'YourSchool',
+                'site_domain' => 'yourschool.co.in',
                 'tagline' => 'Everything You Need to Succeed in CBSE.',
                 'default_meta_description' => 'Chapter-wise CBSE notes, video lessons, worksheets and interactive practice for Classes 6 to 12.',
                 'open_registration' => true,

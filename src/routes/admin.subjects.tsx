@@ -59,7 +59,7 @@ const emptyForm: SubjectForm = {
 export const Route = createFileRoute("/admin/subjects")({
   head: () => ({
     meta: [
-      { title: "Subjects — YourTeacher Admin" },
+      { title: "Subjects — YourSchool Admin" },
       {
         name: "description",
         content: "Manage subjects across every grade.",

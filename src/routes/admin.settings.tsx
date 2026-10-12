@@ -25,7 +25,7 @@ export const Route = createFileRoute("/admin/settings")({
   head: () => ({
     meta: [
       {
-        title: "Website Settings - YourTeacher Admin",
+        title: "Website Settings - YourSchool Admin",
       },
       {
         name: "description",
@@ -59,8 +59,8 @@ type WebsiteSettingsResponse = {
 
 const EMPTY_SETTINGS: WebsiteSettings = {
   id: 1,
-  site_name: "YourTeacher",
-  site_domain: "yourteacher.co.in",
+  site_name: "YourSchool",
+  site_domain: "yourschool.co.in",
   tagline: "",
   default_meta_description: "",
   open_registration: true,

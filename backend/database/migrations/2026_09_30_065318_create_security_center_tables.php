@@ -15,7 +15,7 @@ return new class extends Migration
         |--------------------------------------------------------------------------
         |
         | A single settings row controls the security features that are actually
-        | implemented by YourTeacher. MFA and password-age policies are NOT
+        | implemented by YourSchool. MFA and password-age policies are NOT
         | represented here until those features have real backend support.
         |
         */
