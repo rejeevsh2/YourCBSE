@@ -15,7 +15,7 @@ export function Brand({ className, subtitle }: BrandProps) {
       </span>
       <span className="leading-tight">
         <span className="block font-heading text-lg font-semibold tracking-tight">
-          Your<span className="text-primary">Teacher</span>
+          Your<span className="text-primary">School</span>
         </span>
         {subtitle ? (
           <span className="block text-[11px] font-medium text-muted-foreground">{subtitle}</span>

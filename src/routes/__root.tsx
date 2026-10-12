@@ -172,7 +172,7 @@ export const Route =
         },
         {
           rel: "icon",
-          href: "/favicon.ico",
+          href: "/favicon.svg",
           type: "image/x-icon",
         },
       ],

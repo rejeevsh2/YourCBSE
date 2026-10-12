@@ -30,7 +30,7 @@ function HomeBrand({ onNavigate }: { onNavigate?: () => void }) {
         <GraduationCap className="size-5" aria-hidden="true" />
       </span>
       <span className="font-heading text-lg font-bold tracking-tight text-foreground">
-        Your<span className="text-primary">Teacher</span>
+        Your<span className="text-primary">School</span>
       </span>
     </Link>
   );
