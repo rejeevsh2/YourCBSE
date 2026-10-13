@@ -21,7 +21,7 @@ export function PortalPage({
   description,
   actions,
   children,
-  showNotice = true,
+  showNotice = false,
 }: PortalPageProps) {
   const crumbs: Crumb[] = [
     { label: portalLabel, to: portalPath },
