@@ -14,6 +14,7 @@ const description =
 
 
 export const Route = createFileRoute("/grades")({
+  ssr: false,
   loader: async (): Promise<Grade[]> => {
     const response = await authenticatedFetch(
       `${API_BASE_URL}/public/boards/1/grades`,

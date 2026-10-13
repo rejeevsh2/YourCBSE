@@ -34,6 +34,7 @@ interface Lesson {
 
 
 export const Route = createFileRoute("/lesson/$lessonId")({
+  ssr: false,
   loader: async ({ params }): Promise<Lesson> => {
     const response = await authenticatedFetch(
       `${API_BASE_URL}/public/lessons/${params.lessonId}`,
