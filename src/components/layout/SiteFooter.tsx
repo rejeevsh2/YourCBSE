@@ -106,13 +106,11 @@ export function SiteFooter() {
       <div className="border-t border-border/70">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 px-4 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <p>
-            © {new Date().getFullYear()} YourSchool.
-            All rights reserved.
+            © {new Date().getFullYear()} HRNLMS Private Limited. All rights reserved.
           </p>
 
           <p>
-            Not affiliated with the Central Board of
-            Secondary Education.
+            YourSchool is an independent educational platform and is not affiliated with or endorsed by the Central Board of Secondary Education (CBSE).
           </p>
         </div>
       </div>

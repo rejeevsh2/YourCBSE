@@ -103,8 +103,7 @@ export function HomeFooter() {
 
         <div className="mt-10 flex flex-col gap-4 border-t border-border pt-6 text-xs text-muted-foreground lg:flex-row lg:items-center lg:justify-between">
           <p>
-            © {new Date().getFullYear()} YourSchool.
-            All rights reserved.
+            © {new Date().getFullYear()} HRNLMS Private Limited. All rights reserved.
           </p>
 
           <nav aria-label="Policies">
@@ -123,8 +122,7 @@ export function HomeFooter() {
           </nav>
 
           <p>
-            Not affiliated with the Central Board of
-            Secondary Education.
+            YourSchool is an independent educational platform and is not affiliated with or endorsed by the Central Board of Secondary Education (CBSE).
           </p>
         </div>
       </div>
