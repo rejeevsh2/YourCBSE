@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { GraduationCap, Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { SearchAutocomplete } from "@/components/common/SearchAutocomplete";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { getAuthToken, getStoredUser } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -17,11 +18,43 @@ const navLinks = [
   { label: "Contact", to: "/contact" },
 ] as const;
 
+type PortalDetails = {
+  to: "/student" | "/teacher" | "/admin";
+  label: string;
+};
 
-function HomeBrand({ onNavigate }: { onNavigate?: () => void }) {
+function getPortalDetails(role?: string): PortalDetails {
+  switch (role) {
+    case "admin":
+      return {
+        to: "/admin",
+        label: "Admin Portal",
+      };
+
+    case "teacher":
+      return {
+        to: "/teacher",
+        label: "Teacher Portal",
+      };
+
+    default:
+      return {
+        to: "/student",
+        label: "Student Portal",
+      };
+  }
+}
+
+function HomeBrand({
+  onNavigate,
+  to = "/",
+}: {
+  onNavigate?: () => void;
+  to?: "/" | "/student" | "/teacher" | "/admin";
+}) {
   return (
     <Link
-      to="/"
+      to={to}
       onClick={onNavigate}
       className="flex items-center gap-2.5 rounded-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
       aria-label="YourSchool home"
@@ -40,11 +73,31 @@ function HomeBrand({ onNavigate }: { onNavigate?: () => void }) {
 export function HomeHeader() {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [user, setUser] =
+    useState<ReturnType<typeof getStoredUser>>(null);
+
+  useEffect(() => {
+    const token = getAuthToken();
+    const storedUser = getStoredUser();
+
+    setUser(
+      token && storedUser
+        ? storedUser
+        : null,
+    );
+  }, []);
+
+  const portal = user
+    ? getPortalDetails(user.role)
+    : null;
+
+  const brandDestination =
+    portal?.to ?? "/";
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-2 px-4 sm:gap-3 sm:px-6 lg:h-18 lg:gap-5 lg:px-8">
-        <HomeBrand />
+        <HomeBrand to={brandDestination} />
 
         <nav aria-label="Main" className="hidden lg:block">
           <ul className="flex items-center gap-0.5">
@@ -91,12 +144,32 @@ export function HomeHeader() {
 
           <ThemeToggle />
 
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-            <Link to="/login">Login</Link>
-          </Button>
-          <Button asChild size="sm" className="hidden rounded-xl sm:inline-flex">
-            <Link to="/register">Register</Link>
-          </Button>
+          {portal ? (
+            <Button asChild size="sm" className="hidden rounded-xl sm:inline-flex">
+              <Link to={portal.to}>
+                {portal.label}
+              </Link>
+            </Button>
+          ) : (
+            <>
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="hidden sm:inline-flex"
+              >
+                <Link to="/login">Login</Link>
+              </Button>
+
+              <Button
+                asChild
+                size="sm"
+                className="hidden rounded-xl sm:inline-flex"
+              >
+                <Link to="/register">Register</Link>
+              </Button>
+            </>
+          )}
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
@@ -108,7 +181,10 @@ export function HomeHeader() {
             <SheetContent side="right" className="w-[86vw] max-w-xs bg-background p-0">
               <SheetTitle className="sr-only">Navigation</SheetTitle>
               <div className="border-b border-border p-5">
-                <HomeBrand onNavigate={() => setOpen(false)} />
+                <HomeBrand
+                  to={brandDestination}
+                  onNavigate={() => setOpen(false)}
+                />
               </div>
               <nav aria-label="Mobile" className="p-3">
                 <ul className="space-y-1">
@@ -130,16 +206,40 @@ export function HomeHeader() {
                 </ul>
               </nav>
               <div className="space-y-2 border-t border-border p-5">
-                <Button asChild variant="outline" className="w-full rounded-xl">
-                  <Link to="/login" onClick={() => setOpen(false)}>
-                    Login
-                  </Link>
-                </Button>
-                <Button asChild className="w-full rounded-xl">
-                  <Link to="/register" onClick={() => setOpen(false)}>
-                    Register
-                  </Link>
-                </Button>
+                {portal ? (
+                  <Button asChild className="w-full rounded-xl">
+                    <Link
+                      to={portal.to}
+                      onClick={() => setOpen(false)}
+                    >
+                      {portal.label}
+                    </Link>
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full rounded-xl"
+                    >
+                      <Link
+                        to="/login"
+                        onClick={() => setOpen(false)}
+                      >
+                        Login
+                      </Link>
+                    </Button>
+
+                    <Button asChild className="w-full rounded-xl">
+                      <Link
+                        to="/register"
+                        onClick={() => setOpen(false)}
+                      >
+                        Register
+                      </Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </SheetContent>
           </Sheet>
@@ -154,4 +254,3 @@ export function HomeHeader() {
     </header>
   );
 }
-
