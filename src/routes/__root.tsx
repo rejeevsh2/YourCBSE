@@ -13,6 +13,8 @@ import {
 } from "@tanstack/react-router";
 import {
   useEffect,
+  lazy,
+  Suspense,
   type ReactNode,
 } from "react";
 
@@ -28,6 +30,10 @@ import {
   getAuthToken,
   getStoredUser,
 } from "@/lib/auth";
+
+const NativeAppSupport = lazy(() =>
+  import("@/components/native/NativeAppSupport").then((module) => ({ default: module.NativeAppSupport })),
+);
 
 const AUTH_PUBLIC_ROUTES = new Set([
   "/login",
@@ -267,6 +273,11 @@ function RootComponent() {
       client={queryClient}
     >
       <ThemeProvider>
+        {import.meta.env.VITE_NATIVE_APP === "true" && (
+          <Suspense fallback={null}>
+            <NativeAppSupport />
+          </Suspense>
+        )}
         <AuthGate />
         <Toaster />
       </ThemeProvider>

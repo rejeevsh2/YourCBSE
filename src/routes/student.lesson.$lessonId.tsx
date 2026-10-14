@@ -1016,7 +1016,11 @@ function VideoContent({
         </p>
       ) : null}
 
-      {youtubeEmbedUrl ? (
+      {youtubeEmbedUrl && import.meta.env.VITE_NATIVE_APP === "true" ? (
+        <p className="rounded-2xl border p-5 text-sm text-muted-foreground">
+          Tap Open video to watch on YouTube, then return to your lesson.
+        </p>
+      ) : youtubeEmbedUrl ? (
         <div className="overflow-hidden rounded-2xl border bg-black">
           <div className="aspect-video">
             <iframe
@@ -1171,7 +1175,7 @@ function FileContent({
         </p>
       ) : null}
 
-      {isPdf ? (
+      {isPdf && import.meta.env.VITE_NATIVE_APP !== "true" ? (
         <div className="overflow-hidden rounded-2xl border bg-background">
           <iframe
             src={url}
@@ -1221,7 +1225,7 @@ function GeneralContent({
 
       {fileUrl ? (
         <>
-          {/\.pdf(\?.*)?$/i.test(fileUrl) ? (
+          {/\.pdf(\?.*)?$/i.test(fileUrl) && import.meta.env.VITE_NATIVE_APP !== "true" ? (
             <div className="overflow-hidden rounded-2xl border bg-background">
               <iframe
                 src={fileUrl}
