@@ -104,6 +104,10 @@ export const laravelAuthService: AuthService = {
           password_confirmation:
             payload.passwordConfirmation,
           role: payload.role,
+          grade_ids:
+            payload.role === "teacher"
+              ? payload.gradeIds ?? []
+              : undefined,
         },
       }
     );
