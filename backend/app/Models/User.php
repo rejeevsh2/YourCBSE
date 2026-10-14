@@ -35,6 +35,25 @@ class User extends Authenticatable
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if (
+                in_array(
+                    $user->role,
+                    ['student', 'teacher'],
+                    true
+                ) &&
+                empty($user->approval_status)
+            ) {
+                $user->approval_status =
+                    'pending';
+                $user->approved_at = null;
+                $user->approved_by = null;
+            }
+        });
+    }
+
     public function grades(): BelongsToMany
     {
         return $this->belongsToMany(Grade::class)
