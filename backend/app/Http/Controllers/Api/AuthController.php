@@ -232,57 +232,65 @@ class AuthController extends Controller
         /** @var User $user */
         $user = auth()->user();
 
-        if ($user->approval_status === 'pending') {
-            auth()->logout();
-
-            $this->recordLoginEvent(
-                $request,
-                $email,
-                'failed',
-                'pending_approval',
-                $user
-            );
-
-            return response()->json([
-                'message' =>
-                    'Your account is waiting for administrator approval.',
-                'code' => 'account-pending-approval',
-            ], 403);
-        }
-
-        if ($user->approval_status === 'rejected') {
-            auth()->logout();
-
-            $this->recordLoginEvent(
-                $request,
-                $email,
-                'failed',
-                'account_rejected',
-                $user
-            );
-
-            return response()->json([
-                'message' =>
-                    'This account was not approved. Please contact the YourSchool administrator.',
-                'code' => 'account-rejected',
-            ], 403);
-        }
-
-        if ($user->approval_status !== 'approved') {
-            auth()->logout();
-
-            $this->recordLoginEvent(
-                $request,
-                $email,
-                'failed',
-                'approval_status_invalid',
-                $user
-            );
-
-            return response()->json([
-                'message' =>
-                    'This account is not available for sign in.',
-            ], 403);
+        if (
+            in_array(
+                $user->role,
+                ['student', 'teacher'],
+                true
+            )
+        ) {
+            if ($user->approval_status === 'pending') {
+                auth()->logout();
+    
+                $this->recordLoginEvent(
+                    $request,
+                    $email,
+                    'failed',
+                    'pending_approval',
+                    $user
+                );
+    
+                return response()->json([
+                    'message' =>
+                        'Your account is waiting for administrator approval.',
+                    'code' => 'account-pending-approval',
+                ], 403);
+            }
+    
+            if ($user->approval_status === 'rejected') {
+                auth()->logout();
+    
+                $this->recordLoginEvent(
+                    $request,
+                    $email,
+                    'failed',
+                    'account_rejected',
+                    $user
+                );
+    
+                return response()->json([
+                    'message' =>
+                        'This account was not approved. Please contact the YourSchool administrator.',
+                    'code' => 'account-rejected',
+                ], 403);
+            }
+    
+            if ($user->approval_status !== 'approved') {
+                auth()->logout();
+    
+                $this->recordLoginEvent(
+                    $request,
+                    $email,
+                    'failed',
+                    'approval_status_invalid',
+                    $user
+                );
+    
+                return response()->json([
+                    'message' =>
+                        'This account is not available for sign in.',
+                ], 403);
+            }
         }
 
         $this->recordLoginEvent(
