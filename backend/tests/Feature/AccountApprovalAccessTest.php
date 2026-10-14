@@ -3,8 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\Board;
+use App\Models\Chapter;
 use App\Models\Grade;
+use App\Models\Lesson;
 use App\Models\Subject;
+use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -78,6 +81,102 @@ class AccountApprovalAccessTest extends TestCase
         ]);
 
         return $admin;
+    }
+
+    public function test_new_student_and_teacher_models_default_to_pending(): void
+    {
+        foreach (['student', 'teacher'] as $role) {
+            $user = User::create([
+                'name' => ucfirst($role) . ' Default',
+                'email' =>
+                    $role . '-default@example.test',
+                'role' => $role,
+                'password' =>
+                    'SecurePassword123!',
+            ])->fresh();
+
+            $this->assertSame(
+                'pending',
+                $user->approval_status
+            );
+
+            $this->assertNull(
+                $user->approved_at
+            );
+
+            $this->assertNull(
+                $user->approved_by
+            );
+        }
+    }
+
+    public function test_teacher_cannot_submit_owned_lesson_from_unassigned_class(): void
+    {
+        [, $grade7, $grade9] =
+            $this->curriculum();
+
+        $subject = Subject::query()
+            ->where(
+                'grade_id',
+                $grade7->id
+            )
+            ->firstOrFail();
+
+        $unit = Unit::create([
+            'subject_id' =>
+                $subject->id,
+            'title' => 'Motion',
+            'unit_number' => 1,
+        ]);
+
+        $chapter = Chapter::create([
+            'unit_id' => $unit->id,
+            'title' => 'Speed',
+            'chapter_number' => 1,
+        ]);
+
+        $teacher =
+            User::factory()->create([
+                'role' => 'teacher',
+                'approval_status' =>
+                    'approved',
+            ]);
+
+        $teacher->grades()->sync([
+            $grade9->id,
+        ]);
+
+        $lesson = Lesson::create([
+            'created_by' =>
+                $teacher->id,
+            'chapter_id' =>
+                $chapter->id,
+            'title' =>
+                'Legacy Grade 7 Draft',
+            'slug' =>
+                'legacy-grade-7-draft',
+            'lesson_number' => 1,
+            'is_published' => false,
+            'is_active' => true,
+        ]);
+
+        Sanctum::actingAs($teacher);
+
+        $this->postJson(
+            '/api/teacher/lessons/' .
+            $lesson->id .
+            '/submit-for-approval'
+        )->assertNotFound();
+
+        $this->assertDatabaseMissing(
+            'approval_requests',
+            [
+                'approvable_type' =>
+                    'lesson',
+                'approvable_id' =>
+                    $lesson->id,
+            ]
+        );
     }
 
     public function test_student_registration_is_pending_and_cannot_login_before_approval(): void
