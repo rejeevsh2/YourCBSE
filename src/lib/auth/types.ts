@@ -36,7 +36,9 @@ export type AuthErrorCode =
   | "network-error"
   | "server-error"
   | "email-not-verified"
-  | "account-locked";
+  | "account-locked"
+  | "account-pending-approval"
+  | "account-rejected";
 
 /** Field-level messages keyed by form field name (Laravel `errors` shape). */
 export type FieldErrors = Record<string, string | undefined>;
@@ -70,6 +72,7 @@ export interface RegisterPayload {
   password: string;
   passwordConfirmation: string;
   role: Extract<UserRole, "student" | "teacher">;
+  gradeIds?: number[];
 }
 
 export interface ResetPasswordPayload {
@@ -112,6 +115,8 @@ export const authErrorMessages: Record<AuthErrorCode, string> = {
   "server-error": "Our servers hit a snag. Please try again in a moment.",
   "email-not-verified": "Please verify your email address before signing in.",
   "account-locked": "Your account has been temporarily locked for security.",
+  "account-pending-approval": "Your account is waiting for administrator approval.",
+  "account-rejected": "This account was not approved. Please contact the YourSchool administrator.",
 };
 
 export function authSuccess<TData>(message: string, data?: TData): AuthSuccess<TData> {
