@@ -226,11 +226,13 @@ const portalHome = rootPath as
           {collapsed ? (
             <Brand
               to={portalHome}
+              nativeNavigation
               className="[&_span:last-child]:hidden"
             />
           ) : (
             <Brand
               to={portalHome}
+              nativeNavigation
               subtitle={title}
             />
           )}
@@ -303,6 +305,7 @@ const portalHome = rootPath as
               <div className="border-b border-border p-4">
                 <Brand
                   to={portalHome}
+                  nativeNavigation
                   subtitle={title}
                 />
               </div>
