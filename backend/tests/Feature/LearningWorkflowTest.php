@@ -12,6 +12,7 @@ use App\Models\Subject;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -71,6 +72,24 @@ class LearningWorkflowTest extends TestCase
                 ->subject
                 ->grade_id,
         ]);
+    }
+
+    private function admin(): User
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin',
+        ]);
+
+        $adminRoleId = DB::table('admin_roles')
+            ->where('slug', 'admin')
+            ->value('id');
+
+        DB::table('admin_role_user')->insert([
+            'role_id' => $adminRoleId,
+            'user_id' => $admin->id,
+        ]);
+
+        return $admin;
     }
 
     public function test_public_registration_cannot_grant_admin_role(): void
@@ -339,9 +358,7 @@ class LearningWorkflowTest extends TestCase
         $lesson = $this->lesson();
 
         Sanctum::actingAs(
-            User::factory()->create([
-                'role' => 'admin',
-            ])
+            $this->admin()
         );
 
         $id = $this
