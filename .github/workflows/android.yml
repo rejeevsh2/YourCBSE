@@ -37,10 +37,12 @@ jobs:
         run: npm run build
       - name: Package the Android web assets
         run: npm run android:sync
+      - name: Set up Android SDK tools
+        uses: android-actions/setup-android@v4
+        with:
+          log-accepted-android-sdk-licenses: false
       - name: Install Android SDK packages
-        run: |
-          { yes || true; } | sdkmanager --licenses > /dev/null
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
       - name: Build the test APK
         working-directory: android
         run: bash gradlew --no-daemon assembleDebug
