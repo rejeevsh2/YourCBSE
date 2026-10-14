@@ -83,6 +83,179 @@ class AccountApprovalAccessTest extends TestCase
         return $admin;
     }
 
+    public function test_parent_and_admin_accounts_are_not_blocked_by_approval_gate(): void
+    {
+        foreach (
+            ['parent', 'admin']
+            as $role
+        ) {
+            $user = User::create([
+                'name' =>
+                    ucfirst($role) . ' User',
+                'email' =>
+                    $role . '-approval@example.test',
+                'role' => $role,
+                'password' =>
+                    'SecurePassword123!',
+            ])->fresh();
+
+            $this->assertSame(
+                'approved',
+                $user->approval_status
+            );
+
+            $this->postJson(
+                '/api/login',
+                [
+                    'email' =>
+                        $user->email,
+                    'password' =>
+                        'SecurePassword123!',
+                ]
+            )
+                ->assertOk()
+                ->assertJsonPath(
+                    'user.role',
+                    $role
+                );
+
+            $user->tokens()->delete();
+        }
+    }
+
+    public function test_rejection_revokes_tokens_and_clears_class_assignments(): void
+    {
+        [, $grade7, $grade9] =
+            $this->curriculum();
+
+        $teacher =
+            User::factory()->create([
+                'role' => 'teacher',
+                'approval_status' =>
+                    'pending',
+                'approved_at' => null,
+            ]);
+
+        $teacher->grades()->sync([
+            $grade7->id,
+            $grade9->id,
+        ]);
+
+        $teacher->createToken(
+            'pre-rejection'
+        );
+
+        $admin = $this->admin();
+
+        Sanctum::actingAs($admin);
+
+        $this->patchJson(
+            '/api/admin/users/' .
+            $teacher->id .
+            '/approval',
+            [
+                'status' =>
+                    'rejected',
+                'grade_ids' => [],
+            ]
+        )
+            ->assertOk()
+            ->assertJsonPath(
+                'user.approval_status',
+                'rejected'
+            )
+            ->assertJsonCount(
+                0,
+                'user.grades'
+            );
+
+        $teacher->refresh();
+
+        $this->assertSame(
+            'rejected',
+            $teacher->approval_status
+        );
+
+        $this->assertSame(
+            $admin->id,
+            (int) $teacher->approved_by
+        );
+
+        $this->assertNotNull(
+            $teacher->approved_at
+        );
+
+        $this->assertDatabaseMissing(
+            'grade_user',
+            [
+                'user_id' =>
+                    $teacher->id,
+            ]
+        );
+
+        $this->assertDatabaseMissing(
+            'personal_access_tokens',
+            [
+                'tokenable_id' =>
+                    $teacher->id,
+            ]
+        );
+    }
+
+    public function test_teacher_with_multiple_classes_cannot_be_changed_to_student_without_single_class_assignment(): void
+    {
+        [, $grade7, $grade9] =
+            $this->curriculum();
+
+        $teacher =
+            User::factory()->create([
+                'name' =>
+                    'Multi Class Teacher',
+                'email' =>
+                    'multi-class@example.test',
+                'role' => 'teacher',
+                'approval_status' =>
+                    'approved',
+            ]);
+
+        $teacher->grades()->sync([
+            $grade7->id,
+            $grade9->id,
+        ]);
+
+        Sanctum::actingAs(
+            $this->admin()
+        );
+
+        $this->patchJson(
+            '/api/admin/users/' .
+            $teacher->id,
+            [
+                'name' =>
+                    $teacher->name,
+                'email' =>
+                    $teacher->email,
+                'role' =>
+                    'student',
+                'password' => null,
+            ]
+        )->assertUnprocessable();
+
+        $this->assertSame(
+            'teacher',
+            $teacher
+                ->fresh()
+                ->role
+        );
+
+        $this->assertCount(
+            2,
+            $teacher
+                ->fresh()
+                ->grades
+        );
+    }
+
     public function test_new_student_and_teacher_models_default_to_pending(): void
     {
         foreach (['student', 'teacher'] as $role) {
