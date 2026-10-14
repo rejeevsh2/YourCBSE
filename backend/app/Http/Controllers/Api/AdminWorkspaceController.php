@@ -347,7 +347,11 @@ class AdminWorkspaceController extends Controller
     public function users(Request $request)
     {
         $filters = $request->validate([
-            'search' => ['nullable', 'string', 'max:255'],
+            'search' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
             'role' => [
                 'nullable',
                 Rule::in([
@@ -355,58 +359,89 @@ class AdminWorkspaceController extends Controller
                     'teacher',
                 ]),
             ],
+            'approval_status' => [
+                'nullable',
+                Rule::in([
+                    'pending',
+                    'approved',
+                    'rejected',
+                ]),
+            ],
         ]);
 
+        $users = User::query()
+            ->with([
+                'grades:id,name,grade_number',
+            ])
+            ->when(
+                !empty($filters['role']),
+                fn ($q) =>
+                    $q->where(
+                        'role',
+                        $filters['role']
+                    )
+            )
+            ->when(
+                !empty(
+                    $filters['approval_status']
+                ),
+                fn ($q) =>
+                    $q->where(
+                        'approval_status',
+                        $filters[
+                            'approval_status'
+                        ]
+                    )
+            )
+            ->when(
+                !empty($filters['search']),
+                fn ($q) =>
+                    $q->where(
+                        fn ($q) =>
+                            $q
+                                ->where(
+                                    'name',
+                                    'like',
+                                    '%' .
+                                        $filters['search'] .
+                                        '%'
+                                )
+                                ->orWhere(
+                                    'email',
+                                    'like',
+                                    '%' .
+                                        $filters['search'] .
+                                        '%'
+                                )
+                    )
+            )
+            ->latest()
+            ->limit(200)
+            ->get([
+                'id',
+                'name',
+                'email',
+                'role',
+                'approval_status',
+                'approved_at',
+                'approved_by',
+                'created_at',
+            ]);
+
         return response()->json([
-            'users' => User::query()
-                ->when(
-                    !empty($filters['role']),
-                    fn ($q) =>
-                        $q->where(
-                            'role',
-                            $filters['role']
-                        )
-                )
-                ->when(
-                    !empty($filters['search']),
-                    fn ($q) =>
-                        $q->where(
-                            fn ($q) =>
-                                $q
-                                    ->where(
-                                        'name',
-                                        'like',
-                                        '%' .
-                                            $filters['search'] .
-                                            '%'
-                                    )
-                                    ->orWhere(
-                                        'email',
-                                        'like',
-                                        '%' .
-                                            $filters['search'] .
-                                            '%'
-                                    )
-                        )
-                )
-                ->latest()
-                ->limit(200)
-                ->get([
-                    'id',
-                    'name',
-                    'email',
-                    'role',
-                    'created_at',
-                ]),
+            'users' => $users,
         ]);
     }
 
     public function storeUser(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8',
+            'name' =>
+                'required|string|max:255',
+            'email' =>
+                'required|email|unique:users,email',
+            'password' =>
+                'required|string|min:8',
             'role' => [
                 'required',
                 Rule::in([
@@ -414,10 +449,80 @@ class AdminWorkspaceController extends Controller
                     'teacher',
                 ]),
             ],
+            'grade_ids' => [
+                'required',
+                'array',
+                'min:1',
+                'max:12',
+            ],
+            'grade_ids.*' => [
+                'integer',
+                'distinct',
+                Rule::exists(
+                    'grades',
+                    'id'
+                )->where(
+                    fn ($query) =>
+                        $query->where(
+                            'is_active',
+                            true
+                        )
+                ),
+            ],
         ]);
 
+        $gradeIds = array_values(
+            $data['grade_ids']
+        );
+
+        if (
+            $data['role'] === 'student'
+            && count($gradeIds) !== 1
+        ) {
+            return response()->json([
+                'message' =>
+                    'A student must be assigned exactly one class.',
+                'errors' => [
+                    'grade_ids' => [
+                        'Select exactly one class for the student.',
+                    ],
+                ],
+            ], 422);
+        }
+
+        $user = DB::transaction(
+            function () use (
+                $data,
+                $gradeIds,
+                $request
+            ) {
+                $user = User::create([
+                    'name' => $data['name'],
+                    'email' => $data['email'],
+                    'password' => $data['password'],
+                    'role' => $data['role'],
+                ]);
+
+                $user->forceFill([
+                    'approval_status' =>
+                        'approved',
+                    'approved_at' => now(),
+                    'approved_by' =>
+                        $request->user()->id,
+                ])->save();
+
+                $user->grades()->sync(
+                    $gradeIds
+                );
+
+                return $user->load(
+                    'grades:id,name,grade_number'
+                );
+            }
+        );
+
         return response()->json([
-            'user' => User::create($data),
+            'user' => $user,
         ], 201);
     }
 
@@ -475,11 +580,143 @@ class AdminWorkspaceController extends Controller
 
         return response()->json([
             'message' => 'Account updated.',
-            'user' => $user->fresh([
-                //
-            ]),
+            'user' => $user->fresh(
+                'grades:id,name,grade_number'
+            ),
         ]);
     }
+
+    public function updateUserApproval(
+        Request $request,
+        User $user
+    ) {
+        if (
+            !in_array(
+                $user->role,
+                ['student', 'teacher'],
+                true
+            )
+        ) {
+            return response()->json([
+                'message' =>
+                    'Only student and teacher accounts use this approval workflow.',
+            ], 422);
+        }
+
+        $data = $request->validate([
+            'status' => [
+                'required',
+                Rule::in([
+                    'approved',
+                    'rejected',
+                ]),
+            ],
+            'grade_ids' => [
+                'nullable',
+                'array',
+                'max:12',
+            ],
+            'grade_ids.*' => [
+                'integer',
+                'distinct',
+                Rule::exists(
+                    'grades',
+                    'id'
+                )->where(
+                    fn ($query) =>
+                        $query->where(
+                            'is_active',
+                            true
+                        )
+                ),
+            ],
+        ]);
+
+        $gradeIds = array_values(
+            $data['grade_ids'] ?? []
+        );
+
+        if (
+            $data['status'] === 'approved'
+            && $user->role === 'student'
+            && count($gradeIds) !== 1
+        ) {
+            return response()->json([
+                'message' =>
+                    'A student must be assigned exactly one class before approval.',
+                'errors' => [
+                    'grade_ids' => [
+                        'Select exactly one class.',
+                    ],
+                ],
+            ], 422);
+        }
+
+        if (
+            $data['status'] === 'approved'
+            && $user->role === 'teacher'
+            && count($gradeIds) < 1
+        ) {
+            return response()->json([
+                'message' =>
+                    'A teacher must be assigned at least one class before approval.',
+                'errors' => [
+                    'grade_ids' => [
+                        'Select one or more classes.',
+                    ],
+                ],
+            ], 422);
+        }
+
+        DB::transaction(
+            function () use (
+                $data,
+                $gradeIds,
+                $request,
+                $user
+            ) {
+                if (
+                    $data['status']
+                    === 'approved'
+                ) {
+                    $user->grades()->sync(
+                        $gradeIds
+                    );
+
+                    $user->forceFill([
+                        'approval_status' =>
+                            'approved',
+                        'approved_at' => now(),
+                        'approved_by' =>
+                            $request->user()->id,
+                    ])->save();
+
+                    return;
+                }
+
+                $user->tokens()->delete();
+
+                $user->forceFill([
+                    'approval_status' =>
+                        'rejected',
+                    'approved_at' => null,
+                    'approved_by' => null,
+                ])->save();
+            }
+        );
+
+        return response()->json([
+            'message' =>
+                $data['status']
+                    === 'approved'
+                    ? 'Account approved.'
+                    : 'Account rejected.',
+            'user' => $user->fresh(
+                'grades:id,name,grade_number'
+            ),
+        ]);
+    }
+
     public function practiceSets()
     {
         return response()->json([
