@@ -55,7 +55,7 @@ export function PublicNavbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:h-18 lg:px-8">
-        <Brand />
+        <Brand to={portal?.to ?? "/"} />
 
         <nav
           aria-label="Primary"
@@ -147,7 +147,10 @@ export function PublicNavbar() {
             </SheetTitle>
 
             <div className="border-b border-border p-4">
-              <Brand subtitle="Everything you need to succeed" />
+              <Brand
+                to={portal?.to ?? "/"}
+                subtitle="Everything you need to succeed"
+              />
             </div>
 
             <nav
