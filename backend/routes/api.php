@@ -38,6 +38,7 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 
+Route::get('/registration/grades', [AuthController::class, 'registrationGrades'])->middleware('throttle:30,1');
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:5,1');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
@@ -648,6 +649,7 @@ Route::middleware(['auth:sanctum', 'role:admin', 'permission'])->prefix('admin')
     Route::get('/stats', [$controller, 'stats']);
     Route::get('/users', [$controller, 'users']);
     Route::post('/users', [$controller, 'storeUser']);
+    Route::patch('/users/{user}/approval', [$controller, 'updateUserApproval']);
     Route::get('/practice-sets', [$controller, 'practiceSets']);
     Route::post('/practice-sets', [$controller, 'storePracticeSet']);
     Route::patch('/practice-sets/{id}', [$controller, 'publishPracticeSet']);
