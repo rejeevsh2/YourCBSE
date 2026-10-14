@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 
@@ -45,8 +45,14 @@ function getPortalDetails(role?: string) {
 
 export function PublicNavbar() {
   const [open, setOpen] = useState(false);
+  const [user, setUser] =
+    useState<ReturnType<typeof getStoredUser>>(
+      null
+    );
 
-  const user = getStoredUser();
+  useEffect(() => {
+    setUser(getStoredUser());
+  }, []);
 
   const portal = user
     ? getPortalDetails(user.role)
