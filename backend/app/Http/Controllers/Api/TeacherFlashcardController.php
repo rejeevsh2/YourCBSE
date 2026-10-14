@@ -15,6 +15,13 @@ class TeacherFlashcardController extends Controller
             'created_by',
             $request->user()->id
         )
+            ->whereHas(
+                'lesson',
+                fn ($lesson) =>
+                    $lesson->accessibleTo(
+                        $request->user()
+                    )
+            )
             ->with(['lesson', 'cards'])
             ->withCount('cards')
             ->orderBy('display_order')
@@ -243,17 +250,28 @@ class TeacherFlashcardController extends Controller
         return FlashcardDeck::where(
             'created_by',
             $request->user()->id
-        )->findOrFail($id);
+        )
+            ->whereHas(
+                'lesson',
+                fn ($lesson) =>
+                    $lesson->accessibleTo(
+                        $request->user()
+                    )
+            )
+            ->findOrFail($id);
     }
 
     private function ownedLesson(
         Request $request,
         int $id
     ): Lesson {
-        return Lesson::where(
-            'created_by',
-            $request->user()->id
-        )->findOrFail($id);
+        return Lesson::query()
+            ->accessibleTo($request->user())
+            ->where(
+                'created_by',
+                $request->user()->id
+            )
+            ->findOrFail($id);
     }
 
     private function ensureEditable(
