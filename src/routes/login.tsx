@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   createFileRoute,
   Link,
@@ -24,6 +24,8 @@ import { useAuthAction } from "@/hooks/use-auth-action";
 
 import {
   authService,
+  getAuthToken,
+  getStoredUser,
   mergeFieldErrors,
   saveSession,
   validateEmail,
@@ -71,6 +73,44 @@ function LoginPage() {
     localErrors,
     fieldErrors,
   );
+
+  useEffect(() => {
+    if (!getAuthToken()) {
+      return;
+    }
+
+    const user =
+      getStoredUser();
+
+    if (!user) {
+      return;
+    }
+
+    if (user.role === "admin") {
+      void navigate({
+        to: "/admin",
+        replace: true,
+      });
+
+      return;
+    }
+
+    if (user.role === "teacher") {
+      void navigate({
+        to: "/teacher",
+        replace: true,
+      });
+
+      return;
+    }
+
+    if (user.role === "student") {
+      void navigate({
+        to: "/student",
+        replace: true,
+      });
+    }
+  }, [navigate]);
 
   async function handleSubmit(
     event: React.FormEvent,
