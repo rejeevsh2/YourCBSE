@@ -40,10 +40,10 @@ class Subject extends Model
             return $query->whereRaw('1 = 0');
         }
 
-        return $query->whereHas(
-            'grade.users',
-            fn ($users) =>
-                $users->where('users.id', $user->id)
-        );
+        $assignedGrades = \Illuminate\Support\Facades\DB::table('grade_user')
+            ->select('grade_id')
+            ->where('user_id', $user->id);
+
+        return $query->whereIn('subjects.grade_id', $assignedGrades);
     }
 }
