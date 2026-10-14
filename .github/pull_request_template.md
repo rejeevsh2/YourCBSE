@@ -10,6 +10,7 @@ Describe the change and why it is needed.
 - [ ] Authentication / permissions
 - [ ] Production configuration
 - [ ] Deployment
+- [ ] Documentation
 
 ## Validation
 
