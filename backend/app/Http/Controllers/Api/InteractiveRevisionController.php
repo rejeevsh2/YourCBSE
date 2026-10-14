@@ -11,7 +11,7 @@ class InteractiveRevisionController extends Controller
 {
     private function items(Request $request) {
         return RevisionItem::where('user_id', $request->user()->id)->where('is_active', true)
-            ->whereHas('lesson', fn ($q) => $q->published());
+            ->whereHas('lesson', fn ($q) => $q->published()->accessibleTo($request->user()));
     }
 
     public function index(Request $request) {
@@ -83,7 +83,7 @@ class InteractiveRevisionController extends Controller
     }
 
     public function storeCard(Request $request, Lesson $lesson) {
-        abort_unless(Lesson::published()->whereKey($lesson->id)->exists(), 404);
+        abort_unless(Lesson::published()->accessibleTo($request->user())->whereKey($lesson->id)->exists(), 404);
         $data = $request->validate(['title' => 'required|string|max:255', 'content' => 'required|string|max:10000']);
         $card = RevisionItem::create($data + ['user_id' => $request->user()->id, 'lesson_id' => $lesson->id, 'type' => 'flashcard']);
         return response()->json(['card' => $card], 201);
