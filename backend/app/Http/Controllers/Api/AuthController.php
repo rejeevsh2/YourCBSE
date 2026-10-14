@@ -9,13 +9,36 @@ use App\Models\SecurityAlert;
 use App\Models\SecuritySetting;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
     /**
-     * Register a new user.
+     * List active grades that may be requested during registration.
+     */
+    public function registrationGrades()
+    {
+        return response()->json([
+            'grades' => DB::table('grades')
+                ->where('is_active', true)
+                ->orderBy('grade_number')
+                ->get([
+                    'id',
+                    'name',
+                    'grade_number',
+                ]),
+        ]);
+    }
+
+    /**
+     * Register a new student or teacher.
+     *
+     * Public registrations are always pending until an administrator reviews
+     * the account. Students receive their single class during approval.
+     * Teachers may request one or more classes while registering.
      */
     public function register(Request $request)
     {
@@ -24,18 +47,66 @@ class AuthController extends Controller
             'mobile' => 'nullable|string|max:30',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8|confirmed',
+            'role' => [
+                'required',
+                Rule::in([
+                    'student',
+                    'teacher',
+                ]),
+            ],
+            'grade_ids' => [
+                'prohibited_if:role,student',
+                'required_if:role,teacher',
+                'array',
+                'min:1',
+                'max:12',
+            ],
+            'grade_ids.*' => [
+                'integer',
+                'distinct',
+                Rule::exists(
+                    'grades',
+                    'id'
+                )->where(
+                    fn ($query) =>
+                        $query->where(
+                            'is_active',
+                            true
+                        )
+                ),
+            ],
         ]);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'mobile' => $validated['mobile'] ?? null,
-            'email' => $validated['email'],
-            'role' => 'student',
-            'password' => $validated['password'],
-        ]);
+        $user = DB::transaction(
+            function () use ($validated) {
+                $user = new User([
+                    'name' => $validated['name'],
+                    'mobile' => $validated['mobile'] ?? null,
+                    'email' => $validated['email'],
+                    'role' => $validated['role'],
+                    'password' => $validated['password'],
+                ]);
+
+                $user->approval_status = 'pending';
+                $user->approved_at = null;
+                $user->approved_by = null;
+                $user->save();
+
+                if ($user->role === 'teacher') {
+                    $user->grades()->sync(
+                        $validated['grade_ids']
+                    );
+                }
+
+                return $user->load(
+                    'grades:id,name,grade_number'
+                );
+            }
+        );
 
         return response()->json([
-            'message' => 'Registration successful.',
+            'message' =>
+                'Registration submitted. An administrator must approve your account before you can sign in.',
             'user' => $user,
         ], 201);
     }
@@ -161,6 +232,59 @@ class AuthController extends Controller
         /** @var User $user */
         $user = auth()->user();
 
+        if ($user->approval_status === 'pending') {
+            auth()->logout();
+
+            $this->recordLoginEvent(
+                $request,
+                $email,
+                'failed',
+                'pending_approval',
+                $user
+            );
+
+            return response()->json([
+                'message' =>
+                    'Your account is waiting for administrator approval.',
+                'code' => 'account-pending-approval',
+            ], 403);
+        }
+
+        if ($user->approval_status === 'rejected') {
+            auth()->logout();
+
+            $this->recordLoginEvent(
+                $request,
+                $email,
+                'failed',
+                'account_rejected',
+                $user
+            );
+
+            return response()->json([
+                'message' =>
+                    'This account was not approved. Please contact the YourSchool administrator.',
+                'code' => 'account-rejected',
+            ], 403);
+        }
+
+        if ($user->approval_status !== 'approved') {
+            auth()->logout();
+
+            $this->recordLoginEvent(
+                $request,
+                $email,
+                'failed',
+                'approval_status_invalid',
+                $user
+            );
+
+            return response()->json([
+                'message' =>
+                    'This account is not available for sign in.',
+            ], 403);
+        }
+
         $this->recordLoginEvent(
             $request,
             $email,
@@ -169,7 +293,13 @@ class AuthController extends Controller
             $user
         );
 
-        $token = $user->createToken('YourSchool')->plainTextToken;
+        $user->load(
+            'grades:id,name,grade_number'
+        );
+
+        $token = $user
+            ->createToken('YourSchool')
+            ->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful.',
