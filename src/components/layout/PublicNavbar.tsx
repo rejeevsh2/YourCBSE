@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sheet";
 
 import { publicNav } from "@/config/navigation";
-import { getStoredUser } from "@/lib/auth";
+import { getAuthToken, getStoredUser } from "@/lib/auth";
 
 function getPortalDetails(role?: string) {
   switch (role) {
@@ -49,9 +49,20 @@ export function PublicNavbar() {
     useState<ReturnType<typeof getStoredUser>>(
       null
     );
+  const [sessionReady, setSessionReady] =
+    useState(false);
 
   useEffect(() => {
-    setUser(getStoredUser());
+    const token = getAuthToken();
+    const storedUser = getStoredUser();
+
+    setUser(
+      token && storedUser
+        ? storedUser
+        : null
+    );
+
+    setSessionReady(true);
   }, []);
 
   const portal = user
@@ -91,7 +102,7 @@ export function PublicNavbar() {
         <div className="hidden items-center gap-2 lg:flex">
           <ThemeToggle />
 
-          {user && portal ? (
+          {!sessionReady ? null : user && portal ? (
             <>
               <div className="hidden text-right xl:block">
                 <p className="max-w-40 truncate text-sm font-medium">
@@ -184,7 +195,7 @@ export function PublicNavbar() {
               ))}
 
               <div className="mt-3 grid gap-2 border-t border-border pt-3">
-                {user && portal ? (
+                {!sessionReady ? null : user && portal ? (
                   <>
                     <div className="rounded-2xl bg-muted/50 px-3 py-2">
                       <p className="truncate text-sm font-medium">
