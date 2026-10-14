@@ -219,9 +219,15 @@ const rootPath = `/${portal}`;
           )}
         >
           {collapsed ? (
-            <Brand className="[&_span:last-child]:hidden" />
+            <Brand
+              to={portalHome}
+              className="[&_span:last-child]:hidden"
+            />
           ) : (
-            <Brand subtitle={title} />
+            <Brand
+              to={portalHome}
+              subtitle={title}
+            />
           )}
         </div>
 
@@ -290,7 +296,10 @@ const rootPath = `/${portal}`;
               </SheetTitle>
 
               <div className="border-b border-border p-4">
-                <Brand subtitle={title} />
+                <Brand
+                  to={portalHome}
+                  subtitle={title}
+                />
               </div>
 
               <nav
