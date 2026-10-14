@@ -23,7 +23,7 @@ class RevisionController extends Controller
         $items = RevisionItem::query()
             ->where('user_id', $user->id)
             ->where('is_active', true)
-            ->whereHas('lesson', fn ($q) => $q->published())
+            ->whereHas('lesson', fn ($q) => $q->published()->accessibleTo($request->user()))
             ->with([
                 'lesson:id,title',
             ])
