@@ -168,6 +168,11 @@ const role = loggedInUser?.role
 
 const rootPath = `/${portal}`;
 
+const portalHome = rootPath as
+  | "/student"
+  | "/teacher"
+  | "/admin";
+
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
