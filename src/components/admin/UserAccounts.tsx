@@ -497,38 +497,44 @@ export function UserAccounts({
     setError("");
     setStatus("");
 
-    const result =
-      await apiRequest<UserResponse>(
-        `/admin/users/${reviewing.id}/approval`,
-        {
-          method: "PATCH",
-          body: {
-            status: nextStatus,
-            grade_ids:
-              nextStatus === "approved"
-                ? reviewGradeIds
-                : [],
+    try {
+      const result =
+        await apiRequest<UserResponse>(
+          `/admin/users/${reviewing.id}/approval`,
+          {
+            method: "PATCH",
+            body: {
+              status: nextStatus,
+              grade_ids:
+                nextStatus === "approved"
+                  ? reviewGradeIds
+                  : [],
+            },
           },
-        },
-      );
+        );
 
-    if (result.ok) {
-      setStatus(
-        nextStatus === "approved"
-          ? "Account approved."
-          : "Account rejected.",
-      );
+      if (result.ok) {
+        setStatus(
+          nextStatus === "approved"
+            ? "Account approved."
+            : "Account rejected.",
+        );
 
-      cancelReview();
-      await load(search);
-    } else {
+        cancelReview();
+        await load(search);
+      } else {
+        setError(
+          result.message ??
+            "Unable to update approval.",
+        );
+      }
+    } catch {
       setError(
-        result.message ??
-          "Unable to update approval.",
+        "Unable to update approval.",
       );
+    } finally {
+      setBusy(false);
     }
-
-    setBusy(false);
   }
 
   return (
@@ -742,6 +748,7 @@ export function UserAccounts({
               type="button"
               size="icon"
               variant="ghost"
+              aria-label="Close review"
               onClick={cancelReview}
             >
               <X className="size-4" />
