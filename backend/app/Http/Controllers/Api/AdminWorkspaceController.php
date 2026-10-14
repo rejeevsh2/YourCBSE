@@ -435,6 +435,20 @@ class AdminWorkspaceController extends Controller
 
     public function storeUser(Request $request)
     {
+        $gradeRules = [
+            'required',
+            'array',
+            'min:1',
+            'max:12',
+        ];
+
+        if (
+            $request->input('role')
+            === 'student'
+        ) {
+            $gradeRules[] = 'size:1';
+        }
+
         $data = $request->validate([
             'name' =>
                 'required|string|max:255',
@@ -449,12 +463,8 @@ class AdminWorkspaceController extends Controller
                     'teacher',
                 ]),
             ],
-            'grade_ids' => [
-                'required',
-                'array',
-                'min:1',
-                'max:12',
-            ],
+            'grade_ids' =>
+                $gradeRules,
             'grade_ids.*' => [
                 'integer',
                 'distinct',
@@ -474,21 +484,6 @@ class AdminWorkspaceController extends Controller
         $gradeIds = array_values(
             $data['grade_ids']
         );
-
-        if (
-            $data['role'] === 'student'
-            && count($gradeIds) !== 1
-        ) {
-            return response()->json([
-                'message' =>
-                    'A student must be assigned exactly one class.',
-                'errors' => [
-                    'grade_ids' => [
-                        'Select exactly one class for the student.',
-                    ],
-                ],
-            ], 422);
-        }
 
         $user = DB::transaction(
             function () use (
@@ -563,6 +558,22 @@ class AdminWorkspaceController extends Controller
                     'student',
                     'teacher',
                 ]),
+                function (
+                    string $attribute,
+                    mixed $value,
+                    Closure $fail
+                ) use ($user) {
+                    if (
+                        $value === 'student'
+                        && $user
+                            ->grades()
+                            ->count() !== 1
+                    ) {
+                        $fail(
+                            'A student account must have exactly one assigned class before changing to the student role.'
+                        );
+                    }
+                },
             ],
             'password' => [
                 'nullable',
@@ -603,6 +614,26 @@ class AdminWorkspaceController extends Controller
             ], 422);
         }
 
+        $gradeRules = [
+            'nullable',
+            'array',
+            'max:12',
+        ];
+
+        if (
+            $request->input('status')
+            === 'approved'
+        ) {
+            $gradeRules = [
+                'required',
+                'array',
+                $user->role === 'student'
+                    ? 'size:1'
+                    : 'min:1',
+                'max:12',
+            ];
+        }
+
         $data = $request->validate([
             'status' => [
                 'required',
@@ -611,11 +642,8 @@ class AdminWorkspaceController extends Controller
                     'rejected',
                 ]),
             ],
-            'grade_ids' => [
-                'nullable',
-                'array',
-                'max:12',
-            ],
+            'grade_ids' =>
+                $gradeRules,
             'grade_ids.*' => [
                 'integer',
                 'distinct',
@@ -635,38 +663,6 @@ class AdminWorkspaceController extends Controller
         $gradeIds = array_values(
             $data['grade_ids'] ?? []
         );
-
-        if (
-            $data['status'] === 'approved'
-            && $user->role === 'student'
-            && count($gradeIds) !== 1
-        ) {
-            return response()->json([
-                'message' =>
-                    'A student must be assigned exactly one class before approval.',
-                'errors' => [
-                    'grade_ids' => [
-                        'Select exactly one class.',
-                    ],
-                ],
-            ], 422);
-        }
-
-        if (
-            $data['status'] === 'approved'
-            && $user->role === 'teacher'
-            && count($gradeIds) < 1
-        ) {
-            return response()->json([
-                'message' =>
-                    'A teacher must be assigned at least one class before approval.',
-                'errors' => [
-                    'grade_ids' => [
-                        'Select one or more classes.',
-                    ],
-                ],
-            ], 422);
-        }
 
         DB::transaction(
             function () use (
@@ -695,12 +691,14 @@ class AdminWorkspaceController extends Controller
                 }
 
                 $user->tokens()->delete();
+                $user->grades()->detach();
 
                 $user->forceFill([
                     'approval_status' =>
                         'rejected',
-                    'approved_at' => null,
-                    'approved_by' => null,
+                    'approved_at' => now(),
+                    'approved_by' =>
+                        $request->user()->id,
                 ])->save();
             }
         );
