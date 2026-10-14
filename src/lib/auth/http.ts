@@ -89,6 +89,8 @@ function isAuthErrorCode(
     "server-error",
     "email-not-verified",
     "account-locked",
+    "account-pending-approval",
+    "account-rejected",
   ].includes(value);
 }
 
