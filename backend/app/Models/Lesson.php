@@ -17,6 +17,23 @@ class Lesson extends Model
                             ->whereHas('board', fn ($q) => $q->where('is_active', true))))));
     }
 
+    public function scopeAccessibleTo($query, User $user)
+    {
+        if (!in_array($user->role, ['student', 'teacher'], true)) {
+            return $query;
+        }
+
+        if ($user->approval_status !== 'approved') {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereHas(
+            'chapter.unit.subject.grade.users',
+            fn ($users) =>
+                $users->where('users.id', $user->id)
+        );
+    }
+
     protected $fillable = [
         'created_by',
         'chapter_id',
