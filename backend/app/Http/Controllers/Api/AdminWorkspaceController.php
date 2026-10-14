@@ -561,10 +561,12 @@ class AdminWorkspaceController extends Controller
                 function (
                     string $attribute,
                     mixed $value,
-                    Closure $fail
+                    \Closure $fail
                 ) use ($user) {
                     if (
                         $value === 'student'
+                        && $user->approval_status
+                            === 'approved'
                         && $user
                             ->grades()
                             ->count() !== 1
