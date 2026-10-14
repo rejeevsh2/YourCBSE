@@ -42,10 +42,17 @@ class Chapter extends Model
             return $query->whereRaw('1 = 0');
         }
 
+        $assignedGrades = \Illuminate\Support\Facades\DB::table('grade_user')
+            ->select('grade_id')
+            ->where('user_id', $user->id);
+
         return $query->whereHas(
-            'unit.subject.grade.users',
-            fn ($users) =>
-                $users->where('users.id', $user->id)
+            'unit.subject',
+            fn ($subject) =>
+                $subject->whereIn(
+                    'subjects.grade_id',
+                    $assignedGrades
+                )
         );
     }
 }
