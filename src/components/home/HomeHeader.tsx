@@ -75,6 +75,8 @@ export function HomeHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [user, setUser] =
     useState<ReturnType<typeof getStoredUser>>(null);
+  const [sessionReady, setSessionReady] =
+    useState(false);
 
   useEffect(() => {
     const token = getAuthToken();
@@ -85,6 +87,8 @@ export function HomeHeader() {
         ? storedUser
         : null,
     );
+
+    setSessionReady(true);
   }, []);
 
   const portal = user
@@ -144,7 +148,7 @@ export function HomeHeader() {
 
           <ThemeToggle />
 
-          {portal ? (
+          {!sessionReady ? null : portal ? (
             <Button asChild size="sm" className="hidden rounded-xl sm:inline-flex">
               <Link to={portal.to}>
                 {portal.label}
@@ -206,7 +210,7 @@ export function HomeHeader() {
                 </ul>
               </nav>
               <div className="space-y-2 border-t border-border p-5">
-                {portal ? (
+                {!sessionReady ? null : portal ? (
                   <Button asChild className="w-full rounded-xl">
                     <Link
                       to={portal.to}
