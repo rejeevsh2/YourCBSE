@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
@@ -82,38 +82,43 @@ function RegisterPage() {
   const { loading, error, fieldErrors, run } = useAuthAction(authService.register);
   const errors = mergeFieldErrors(localErrors, fieldErrors);
 
-  useEffect(() => {
-    let cancelled = false;
+  const loadGrades = useCallback(async () => {
+    setGradesLoading(true);
+    setGradesError("");
 
-    async function loadGrades() {
-      setGradesLoading(true);
-      setGradesError("");
-
-      const result = await apiRequest<GradesResponse>(
-        "/registration/grades",
-        { method: "GET" },
-      );
-
-      if (cancelled) return;
+    try {
+      const result =
+        await apiRequest<GradesResponse>(
+          "/registration/grades",
+          { method: "GET" },
+        );
 
       if (result.ok && result.data) {
-        setGrades(result.data.grades ?? []);
+        setGrades(
+          result.data.grades ?? [],
+        );
       } else {
+        setGrades([]);
+
         setGradesError(
           result.message ??
             "Unable to load classes. Please try again.",
         );
       }
+    } catch {
+      setGrades([]);
 
+      setGradesError(
+        "Unable to load classes. Please try again.",
+      );
+    } finally {
       setGradesLoading(false);
     }
-
-    void loadGrades();
-
-    return () => {
-      cancelled = true;
-    };
   }, []);
+
+  useEffect(() => {
+    void loadGrades();
+  }, [loadGrades]);
 
   const set = <K extends keyof typeof values>(
     key: K,
@@ -281,12 +286,49 @@ function RegisterPage() {
             ) : null}
 
             {gradesError ? (
-              <ErrorAlert title="Classes unavailable">
-                {gradesError}
-              </ErrorAlert>
+              <div className="space-y-2">
+                <ErrorAlert title="Classes unavailable">
+                  {gradesError}
+                </ErrorAlert>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={gradesLoading}
+                  onClick={() => {
+                    void loadGrades();
+                  }}
+                >
+                  Retry loading classes
+                </Button>
+              </div>
             ) : null}
 
-            {!gradesLoading && !gradesError ? (
+            {!gradesLoading &&
+            !gradesError &&
+            grades.length === 0 ? (
+              <div className="space-y-2 rounded-xl border bg-muted/30 p-4">
+                <p className="text-sm text-muted-foreground">
+                  No active classes are available right now. Please contact the YourSchool administrator.
+                </p>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    void loadGrades();
+                  }}
+                >
+                  Retry loading classes
+                </Button>
+              </div>
+            ) : null}
+
+            {!gradesLoading &&
+            !gradesError &&
+            grades.length > 0 ? (
               <div className="grid gap-2 sm:grid-cols-2">
                 {grades.map((grade) => {
                   const id = `register-grade-${grade.id}`;
@@ -380,7 +422,9 @@ function RegisterPage() {
           disabled={
             loading ||
             (values.role === "teacher" &&
-              (gradesLoading || Boolean(gradesError)))
+              (gradesLoading ||
+                Boolean(gradesError) ||
+                grades.length === 0))
           }
         >
           Submit registration
