@@ -31,4 +31,21 @@ class Unit extends Model
     {
         return $this->hasMany(Chapter::class);
     }
+
+    public function scopeAccessibleTo($query, User $user)
+    {
+        if (!in_array($user->role, ['student', 'teacher'], true)) {
+            return $query;
+        }
+
+        if ($user->approval_status !== 'approved') {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereHas(
+            'subject.grade.users',
+            fn ($users) =>
+                $users->where('users.id', $user->id)
+        );
+    }
 }
