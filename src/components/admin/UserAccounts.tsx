@@ -2,29 +2,48 @@ import {
   type FormEvent,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import {
+  CheckCircle2,
   Loader2,
   Pencil,
   Save,
+  ShieldCheck,
   X,
+  XCircle,
 } from "lucide-react";
 
 import { PortalPage } from "@/components/layout/PortalPage";
 import { apiRequest } from "@/lib/auth/http";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 
 type AccountRole =
   | "student"
   | "teacher";
 
+type ApprovalStatus =
+  | "pending"
+  | "approved"
+  | "rejected";
+
+type Grade = {
+  id: number;
+  name: string;
+  grade_number: number;
+};
+
 type User = {
   id: number;
   name: string;
   email: string;
   role: string;
+  approval_status?: ApprovalStatus;
+  approved_at?: string | null;
+  grades?: Grade[];
   created_at?: string;
 };
 
@@ -34,6 +53,20 @@ type UserResponse = {
   message?: string;
 };
 
+type GradesResponse = {
+  grades?: Grade[];
+};
+
+function classNames(user: User) {
+  if (!user.grades?.length) {
+    return "Not assigned";
+  }
+
+  return user.grades
+    .map((grade) => grade.name)
+    .join(", ");
+}
+
 export function UserAccounts({
   role,
 }: {
@@ -41,6 +74,9 @@ export function UserAccounts({
 }) {
   const [users, setUsers] =
     useState<User[]>([]);
+
+  const [grades, setGrades] =
+    useState<Grade[]>([]);
 
   const [search, setSearch] =
     useState("");
@@ -71,6 +107,9 @@ export function UserAccounts({
       role ?? "student",
     );
 
+  const [newGradeIds, setNewGradeIds] =
+    useState<number[]>([]);
+
   const [editing, setEditing] =
     useState<User | null>(null);
 
@@ -86,6 +125,15 @@ export function UserAccounts({
   const [editRole, setEditRole] =
     useState<AccountRole>("student");
 
+  const [reviewing, setReviewing] =
+    useState<User | null>(null);
+
+  const [reviewGradeIds, setReviewGradeIds] =
+    useState<number[]>([]);
+
+  const accountRole =
+    role ?? newRole;
+
   const title =
     role === "student"
       ? "Students"
@@ -95,10 +143,19 @@ export function UserAccounts({
 
   const description =
     role === "student"
-      ? "Find, create and manage student accounts."
+      ? "Review, approve and manage student accounts."
       : role === "teacher"
-        ? "Find, create and manage teacher accounts."
-        : "Find and manage student and teacher accounts.";
+        ? "Review, approve and manage teacher accounts."
+        : "Review, approve and manage student and teacher accounts.";
+
+  const pendingCount = useMemo(
+    () =>
+      users.filter(
+        (user) =>
+          user.approval_status === "pending",
+      ).length,
+    [users],
+  );
 
   const load = useCallback(
     async (term = "") => {
@@ -158,17 +215,102 @@ export function UserAccounts({
     void load();
   }, [load]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadGrades() {
+      const result =
+        await apiRequest<GradesResponse>(
+          "/registration/grades",
+          {
+            method: "GET",
+          },
+        );
+
+      if (cancelled) {
+        return;
+      }
+
+      if (
+        result.ok &&
+        result.data
+      ) {
+        setGrades(
+          result.data.grades ?? [],
+        );
+
+        return;
+      }
+
+      setError(
+        result.message ??
+          "Unable to load classes.",
+      );
+    }
+
+    void loadGrades();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  function toggleId(
+    current: number[],
+    id: number,
+    checked: boolean,
+  ) {
+    return checked
+      ? Array.from(
+          new Set([
+            ...current,
+            id,
+          ]),
+        )
+      : current.filter(
+          (value) =>
+            value !== id,
+        );
+  }
+
+  function resetNewGrades(
+    nextRole: AccountRole,
+  ) {
+    setNewGradeIds(
+      nextRole === "student"
+        ? []
+        : newGradeIds,
+    );
+  }
+
   async function create(
     event: FormEvent,
   ) {
     event.preventDefault();
 
+    if (
+      accountRole === "student" &&
+      newGradeIds.length !== 1
+    ) {
+      setError(
+        "Select exactly one class for the student.",
+      );
+      return;
+    }
+
+    if (
+      accountRole === "teacher" &&
+      newGradeIds.length < 1
+    ) {
+      setError(
+        "Select at least one class for the teacher.",
+      );
+      return;
+    }
+
     setBusy(true);
     setError("");
     setStatus("");
-
-    const accountRole =
-      role ?? newRole;
 
     const result =
       await apiRequest<UserResponse>(
@@ -179,6 +321,8 @@ export function UserAccounts({
             email,
             password,
             role: accountRole,
+            grade_ids:
+              newGradeIds,
           },
         },
       );
@@ -187,13 +331,14 @@ export function UserAccounts({
       setName("");
       setEmail("");
       setPassword("");
+      setNewGradeIds([]);
 
       setStatus(
         `${
           accountRole === "student"
             ? "Student"
             : "Teacher"
-        } account created.`,
+        } account created and approved.`,
       );
 
       await load(search);
@@ -223,6 +368,7 @@ export function UserAccounts({
 
     setError("");
     setStatus("");
+    setReviewing(null);
 
     setEditing(user);
     setEditName(user.name);
@@ -252,7 +398,7 @@ export function UserAccounts({
     setError("");
     setStatus("");
 
-    const accountRole =
+    const nextRole =
       role ?? editRole;
 
     const result =
@@ -263,7 +409,7 @@ export function UserAccounts({
           body: {
             name: editName,
             email: editEmail,
-            role: accountRole,
+            role: nextRole,
             password:
               editPassword.trim() ||
               null,
@@ -290,6 +436,101 @@ export function UserAccounts({
     setBusy(false);
   }
 
+  function startReview(
+    user: User,
+  ) {
+    if (
+      user.role !== "student" &&
+      user.role !== "teacher"
+    ) {
+      return;
+    }
+
+    setEditing(null);
+    setError("");
+    setStatus("");
+    setReviewing(user);
+
+    setReviewGradeIds(
+      (user.grades ?? [])
+        .map((grade) => grade.id),
+    );
+  }
+
+  function cancelReview() {
+    setReviewing(null);
+    setReviewGradeIds([]);
+  }
+
+  async function updateApproval(
+    nextStatus:
+      | "approved"
+      | "rejected",
+  ) {
+    if (!reviewing) {
+      return;
+    }
+
+    if (
+      nextStatus === "approved" &&
+      reviewing.role === "student" &&
+      reviewGradeIds.length !== 1
+    ) {
+      setError(
+        "Select exactly one class before approving this student.",
+      );
+      return;
+    }
+
+    if (
+      nextStatus === "approved" &&
+      reviewing.role === "teacher" &&
+      reviewGradeIds.length < 1
+    ) {
+      setError(
+        "Select at least one class before approving this teacher.",
+      );
+      return;
+    }
+
+    setBusy(true);
+    setError("");
+    setStatus("");
+
+    const result =
+      await apiRequest<UserResponse>(
+        `/admin/users/${reviewing.id}/approval`,
+        {
+          method: "PATCH",
+          body: {
+            status: nextStatus,
+            grade_ids:
+              nextStatus === "approved"
+                ? reviewGradeIds
+                : [],
+          },
+        },
+      );
+
+    if (result.ok) {
+      setStatus(
+        nextStatus === "approved"
+          ? "Account approved."
+          : "Account rejected.",
+      );
+
+      cancelReview();
+      await load(search);
+    } else {
+      setError(
+        result.message ??
+          "Unable to update approval.",
+      );
+    }
+
+    setBusy(false);
+  }
+
   return (
     <PortalPage
       portalLabel="Admin"
@@ -298,6 +539,25 @@ export function UserAccounts({
       description={description}
       showNotice={false}
     >
+      {pendingCount > 0 ? (
+        <div
+          role="status"
+          className="tile flex items-center gap-3 p-4"
+        >
+          <ShieldCheck className="size-5 text-primary" />
+          <p className="text-sm">
+            <strong>
+              {pendingCount}
+            </strong>{" "}
+            account
+            {pendingCount === 1
+              ? ""
+              : "s"}{" "}
+            waiting for approval in this list.
+          </p>
+        </div>
+      ) : null}
+
       {error ? (
         <p
           role="alert"
@@ -359,59 +619,99 @@ export function UserAccounts({
                 Role
               </th>
               <th className="p-2">
+                Status
+              </th>
+              <th className="p-2">
+                Classes
+              </th>
+              <th className="p-2">
                 Action
               </th>
             </tr>
           </thead>
 
           <tbody>
-            {users.map((user) => (
-              <tr
-                key={user.id}
-                className="border-t"
-              >
-                <td className="p-2">
-                  {user.name}
-                </td>
+            {users.map((user) => {
+              const approval =
+                user.approval_status ??
+                "approved";
 
-                <td className="p-2">
-                  {user.email}
-                </td>
+              return (
+                <tr
+                  key={user.id}
+                  className="border-t align-top"
+                >
+                  <td className="p-2">
+                    {user.name}
+                  </td>
 
-                <td className="p-2 capitalize">
-                  {user.role}
-                </td>
+                  <td className="p-2">
+                    {user.email}
+                  </td>
 
-                <td className="p-2">
-                  {user.role ===
-                    "student" ||
-                  user.role ===
-                    "teacher" ? (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() =>
-                        startEdit(user)
-                      }
-                    >
-                      <Pencil className="size-4" />
-                      Edit
-                    </Button>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">
-                      Roles & Permissions
-                    </span>
-                  )}
-                </td>
-              </tr>
-            ))}
+                  <td className="p-2 capitalize">
+                    {user.role}
+                  </td>
+
+                  <td className="p-2 capitalize">
+                    {approval}
+                  </td>
+
+                  <td className="p-2 text-sm">
+                    {classNames(user)}
+                  </td>
+
+                  <td className="p-2">
+                    {user.role ===
+                      "student" ||
+                    user.role ===
+                      "teacher" ? (
+                      <div className="flex flex-wrap gap-2">
+                        {approval !==
+                        "approved" ? (
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={() =>
+                              startReview(
+                                user,
+                              )
+                            }
+                          >
+                            <ShieldCheck className="size-4" />
+                            Review
+                          </Button>
+                        ) : null}
+
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            startEdit(
+                              user,
+                            )
+                          }
+                        >
+                          <Pencil className="size-4" />
+                          Edit
+                        </Button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">
+                        Roles & Permissions
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
 
             {loaded &&
             users.length === 0 ? (
               <tr>
                 <td
-                  colSpan={4}
+                  colSpan={6}
                   className="p-6 text-center text-sm text-muted-foreground"
                 >
                   No matching accounts.
@@ -421,6 +721,156 @@ export function UserAccounts({
           </tbody>
         </table>
       </section>
+
+      {reviewing ? (
+        <section className="tile max-w-2xl space-y-5 p-6">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-bold">
+                Review account
+              </h2>
+
+              <p className="mt-1 text-sm text-muted-foreground">
+                {reviewing.name} ·{" "}
+                <span className="capitalize">
+                  {reviewing.role}
+                </span>
+              </p>
+            </div>
+
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              onClick={cancelReview}
+            >
+              <X className="size-4" />
+            </Button>
+          </div>
+
+          {reviewing.role ===
+          "student" ? (
+            <label className="block space-y-2">
+              <span className="font-medium">
+                Assign one class
+              </span>
+
+              <select
+                className="w-full rounded-lg border bg-background p-2"
+                value={
+                  reviewGradeIds[0] ??
+                  ""
+                }
+                onChange={(event) =>
+                  setReviewGradeIds(
+                    event.target.value
+                      ? [
+                          Number(
+                            event.target
+                              .value,
+                          ),
+                        ]
+                      : [],
+                  )
+                }
+              >
+                <option value="">
+                  Select class
+                </option>
+
+                {grades.map((grade) => (
+                  <option
+                    key={grade.id}
+                    value={grade.id}
+                  >
+                    {grade.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <p className="font-medium">
+                  Classes
+                </p>
+
+                <p className="text-sm text-muted-foreground">
+                  The teacher requested the checked classes. Adjust them if needed before approval.
+                </p>
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-2">
+                {grades.map((grade) => {
+                  const checked =
+                    reviewGradeIds.includes(
+                      grade.id,
+                    );
+
+                  return (
+                    <label
+                      key={grade.id}
+                      className="flex cursor-pointer items-center gap-3 rounded-lg border p-3"
+                    >
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={(value) =>
+                          setReviewGradeIds(
+                            (current) =>
+                              toggleId(
+                                current,
+                                grade.id,
+                                value ===
+                                  true,
+                              ),
+                          )
+                        }
+                      />
+
+                      <span className="text-sm">
+                        {grade.name}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-3">
+            <Button
+              type="button"
+              disabled={busy}
+              onClick={() =>
+                void updateApproval(
+                  "approved",
+                )
+              }
+            >
+              {busy ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <CheckCircle2 className="size-4" />
+              )}
+              Approve
+            </Button>
+
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={busy}
+              onClick={() =>
+                void updateApproval(
+                  "rejected",
+                )
+              }
+            >
+              <XCircle className="size-4" />
+              Reject
+            </Button>
+          </div>
+        </section>
+      ) : null}
 
       {editing ? (
         <form
@@ -550,7 +1000,7 @@ export function UserAccounts({
 
       <form
         onSubmit={create}
-        className="tile max-w-xl space-y-4 p-6"
+        className="tile max-w-2xl space-y-4 p-6"
       >
         <h2 className="text-xl font-bold">
           {role === "student"
@@ -559,6 +1009,10 @@ export function UserAccounts({
               ? "Create teacher"
               : "Create an account"}
         </h2>
+
+        <p className="text-sm text-muted-foreground">
+          Accounts created by an administrator are approved immediately.
+        </p>
 
         <label className="block space-y-1">
           <span>Name</span>
@@ -619,18 +1073,25 @@ export function UserAccounts({
             </p>
           </div>
         ) : (
-          <label className="block">
-            Role
+          <label className="block space-y-1">
+            <span>Role</span>
 
             <select
-              className="ml-3 rounded-lg border bg-background p-2"
+              className="w-full rounded-lg border bg-background p-2"
               value={newRole}
-              onChange={(event) =>
-                setNewRole(
+              onChange={(event) => {
+                const nextRole =
                   event.target
-                    .value as AccountRole,
-                )
-              }
+                    .value as AccountRole;
+
+                setNewRole(
+                  nextRole,
+                );
+
+                resetNewGrades(
+                  nextRole,
+                );
+              }}
             >
               <option value="student">
                 Student
@@ -641,6 +1102,88 @@ export function UserAccounts({
               </option>
             </select>
           </label>
+        )}
+
+        {accountRole ===
+        "student" ? (
+          <label className="block space-y-2">
+            <span>
+              Class
+            </span>
+
+            <select
+              className="w-full rounded-lg border bg-background p-2"
+              value={
+                newGradeIds[0] ??
+                ""
+              }
+              onChange={(event) =>
+                setNewGradeIds(
+                  event.target.value
+                    ? [
+                        Number(
+                          event.target
+                            .value,
+                        ),
+                      ]
+                    : [],
+                )
+              }
+            >
+              <option value="">
+                Select class
+              </option>
+
+              {grades.map((grade) => (
+                <option
+                  key={grade.id}
+                  value={grade.id}
+                >
+                  {grade.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <div className="space-y-2">
+            <p>
+              Classes
+            </p>
+
+            <div className="grid gap-2 sm:grid-cols-2">
+              {grades.map((grade) => {
+                const checked =
+                  newGradeIds.includes(
+                    grade.id,
+                  );
+
+                return (
+                  <label
+                    key={grade.id}
+                    className="flex cursor-pointer items-center gap-3 rounded-lg border p-3"
+                  >
+                    <Checkbox
+                      checked={checked}
+                      onCheckedChange={(value) =>
+                        setNewGradeIds(
+                          (current) =>
+                            toggleId(
+                              current,
+                              grade.id,
+                              value === true,
+                            ),
+                        )
+                      }
+                    />
+
+                    <span className="text-sm">
+                      {grade.name}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
         )}
 
         <Button
