@@ -47,7 +47,7 @@ class InteractiveAppFileController extends Controller
                 self::SESSION_MINUTES,
                 '/interactive-apps/' . $app->id,
                 null,
-                $request->isSecure(),
+                $request->isSecure() || app()->environment('production'),
                 true,
                 false,
                 'lax'
