@@ -747,7 +747,7 @@ if (form.resource_category) {
                     if (newType) {
                       setForm((current) => ({ ...current, content_type: newType }));
                     }
-                  }
+                  }}
                 />
 
                 <p className="text-xs text-muted-foreground">
