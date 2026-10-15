@@ -582,6 +582,11 @@ Route::middleware([
         'update'
     ]);
 
+    Route::delete('/lesson-contents/{id}/file', [
+        LessonContentController::class,
+        'removeFile'
+    ]);
+
     Route::delete('/lesson-contents/{id}', [
         LessonContentController::class,
         'destroy'
