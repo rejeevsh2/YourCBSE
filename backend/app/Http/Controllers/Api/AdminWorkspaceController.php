@@ -684,6 +684,7 @@ class AdminWorkspaceController extends Controller
                     $user->forceFill([
                         'approval_status' =>
                             'approved',
+                        'legacy_class_access' => false,
                         'approved_at' => now(),
                         'approved_by' =>
                             $request->user()->id,
@@ -698,6 +699,7 @@ class AdminWorkspaceController extends Controller
                 $user->forceFill([
                     'approval_status' =>
                         'rejected',
+                    'legacy_class_access' => false,
                     'approved_at' => now(),
                     'approved_by' =>
                         $request->user()->id,

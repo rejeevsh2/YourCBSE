@@ -29,11 +29,28 @@ Artisan::command('yourschool:audit-class-assignments', function () {
                 ->whereColumn('grade_user.user_id', 'users.id');
         });
 
+    $legacyCount = (clone $query)
+        ->where('users.legacy_class_access', true)
+        ->count();
+
+    // An approved user without classes must have explicit
+    // temporary legacy protection, otherwise rollout fails.
+    $query->where('users.legacy_class_access', false);
     $count = (clone $query)->count();
+
+    if ($legacyCount > 0) {
+        $this->warn(
+            "LEGACY: {$legacyCount} approved account(s) use temporary curriculum access."
+        );
+
+        $this->warn(
+            'Assign verified classes to remove unrestricted legacy access.'
+        );
+    }
 
     if ($count === 0) {
         $this->info(
-            'PASS: All approved students and teachers have class assignments.'
+            'PASS: All approved students and teachers have class assignments or temporary legacy access.'
         );
 
         return 0;

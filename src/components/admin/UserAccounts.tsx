@@ -78,6 +78,15 @@ export function UserAccounts({
   const [grades, setGrades] =
     useState<Grade[]>([]);
 
+  const [gradesLoading, setGradesLoading] =
+    useState(true);
+
+  const [gradesError, setGradesError] =
+    useState("");
+
+  const [gradeLoadAttempt, setGradeLoadAttempt] =
+    useState(0);
+
   const [search, setSearch] =
     useState("");
 
@@ -133,6 +142,11 @@ export function UserAccounts({
 
   const accountRole =
     role ?? newRole;
+
+  const classesReady =
+    !gradesLoading &&
+    !gradesError &&
+    grades.length > 0;
 
   const title =
     role === "student"
@@ -219,33 +233,44 @@ export function UserAccounts({
     let cancelled = false;
 
     async function loadGrades() {
-      const result =
-        await apiRequest<GradesResponse>(
-          "/registration/grades",
-          {
-            method: "GET",
-          },
-        );
+      setGradesLoading(true);
+      setGradesError("");
+      setGrades([]);
 
-      if (cancelled) {
-        return;
+      try {
+        const result =
+          await apiRequest<GradesResponse>(
+            "/registration/grades",
+            {
+              method: "GET",
+            },
+          );
+
+        if (cancelled) return;
+
+        if (result.ok && result.data) {
+          const available = result.data.grades ?? [];
+          setGrades(available);
+
+          if (available.length === 0) {
+            setGradesError(
+              "No active classes are available. Add a class and retry.",
+            );
+          }
+        } else {
+          setGradesError(
+            result.message ?? "Unable to load classes.",
+          );
+        }
+      } catch {
+        if (!cancelled) {
+          setGradesError("Unable to load classes.");
+        }
+      } finally {
+        if (!cancelled) {
+          setGradesLoading(false);
+        }
       }
-
-      if (
-        result.ok &&
-        result.data
-      ) {
-        setGrades(
-          result.data.grades ?? [],
-        );
-
-        return;
-      }
-
-      setError(
-        result.message ??
-          "Unable to load classes.",
-      );
     }
 
     void loadGrades();
@@ -253,7 +278,7 @@ export function UserAccounts({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [gradeLoadAttempt]);
 
   function toggleId(
     current: number[],
@@ -287,6 +312,11 @@ export function UserAccounts({
     event: FormEvent,
   ) {
     event.preventDefault();
+
+    if (!classesReady) {
+      setError("Load available classes before creating an account.");
+      return;
+    }
 
     if (
       accountRole === "student" &&
@@ -471,6 +501,11 @@ export function UserAccounts({
       return;
     }
 
+    if (nextStatus === "approved" && !classesReady) {
+      setError("Load available classes before approving.");
+      return;
+    }
+
     if (
       nextStatus === "approved" &&
       reviewing.role === "student" &&
@@ -573,6 +608,27 @@ export function UserAccounts({
         >
           {error}
         </p>
+      ) : null}
+
+      {gradesLoading ? (
+        <p role="status" className="tile p-4 text-sm">
+          Loading classes...
+        </p>
+      ) : gradesError ? (
+        <div role="alert" className="tile space-y-3 p-4">
+          <p className="text-sm text-destructive">
+            {gradesError}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              setGradeLoadAttempt((current) => current + 1)
+            }
+          >
+            Retry loading classes
+          </Button>
+        </div>
       ) : null}
 
       {status ? (
@@ -851,7 +907,7 @@ export function UserAccounts({
           <div className="flex flex-wrap gap-3">
             <Button
               type="button"
-              disabled={busy}
+              disabled={busy || !classesReady}
               onClick={() =>
                 void updateApproval(
                   "approved",
@@ -1212,7 +1268,7 @@ export function UserAccounts({
 
         <Button
           type="submit"
-          disabled={busy}
+          disabled={busy || !classesReady}
         >
           {busy ? (
             <Loader2 className="size-4 animate-spin" />

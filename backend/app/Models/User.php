@@ -31,6 +31,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'approved_at' => 'datetime',
+            'legacy_class_access' => 'boolean',
             'password' => 'hashed',
         ];
     }
@@ -58,6 +59,20 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Grade::class)
             ->withTimestamps();
+    }
+
+    /**
+     * Temporary compatibility for approved users present before
+     * class assignments were introduced.
+     *
+     * Any real class assignment restores normal class scoping.
+     */
+    public function hasLegacyClassAccess(): bool
+    {
+        return in_array($this->role, ['student', 'teacher'], true)
+            && $this->approval_status === 'approved'
+            && $this->legacy_class_access === true
+            && ! $this->grades()->exists();
     }
 
     public function approver(): BelongsTo

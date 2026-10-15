@@ -79,3 +79,53 @@ historical databases.
 
 School administrators must verify and assign those
 classes using authoritative school records.
+## October 2026 - Legacy Access and Deployment Safety
+
+This section takes precedence over earlier rollout steps where they differ.
+
+### Temporary legacy protection
+
+The legacy_class_access migration marks existing approved students
+and teachers who have no grade_user assignments.
+
+These accounts temporarily retain previous broad curriculum access.
+This is not permanent class-based access or school isolation.
+
+New registrations must remain pending until administrator approval.
+Assigning verified classes or rejecting an account clears legacy access.
+Do not assign every class as a migration shortcut.
+
+### Required production deployment order
+
+1. Back up the database and verify the recovery procedure.
+2. Collect verified class assignments from school records.
+3. Confirm backend tests and frontend production build pass.
+4. Apply database migrations in the production backend environment
+   before deploying the backend that uses the new columns.
+5. Deploy the Laravel backend on Railway.
+6. Verify login, registration, approval and class assignment APIs.
+7. Run php artisan yourschool:audit-class-assignments.
+8. Deploy the matching frontend only after backend verification.
+9. Test student and teacher access with authorized test accounts.
+10. Assign verified classes to all remaining legacy accounts.
+
+### Audit interpretation
+
+FAIL: An approved account has neither assigned classes nor legacy protection.
+
+PASS with LEGACY warning: Existing accounts retain temporary broad
+access. Record the count and resolve these accounts promptly.
+
+PASS without LEGACY warning: No approved accounts are missing
+assignments, but assignment correctness must still be verified.
+
+The public /api/registration/grades endpoint supports registration.
+It should expose only active class catalog data, not private user data.
+
+Do not drop the legacy_class_access column while the running backend
+still depends on it. Never reset production data to pass the audit.
+
+### Final validation
+
+Run php artisan test from the backend directory.
+Run npm.cmd run build from the project root.

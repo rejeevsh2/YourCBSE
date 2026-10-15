@@ -45,6 +45,10 @@ class Grade extends Model
             return $query->whereRaw('1 = 0');
         }
 
+        if ($user->hasLegacyClassAccess()) {
+            return $query;
+        }
+
         $assignedGrades = \Illuminate\Support\Facades\DB::table('grade_user')
             ->select('grade_id')
             ->where('user_id', $user->id);
