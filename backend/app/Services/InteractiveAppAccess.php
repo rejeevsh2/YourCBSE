@@ -10,7 +10,11 @@ class InteractiveAppAccess
 {
     public function mayOpen(User $user, InteractiveApp $app): bool
     {
-        if ($user->paused_at !== null || ! $app->is_active) {
+        // Consult current database state for every launch and asset request.
+        // Cached authenticated user instances must not retain access after
+        // an administrator pauses, deletes or changes class assignments.
+        $user = $user->fresh();
+        if (! $user || $user->paused_at !== null || ! $app->is_active) {
             return false;
         }
 
