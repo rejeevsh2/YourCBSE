@@ -106,7 +106,10 @@ class ProtectedInteractiveAppTest extends TestCase
         $this->withUnencryptedCookie($sessionCookie->getName(), $sessionCookie->getValue())
             ->get("/interactive-apps/{$app->id}/files/lab/game.js")
             ->assertOk()
-            ->assertSee('console.log("ready")', false);
+            ->assertHeader('Content-Type', 'text/javascript; charset=UTF-8');
+
+        $this->assertSame('console.log("ready")',
+            Storage::disk('local')->get($directory . '/lab/game.js'));
 
         // The ticket is consumed; sharing or reusing it grants no access.
         $this->get($url)->assertForbidden();
