@@ -103,6 +103,8 @@ function AdminLessonContentsPage() {
       Number(lesson.id) === Number(selectedLessonId),
   );  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [removingFileId, setRemovingFileId] = useState<number | null>(null);
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -394,40 +396,55 @@ if (form.resource_category) {
     }
   }
 
-  async function handleDelete(
-    item: LessonContent,
-  ) {
-    const confirmed = window.confirm(
-      `Delete "${item.title}"?`,
-    );
+  async function handleDelete(item: LessonContent) {
+    if (deletingId !== null || removingFileId !== null) return;
+    if (!window.confirm(
+      `Delete "${item.title}" from this lesson?\n\nIts uploaded file, if any, will also be deleted. External links will be removed from YourSchool without deleting the original YouTube or Drive resource.`,
+    )) return;
 
-    if (!confirmed) return;
-
+    setDeletingId(item.id);
     try {
-      const response = await apiFetch(
-        `${API}/lesson-contents/${item.id}`,
-        {
-          method: "DELETE",
-        },
-      );
-
+      const response = await apiFetch(`${API}/lesson-contents/${item.id}`, {
+        method: "DELETE",
+      });
       if (!response.ok) {
-        throw new Error(
-          "Could not delete lesson content.",
-        );
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.message ?? "Could not delete lesson content.");
       }
-
-      toast.success(
-        "Lesson content deleted.",
-      );
-
+      if (editingId === item.id) closeForm();
+      toast.success("Lesson content deleted.");
       await loadData();
     } catch (error) {
       console.error(error);
+      toast.error(error instanceof Error ? error.message : "Could not delete lesson content.");
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
-      toast.error(
-        "Could not delete lesson content.",
-      );
+  async function handleRemoveFile(item: LessonContent) {
+    if (!item.file_path || deletingId !== null || removingFileId !== null) return;
+    if (!window.confirm(
+      `Remove the uploaded file from "${item.title}"?\n\nThe lesson content, description, and any external link will remain.`,
+    )) return;
+
+    setRemovingFileId(item.id);
+    try {
+      const response = await apiFetch(`${API}/lesson-contents/${item.id}/file`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.message ?? "Could not remove the uploaded file.");
+      }
+      if (editingId === item.id) setExistingFile(null);
+      toast.success("Uploaded file removed. Lesson content preserved.");
+      await loadData();
+    } catch (error) {
+      console.error(error);
+      toast.error(error instanceof Error ? error.message : "Could not remove the file.");
+    } finally {
+      setRemovingFileId(null);
     }
   }
 
@@ -436,7 +453,7 @@ if (form.resource_category) {
       portalLabel="Admin"
       portalPath="/admin"
       title="Lesson Content"
-      description="Create text, videos, PDFs, images, audio, worksheets and activities for each lesson."
+      description="Add PDFs, images, PowerPoint presentations, videos and other resources. Edit or delete each item independently."
     >
       <div className="space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -581,6 +598,10 @@ if (form.resource_category) {
                     PDF
                   </option>
 
+                  <option value="ppt">
+                    PowerPoint (PPT / PPTX)
+                  </option>
+
                   <option value="image">
                     Image
                   </option>
@@ -705,25 +726,34 @@ if (form.resource_category) {
 
               <div className="space-y-2">
                 <Label htmlFor="file">
-                  Upload file
+                  Upload file (PDF, image, PowerPoint or video)
                 </Label>
 
                 <Input
                   id="file"
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.mp3,.wav,.ogg,.m4a,.mp4,.webm,.mov,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
-                  onChange={(event) =>
-                    setSelectedFile(
-                      event.target.files?.[0] ??
-                        null,
-                    )
-                  }
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+                    setSelectedFile(file);
+                    if (!file) return;
+                    const extension = file.name.toLowerCase().split(".").pop();
+                    const newType = extension === "ppt" || extension === "pptx"
+                      ? "ppt"
+                      : extension === "pdf" ? "pdf"
+                      : ["jpg", "jpeg", "png", "gif", "webp"].includes(extension ?? "") ? "image"
+                      : ["mp4", "webm", "mov"].includes(extension ?? "") ? "video"
+                      : null;
+                    if (newType) {
+                      setForm((current) => ({ ...current, content_type: newType }));
+                    }
+                  }}
                 />
 
                 <p className="text-xs text-muted-foreground">
-                  PDF, image, audio, video,
-                  worksheet or document. Maximum
-                  size: 100 MB.
+                  PDF, image, audio, video, PowerPoint (.ppt/.pptx),
+                  worksheet or document. Maximum size: 100 MB.
+                  Presentations open or download in a compatible viewer.
                 </p>
 
                 {selectedFile ? (
@@ -747,6 +777,16 @@ if (form.resource_category) {
                   </div>
                 ) : null}
 
+                {selectedFile ? (
+                  <Button type="button" size="sm" variant="outline"
+                    onClick={() => {
+                      setSelectedFile(null);
+                      const input = document.getElementById("file") as HTMLInputElement | null;
+                      if (input) input.value = "";
+                    }}
+                  >Clear selected file</Button>
+                ) : null}
+
                 {!selectedFile &&
                 existingFile ? (
                   <div className="rounded-xl border bg-muted/30 p-3">
@@ -767,6 +807,22 @@ if (form.resource_category) {
                       Open current file
                       <ExternalLink className="size-3" />
                     </a>
+                    {editingId ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        className="mt-3"
+                        disabled={deletingId !== null || removingFileId !== null}
+                        onClick={() => {
+                          const item = items.find((entry) => entry.id === editingId);
+                          if (item) void handleRemoveFile(item);
+                        }}
+                      >
+                        <Trash2 className="size-4" />
+                        {removingFileId === editingId ? "Removing..." : "Remove uploaded file"}
+                      </Button>
+                    ) : null}
                   </div>
                 ) : null}
               </div>
@@ -836,7 +892,57 @@ if (form.resource_category) {
           </form>
         ) : null}
 
-        <div className="overflow-hidden rounded-3xl border bg-card">
+
+        {/* Mobile cards show Delete next to the resource, not off-screen
+            in the last column of a wide table. */}
+        {!loading && items.length > 0 ? (
+          <div className="space-y-3 lg:hidden">
+            {items.map((item) => (
+              <article key={item.id} className="rounded-2xl border bg-card p-4">
+                <h3 className="font-semibold">{item.title}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {item.lesson?.title ?? `Lesson ${item.lesson_id}`} · {item.content_type === "ppt" ? "PowerPoint" : item.content_type.toUpperCase()}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {item.file_path || item.external_url ? (
+                    <Button type="button" size="sm" variant="outline" asChild>
+                      <a href={item.file_path || item.external_url || "#"} target="_blank" rel="noreferrer">
+                        <ExternalLink className="size-4" />
+                        {item.file_path ? "Open file" : "Open link"}
+                      </a>
+                    </Button>
+                  ) : null}
+                  <Button type="button" size="sm" variant="outline" onClick={() => openEdit(item)}>
+                    <Pencil className="size-4" />
+                    Edit
+                  </Button>
+                  {item.file_path ? (
+                    <Button type="button" size="sm" variant="outline"
+                      disabled={deletingId !== null || removingFileId !== null}
+                      onClick={() => void handleRemoveFile(item)}>
+                      <Trash2 className="size-4" />
+                      {removingFileId === item.id ? "Removing..." : "Remove file"}
+                    </Button>
+                  ) : null}
+                  <Button type="button" size="sm" variant="destructive"
+                    disabled={deletingId !== null || removingFileId !== null}
+                    onClick={() => void handleDelete(item)}>
+                    <Trash2 className="size-4" />
+                    {deletingId === item.id ? "Deleting..." : "Delete content"}
+                  </Button>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : null}
+
+        {!loading && items.length === 0 ? (
+          <p className="rounded-2xl border bg-card p-6 text-center text-sm text-muted-foreground lg:hidden">
+            No lesson content yet. Click New content to add a PDF, presentation, image or video.
+          </p>
+        ) : null}
+
+        <div className="hidden overflow-hidden rounded-3xl border bg-card lg:block">
           {loading ? (
             <div className="p-8 text-center text-sm text-muted-foreground">
               Loading lesson content...
@@ -885,7 +991,7 @@ if (form.resource_category) {
                       Status
                     </th>
 
-                    <th className="px-4 py-3 text-right">
+                    <th className="sticky right-0 z-10 min-w-[185px] bg-muted px-4 py-3 text-right">
                       Actions
                     </th>
                   </tr>
@@ -913,7 +1019,7 @@ if (form.resource_category) {
                       </td>
 
                       <td className="px-4 py-4 capitalize">
-                        {item.content_type}
+                        {item.content_type === "ppt" ? "PowerPoint" : item.content_type}
                       </td>
 
                       <td className="px-4 py-4">
@@ -963,8 +1069,8 @@ if (form.resource_category) {
                         </span>
                       </td>
 
-                      <td className="px-4 py-4">
-                        <div className="flex justify-end gap-2">
+                      <td className="sticky right-0 z-10 bg-card px-4 py-4">
+                        <div className="flex flex-wrap justify-end gap-2">
                           <Button
                             type="button"
                             size="sm"
@@ -977,17 +1083,28 @@ if (form.resource_category) {
                             Edit
                           </Button>
 
+                          {item.file_path ? (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              disabled={deletingId !== null || removingFileId !== null}
+                              onClick={() => void handleRemoveFile(item)}
+                            >
+                              <Trash2 className="size-4" />
+                              {removingFileId === item.id ? "Removing..." : "Remove file"}
+                            </Button>
+                          ) : null}
+
                           <Button
                             type="button"
                             size="sm"
-                            variant="ghost"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() =>
-                              handleDelete(item)
-                            }
+                            variant="destructive"
+                            disabled={deletingId !== null || removingFileId !== null}
+                            onClick={() => void handleDelete(item)}
                           >
                             <Trash2 className="mr-1 size-4" />
-                            Delete
+                            {deletingId === item.id ? "Deleting..." : "Delete content"}
                           </Button>
                         </div>
                       </td>

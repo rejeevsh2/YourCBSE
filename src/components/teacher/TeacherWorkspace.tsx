@@ -245,7 +245,7 @@ export function TeacherWorkspace({ filter }: { filter?: "draft" | "published" })
                       value={type}
                       onChange={(e) => setType(e.target.value)}
                     >
-                      {["text", "video", "pdf", "image", "audio", "worksheet", "activity"].map(
+                      {["text", "video", "pdf", "ppt", "image", "audio", "worksheet", "activity"].map(
                         (t) => (
                           <option key={t}>{t}</option>
                         ),

@@ -21,6 +21,7 @@ export type TeacherLessonContent = {
     | "text"
     | "video"
     | "pdf"
+    | "ppt"
     | "image"
     | "audio"
     | "quiz"
@@ -144,6 +145,8 @@ function typeLabel(
   switch (type) {
     case "pdf":
       return "PDF";
+    case "ppt":
+      return "PowerPoint";
     case "video":
       return "Video";
     case "image":
@@ -333,7 +336,7 @@ function ContentBlock({
               rel="noreferrer"
             >
               <ExternalLink className="size-4" />
-              Open resource
+              {item.content_type === "ppt" ? "Open PowerPoint" : "Open resource"}
             </a>
           </Button>
         ) : null}
