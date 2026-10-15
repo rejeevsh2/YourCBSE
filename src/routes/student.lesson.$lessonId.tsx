@@ -24,6 +24,7 @@ import { PortalPage } from "@/components/layout/PortalPage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getAuthToken } from "@/lib/auth";
+import { PowerPointSlideViewer } from "@/components/lesson/PowerPointSlideViewer";
 
 const PUBLIC_API = `${API_BASE_URL}/public`;
 const AUTH_API = API_BASE_URL;
@@ -934,7 +935,16 @@ function ContentBlock({
         ) : null}
 
         {item.content_type === "ppt" ? (
-          <FileContent item={item} label="Open PowerPoint" />
+          item.file_path ? (
+            <PowerPointSlideViewer
+              contentId={item.id}
+              title={item.title}
+              originalFileUrl={item.file_path}
+              description={item.content}
+            />
+          ) : (
+            <FileContent item={item} label="Open PowerPoint" />
+          )
         ) : null}
 
         {item.content_type === "pdf" ? (
