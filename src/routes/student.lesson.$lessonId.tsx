@@ -40,6 +40,7 @@ type LessonContent = {
     | "text"
     | "video"
     | "pdf"
+    | "ppt"
     | "image"
     | "audio"
     | "quiz"
@@ -932,6 +933,10 @@ function ContentBlock({
           <AudioContent item={item} />
         ) : null}
 
+        {item.content_type === "ppt" ? (
+          <FileContent item={item} label="Open PowerPoint" />
+        ) : null}
+
         {item.content_type === "pdf" ? (
           <FileContent
             item={item}
@@ -1298,6 +1303,9 @@ function formatType(
     case "pdf":
       return "PDF";
 
+    case "ppt":
+      return "PowerPoint";
+
     case "video":
       return "Video";
 
@@ -1343,6 +1351,7 @@ function getContentIcon(
     case "activity":
       return Activity;
 
+    case "ppt":
     case "pdf":
       return FileText;
 
