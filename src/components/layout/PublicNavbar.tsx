@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sheet";
 
 import { publicNav } from "@/config/navigation";
-import { getStoredUser } from "@/lib/auth";
+import { getAuthToken, getStoredUser } from "@/lib/auth";
 
 function getPortalDetails(role?: string) {
   switch (role) {
@@ -45,8 +45,25 @@ function getPortalDetails(role?: string) {
 
 export function PublicNavbar() {
   const [open, setOpen] = useState(false);
+  const [user, setUser] =
+    useState<ReturnType<typeof getStoredUser>>(
+      null
+    );
+  const [sessionReady, setSessionReady] =
+    useState(false);
 
-  const user = getStoredUser();
+  useEffect(() => {
+    const token = getAuthToken();
+    const storedUser = getStoredUser();
+
+    setUser(
+      token && storedUser
+        ? storedUser
+        : null
+    );
+
+    setSessionReady(true);
+  }, []);
 
   const portal = user
     ? getPortalDetails(user.role)
@@ -55,7 +72,7 @@ export function PublicNavbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:h-18 lg:px-8">
-        <Brand />
+        <Brand to={portal?.to ?? "/"} />
 
         <nav
           aria-label="Primary"
@@ -85,7 +102,7 @@ export function PublicNavbar() {
         <div className="hidden items-center gap-2 lg:flex">
           <ThemeToggle />
 
-          {user && portal ? (
+          {!sessionReady ? null : user && portal ? (
             <>
               <div className="hidden text-right xl:block">
                 <p className="max-w-40 truncate text-sm font-medium">
@@ -147,7 +164,10 @@ export function PublicNavbar() {
             </SheetTitle>
 
             <div className="border-b border-border p-4">
-              <Brand subtitle="Everything you need to succeed" />
+              <Brand
+                to={portal?.to ?? "/"}
+                subtitle="Everything you need to succeed"
+              />
             </div>
 
             <nav
@@ -175,7 +195,7 @@ export function PublicNavbar() {
               ))}
 
               <div className="mt-3 grid gap-2 border-t border-border pt-3">
-                {user && portal ? (
+                {!sessionReady ? null : user && portal ? (
                   <>
                     <div className="rounded-2xl bg-muted/50 px-3 py-2">
                       <p className="truncate text-sm font-medium">

@@ -103,6 +103,15 @@ class PermissionMiddleware
         $uri = trim($route->uri(), '/');
 
         /*
+         * routes/api.php is mounted under Laravel's automatic "api"
+         * prefix. Permission mappings below are intentionally written
+         * against the route paths inside that file.
+         */
+        if (str_starts_with($uri, 'api/')) {
+            $uri = substr($uri, 4);
+        }
+
+        /*
          * Roles & permissions
          */
         if (

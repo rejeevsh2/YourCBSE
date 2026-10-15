@@ -75,6 +75,17 @@ disables mock login/data. Do not put secrets in any frontend build variable.
 
 ## First phone test
 
+Version 0.1.1 includes the current administrator-approval registration flow.
+New accounts wait for administrator approval and class assignment; this flow
+does not send an email OTP. Pending/rejected responses and other HTTP 403 errors
+must not send users to the unconnected email-verification screens.
+
+Test new student/teacher registration and the pending-approval screen, then
+approve the test account with its class access in the admin portal before login.
+GitHub test APKs use a temporary debug signing key. If Android rejects an update
+because the signatures differ, uninstall the old test app and install the new
+APK. This clears local app data; account data saved on the server is retained.
+
 1. Sign in with a test student account; check the dashboard.
 2. Open a class, subject, chapter and lesson.
 3. Open a YouTube video, a PDF and an interactive activity; return to the lesson.

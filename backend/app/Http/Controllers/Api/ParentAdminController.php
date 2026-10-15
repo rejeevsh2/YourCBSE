@@ -148,6 +148,13 @@ class ParentAdminController extends Controller
             'role' => 'parent',
         ]);
 
+        $parent->forceFill([
+            'approval_status' =>
+                'approved',
+            'approved_at' => now(),
+            'approved_by' => null,
+        ])->save();
+
         return response()->json([
             'message' =>
                 'Parent account created successfully.',

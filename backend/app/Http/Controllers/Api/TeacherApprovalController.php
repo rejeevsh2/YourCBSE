@@ -15,6 +15,7 @@ class TeacherApprovalController extends Controller
         int $id
     ) {
         $lesson = Lesson::query()
+            ->accessibleTo($request->user())
             ->where(
                 'created_by',
                 $request->user()->id

@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountCreatedRouteImport } from './routes/account-created'
 import { Route as AccountLockedRouteImport } from './routes/account-locked'
+import { Route as AccountPendingRouteImport } from './routes/account-pending'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as ComingSoonRouteImport } from './routes/coming-soon'
@@ -161,6 +162,11 @@ const AccountCreatedRoute = AccountCreatedRouteImport.update({
 const AccountLockedRoute = AccountLockedRouteImport.update({
   id: '/account-locked',
   path: '/account-locked',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountPendingRoute = AccountPendingRouteImport.update({
+  id: '/account-pending',
+  path: '/account-pending',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -822,6 +828,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/account-created': typeof AccountCreatedRoute
   '/account-locked': typeof AccountLockedRoute
+  '/account-pending': typeof AccountPendingRoute
   '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRoute
   '/coming-soon': typeof ComingSoonRoute
@@ -957,6 +964,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/account-created': typeof AccountCreatedRoute
   '/account-locked': typeof AccountLockedRoute
+  '/account-pending': typeof AccountPendingRoute
   '/blog': typeof BlogRoute
   '/coming-soon': typeof ComingSoonRoute
   '/contact': typeof ContactRoute
@@ -1089,6 +1097,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/account-created': typeof AccountCreatedRoute
   '/account-locked': typeof AccountLockedRoute
+  '/account-pending': typeof AccountPendingRoute
   '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRoute
   '/coming-soon': typeof ComingSoonRoute
@@ -1226,6 +1235,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/account-created'
     | '/account-locked'
+    | '/account-pending'
     | '/admin'
     | '/blog'
     | '/coming-soon'
@@ -1361,6 +1371,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/account-created'
     | '/account-locked'
+    | '/account-pending'
     | '/blog'
     | '/coming-soon'
     | '/contact'
@@ -1492,6 +1503,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/account-created'
     | '/account-locked'
+    | '/account-pending'
     | '/admin'
     | '/blog'
     | '/coming-soon'
@@ -1628,6 +1640,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AccountCreatedRoute: typeof AccountCreatedRoute
   AccountLockedRoute: typeof AccountLockedRoute
+  AccountPendingRoute: typeof AccountPendingRoute
   AdminRoute: typeof AdminRouteWithChildren
   BlogRoute: typeof BlogRoute
   ComingSoonRoute: typeof ComingSoonRoute
@@ -1691,6 +1704,13 @@ declare module '@tanstack/react-router' {
       path: '/account-locked'
       fullPath: '/account-locked'
       preLoaderRoute: typeof AccountLockedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account-pending': {
+      id: '/account-pending'
+      path: '/account-pending'
+      fullPath: '/account-pending'
+      preLoaderRoute: typeof AccountPendingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -2831,6 +2851,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AccountCreatedRoute: AccountCreatedRoute,
   AccountLockedRoute: AccountLockedRoute,
+  AccountPendingRoute: AccountPendingRoute,
   AdminRoute: AdminRouteWithChildren,
   BlogRoute: BlogRoute,
   ComingSoonRoute: ComingSoonRoute,

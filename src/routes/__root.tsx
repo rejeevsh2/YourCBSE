@@ -38,6 +38,7 @@ const NativeAppSupport = lazy(() =>
 const AUTH_PUBLIC_ROUTES = new Set([
   "/login",
   "/register",
+  "/account-pending",
   "/forgot-password",
   "/reset-password",
   "/verify-email",

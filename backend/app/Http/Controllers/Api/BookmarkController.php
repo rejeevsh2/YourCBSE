@@ -16,7 +16,7 @@ class BookmarkController extends Controller
     public function index(Request $request): JsonResponse
     {
         $bookmarks = Bookmark::query()
-            ->whereHas('lesson', fn ($q) => $q->published())
+            ->whereHas('lesson', fn ($q) => $q->published()->accessibleTo($request->user()))
             ->where('user_id', $request->user()->id)
             ->with([
                 'lesson.chapter.unit.subject',
@@ -37,7 +37,7 @@ class BookmarkController extends Controller
         Request $request,
         Lesson $lesson
     ): JsonResponse {
-        abort_unless(Lesson::published()->whereKey($lesson->id)->exists(), 404);
+        abort_unless(Lesson::published()->accessibleTo($request->user())->whereKey($lesson->id)->exists(), 404);
         $bookmark = Bookmark::query()
             ->where('user_id', $request->user()->id)
             ->where('lesson_id', $lesson->id)
@@ -56,7 +56,7 @@ class BookmarkController extends Controller
         Request $request,
         Lesson $lesson
     ): JsonResponse {
-        abort_unless(Lesson::published()->whereKey($lesson->id)->exists(), 404);
+        abort_unless(Lesson::published()->accessibleTo($request->user())->whereKey($lesson->id)->exists(), 404);
         $bookmark = Bookmark::firstOrCreate([
             'user_id' => $request->user()->id,
             'lesson_id' => $lesson->id,
@@ -79,7 +79,7 @@ class BookmarkController extends Controller
         Request $request,
         Lesson $lesson
     ): JsonResponse {
-        abort_unless(Lesson::published()->whereKey($lesson->id)->exists(), 404);
+        abort_unless(Lesson::published()->accessibleTo($request->user())->whereKey($lesson->id)->exists(), 404);
         $deleted = Bookmark::query()
             ->where('user_id', $request->user()->id)
             ->where('lesson_id', $lesson->id)

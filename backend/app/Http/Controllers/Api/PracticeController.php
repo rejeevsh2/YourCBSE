@@ -21,6 +21,7 @@ class PracticeController extends Controller
     public function index(Request $request): JsonResponse
     {
         $practiceSets = PracticeSet::query()
+            ->accessibleTo($request->user())
             ->with([
                 'subject:id,grade_id,name,code',
                 'unit:id,subject_id,title,code',
@@ -56,7 +57,11 @@ class PracticeController extends Controller
     ): JsonResponse {
         if (
             !$practiceSet->is_published ||
-            !$practiceSet->is_active
+            !$practiceSet->is_active ||
+            !PracticeSet::query()
+                ->accessibleTo($request->user())
+                ->whereKey($practiceSet->id)
+                ->exists()
         ) {
             return response()->json([
                 'message' => 'Practice set not found.',
@@ -114,7 +119,11 @@ class PracticeController extends Controller
     ): JsonResponse {
         if (
             !$practiceSet->is_published ||
-            !$practiceSet->is_active
+            !$practiceSet->is_active ||
+            !PracticeSet::query()
+                ->accessibleTo($request->user())
+                ->whereKey($practiceSet->id)
+                ->exists()
         ) {
             return response()->json([
                 'message' => 'Practice set not found.',
@@ -214,6 +223,7 @@ class PracticeController extends Controller
         ]);
 
         $practiceSet = PracticeSet::query()
+            ->accessibleTo($request->user())
             ->findOrFail($attempt->practice_set_id);
 
         $result = DB::transaction(function () use (
@@ -348,6 +358,7 @@ class PracticeController extends Controller
         }
 
         $practiceSet = PracticeSet::query()
+            ->accessibleTo($request->user())
             ->with([
                 'subject:id,grade_id,name,code',
                 'unit:id,subject_id,title,code',
@@ -464,6 +475,13 @@ class PracticeController extends Controller
     public function history(Request $request): JsonResponse
     {
         $attempts = PracticeAttempt::query()
+            ->whereHas(
+                'practiceSet',
+                fn ($query) =>
+                    $query->accessibleTo(
+                        $request->user()
+                    )
+            )
             ->with([
                 'practiceSet:id,title,type,subject_id,unit_id,chapter_id,lesson_id',
                 'practiceSet.subject:id,grade_id,name,code',

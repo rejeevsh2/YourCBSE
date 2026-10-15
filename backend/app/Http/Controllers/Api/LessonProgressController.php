@@ -19,9 +19,9 @@ class LessonProgressController extends Controller
         Request $request,
         Lesson $lesson
     ): JsonResponse {
-        abort_unless(Lesson::published()->whereKey($lesson->id)->exists(), 404);
+        abort_unless(Lesson::published()->accessibleTo($request->user())->whereKey($lesson->id)->exists(), 404);
         $progress = LessonProgress::query()
-        ->whereHas('lesson', fn ($q) => $q->published())
+        ->whereHas('lesson', fn ($q) => $q->published()->accessibleTo($request->user()))
             ->where('user_id', $request->user()->id)
             ->where('lesson_id', $lesson->id)
             ->first();
@@ -39,7 +39,7 @@ class LessonProgressController extends Controller
         Request $request,
         Lesson $lesson
     ): JsonResponse {
-        abort_unless(Lesson::published()->whereKey($lesson->id)->exists(), 404);
+        abort_unless(Lesson::published()->accessibleTo($request->user())->whereKey($lesson->id)->exists(), 404);
         $now = now();
 
         $progress = LessonProgress::firstOrNew([
@@ -67,7 +67,7 @@ class LessonProgressController extends Controller
         Request $request,
         Lesson $lesson
     ): JsonResponse {
-        abort_unless(Lesson::published()->whereKey($lesson->id)->exists(), 404);
+        abort_unless(Lesson::published()->accessibleTo($request->user())->whereKey($lesson->id)->exists(), 404);
         $now = now();
 
         $progress = LessonProgress::firstOrNew([
@@ -101,9 +101,9 @@ class LessonProgressController extends Controller
         Request $request,
         Lesson $lesson
     ): JsonResponse {
-        abort_unless(Lesson::published()->whereKey($lesson->id)->exists(), 404);
+        abort_unless(Lesson::published()->accessibleTo($request->user())->whereKey($lesson->id)->exists(), 404);
         $progress = LessonProgress::query()
-        ->whereHas('lesson', fn ($q) => $q->published())
+        ->whereHas('lesson', fn ($q) => $q->published()->accessibleTo($request->user()))
             ->where('user_id', $request->user()->id)
             ->where('lesson_id', $lesson->id)
             ->first();
@@ -136,7 +136,7 @@ class LessonProgressController extends Controller
     ): JsonResponse {
         $userId = $request->user()->id;
 
-        $lessons = Lesson::published()
+        $lessons = Lesson::published()->accessibleTo($request->user())
             ->where('chapter_id', $chapter->id)
             ->where('is_published', true)
             ->where('is_active', true)
@@ -154,7 +154,7 @@ class LessonProgressController extends Controller
             ]);
 
         $progressRecords = LessonProgress::query()
-        ->whereHas('lesson', fn ($q) => $q->published())
+        ->whereHas('lesson', fn ($q) => $q->published()->accessibleTo($request->user()))
             ->where('user_id', $userId)
             ->whereIn('lesson_id', $lessons->pluck('id'))
             ->get()
@@ -207,7 +207,7 @@ class LessonProgressController extends Controller
         $userId = $request->user()->id;
 
         $progress = LessonProgress::query()
-        ->whereHas('lesson', fn ($q) => $q->published())
+        ->whereHas('lesson', fn ($q) => $q->published()->accessibleTo($request->user()))
             ->with([
                 'lesson',
                 'lesson.chapter',
@@ -222,7 +222,7 @@ class LessonProgressController extends Controller
 
         if (!$progress) {
             $progress = LessonProgress::query()
-        ->whereHas('lesson', fn ($q) => $q->published())
+        ->whereHas('lesson', fn ($q) => $q->published()->accessibleTo($request->user()))
                 ->with([
                     'lesson',
                     'lesson.chapter',
@@ -248,19 +248,19 @@ class LessonProgressController extends Controller
 ): JsonResponse {
     $userId = $request->user()->id;
 
-    $totalLessons = Lesson::published()
+    $totalLessons = Lesson::published()->accessibleTo($request->user())
         ->where('is_active', true)
         ->where('is_published', true)
         ->count();
 
     $completedLessons = LessonProgress::query()
-        ->whereHas('lesson', fn ($q) => $q->published())
+        ->whereHas('lesson', fn ($q) => $q->published()->accessibleTo($request->user()))
         ->where('user_id', $userId)
         ->where('is_completed', true)
         ->count();
 
     $inProgressLessons = LessonProgress::query()
-        ->whereHas('lesson', fn ($q) => $q->published())
+        ->whereHas('lesson', fn ($q) => $q->published()->accessibleTo($request->user()))
         ->where('user_id', $userId)
         ->where('is_completed', false)
         ->count();
@@ -284,7 +284,7 @@ public function recentChapters(
     Request $request
 ): JsonResponse {
     $chapters = LessonProgress::query()
-        ->whereHas('lesson', fn ($q) => $q->published())
+        ->whereHas('lesson', fn ($q) => $q->published()->accessibleTo($request->user()))
         ->with([
             'lesson.chapter.unit.subject',
         ])
@@ -319,7 +319,7 @@ public function recentActivity(
     Request $request
 ): JsonResponse {
     $activities = LessonProgress::query()
-        ->whereHas('lesson', fn ($q) => $q->published())
+        ->whereHas('lesson', fn ($q) => $q->published()->accessibleTo($request->user()))
         ->with([
             'lesson.chapter.unit.subject',
         ])
@@ -368,6 +368,7 @@ public function myCourses(
     $userId = $request->user()->id;
 
     $subjects = Subject::query()
+        ->accessibleTo($request->user())
         ->where('is_active', true)
         ->with([
             'grade',
@@ -407,7 +408,7 @@ public function myCourses(
         ->values();
 
     $progressRecords = LessonProgress::query()
-        ->whereHas('lesson', fn ($q) => $q->published())
+        ->whereHas('lesson', fn ($q) => $q->published()->accessibleTo($request->user()))
         ->where('user_id', $userId)
         ->whereIn('lesson_id', $lessonIds)
         ->get()
@@ -524,6 +525,7 @@ public function learningPath(
     $userId = $request->user()->id;
 
     $subjects = \App\Models\Subject::query()
+        ->accessibleTo($request->user())
         ->with([
             'grade',
             'units' => function ($query) {
@@ -562,7 +564,7 @@ public function learningPath(
         ->values();
 
     $progressRecords = LessonProgress::query()
-        ->whereHas('lesson', fn ($q) => $q->published())
+        ->whereHas('lesson', fn ($q) => $q->published()->accessibleTo($request->user()))
         ->where('user_id', $userId)
         ->whereIn('lesson_id', $lessonIds)
         ->get()

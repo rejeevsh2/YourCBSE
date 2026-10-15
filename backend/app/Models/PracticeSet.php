@@ -67,4 +67,32 @@ class PracticeSet extends Model
     {
         return $this->hasMany(PracticeAttempt::class);
     }
+
+    public function scopeAccessibleTo($query, User $user)
+    {
+        if (!in_array($user->role, ['student', 'teacher'], true)) {
+            return $query;
+        }
+
+        if ($user->approval_status !== 'approved') {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($user->hasLegacyClassAccess()) {
+            return $query;
+        }
+
+        $assignedGrades = \Illuminate\Support\Facades\DB::table('grade_user')
+            ->select('grade_id')
+            ->where('user_id', $user->id);
+
+        return $query->whereHas(
+            'subject',
+            fn ($subject) =>
+                $subject->whereIn(
+                    'subjects.grade_id',
+                    $assignedGrades
+                )
+        );
+    }
 }

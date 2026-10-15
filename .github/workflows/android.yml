@@ -5,6 +5,7 @@ on:
     paths:
       - "android/**"
       - "src/**"
+      - "tests/**"
       - "public/**"
       - "mobile/**"
       - "package*.json"
@@ -33,6 +34,8 @@ jobs:
         run: npm ci
       - name: Typecheck
         run: npm run typecheck
+      - name: Check registration error handling
+        run: npm run test:auth
       - name: Check the website still builds
         run: npm run build
       - name: Package the Android web assets
