@@ -300,7 +300,7 @@ class TeacherInteractiveAppController extends InteractiveAppController
             $interactiveApp->file_path;
 
         $entryUrl =
-            $interactiveApp->entry_url;
+            $interactiveApp->getRawOriginal('entry_url');
 
         /*
          * Switch to an external app.

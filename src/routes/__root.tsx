@@ -223,7 +223,8 @@ function AuthGate() {
     );
 
   const authRoute =
-    AUTH_PUBLIC_ROUTES.has(pathname);
+    AUTH_PUBLIC_ROUTES.has(pathname) ||
+    /^\/interactive-app\/[1-9][0-9]*$/.test(pathname);
 
   const authenticated =
     typeof window !== "undefined" &&

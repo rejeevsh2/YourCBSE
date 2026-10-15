@@ -214,7 +214,7 @@ class InteractiveAppController extends Controller
             $interactiveApp->file_path;
 
         $entryUrl =
-            $interactiveApp->entry_url;
+            $interactiveApp->getRawOriginal('entry_url');
 
         /*
          * Changing to external.
@@ -238,13 +238,11 @@ class InteractiveAppController extends Controller
             $validated['source_type'] === 'html' &&
             $request->hasFile('file')
         ) {
-            $this->deleteStoredApp(
-                $interactiveApp
-            );
-
             $result = $this->storeHtmlApp(
                 $request->file('file')
             );
+
+            $this->deleteStoredApp($interactiveApp);
 
             $filePath =
                 $result['file_path'];
@@ -421,7 +419,7 @@ class InteractiveAppController extends Controller
         $filePath =
             $directory . '/index.html';
 
-        Storage::disk('public')->put(
+        Storage::disk('local')->put(
             $filePath,
             file_get_contents(
                 $uploadedFile->getRealPath()
@@ -432,7 +430,7 @@ class InteractiveAppController extends Controller
             'file_path' => $directory,
 
             'entry_url' =>
-                asset('storage/' . $filePath),
+                $filePath,
         ];
     }
 
@@ -654,7 +652,7 @@ class InteractiveAppController extends Controller
             'interactive-apps/' . $appId;
 
         $destination =
-            Storage::disk('public')
+            Storage::disk('local')
                 ->path($relativeDirectory);
 
         File::ensureDirectoryExists(
@@ -762,11 +760,7 @@ class InteractiveAppController extends Controller
             'file_path' =>
                 $relativeDirectory,
 
-            'entry_url' =>
-                asset(
-                    'storage/' .
-                    $publicIndexPath
-                ),
+            'entry_url' => $publicIndexPath,
         ];
     }
 
@@ -791,12 +785,12 @@ class InteractiveAppController extends Controller
         }
 
         if (
-            Storage::disk('public')
+            Storage::disk('local')
                 ->exists(
                     $interactiveApp->file_path
                 )
         ) {
-            Storage::disk('public')
+            Storage::disk('local')
                 ->deleteDirectory(
                     $interactiveApp->file_path
                 );

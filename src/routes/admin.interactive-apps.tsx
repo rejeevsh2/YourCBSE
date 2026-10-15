@@ -1500,7 +1500,7 @@ function AdminInteractiveAppsPage() {
   >
     <a
       href={app.entry_url || app.external_url || "#"}
-      target="_blank"
+      target={app.source_type === "external" ? "_blank" : "_self"}
       rel="noreferrer"
     >
       <ExternalLink className="size-4" />

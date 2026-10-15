@@ -73,6 +73,12 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
 
+    // Issue an authenticated one-time launch ticket for private HTML/ZIP apps.
+    Route::post('/interactive-apps/{app}/launch', [
+        \App\Http\Controllers\Api\InteractiveAppLaunchController::class,
+        'launch',
+    ])->middleware('throttle:30,1');
+
     Route::post('/logout', [
         AuthController::class,
         'logout'
