@@ -84,3 +84,52 @@ Artisan::command('yourschool:audit-class-assignments', function () {
 })->purpose(
     'Audit approved student and teacher accounts for missing class assignments'
 );
+
+
+// Read-only by default. Use --write to verify private upload, download and cleanup.
+// No credentials or sensitive exception messages are printed to the terminal.
+Artisan::command('yourschool:r2-check {--write : Test uploading and deleting a small private object}', function () {
+    $settings = config('filesystems.disks.r2', []);
+
+    foreach (['key', 'secret', 'endpoint', 'bucket'] as $field) {
+        if (! is_string($settings[$field] ?? null) || trim($settings[$field]) === '') {
+            $this->error("R2 is not configured: missing {$field}. No remote request made.");
+
+            return 1;
+        }
+    }
+
+    try {
+        $disk = \Illuminate\Support\Facades\Storage::disk('r2');
+
+        if (! $this->option('write')) {
+            $disk->files('health-check/');
+
+            $this->info('R2 list request succeeded. Use --write for an upload/read/delete test.');
+
+            return 0;
+        }
+
+        $path = 'health-check/'.\Illuminate\Support\Str::uuid().'.txt';
+        $payload = bin2hex(random_bytes(16));
+
+        try {
+            if (! $disk->put($path, $payload) || $disk->get($path) !== $payload) {
+                $this->error('R2 write/read verification failed.');
+
+                return 1;
+            }
+
+            $this->info('R2 private upload and download succeeded.');
+
+            return 0;
+        } finally {
+            $disk->delete($path);
+        }
+    } catch (\Throwable $exception) {
+        // Never print exception messages; SDK errors can contain endpoint details.
+        $this->error('R2 check failed. Verify endpoint, bucket, credentials, permissions and connectivity.');
+
+        return 1;
+    }
+})->purpose('Verify the private Cloudflare R2 connection without revealing credentials');
