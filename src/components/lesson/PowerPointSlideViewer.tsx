@@ -148,6 +148,13 @@ export function PowerPointSlideViewer({
     };
   }, [presentation, index, contentId]);
 
+  // Release images and fonts allocated while parsing a large deck.
+  useEffect(() => {
+    return () => {
+      presentation?.dispose?.();
+    };
+  }, [presentation]);
+
   useEffect(() => {
     const onChange = () => setFullscreen(document.fullscreenElement === viewerRef.current);
     document.addEventListener("fullscreenchange", onChange);
