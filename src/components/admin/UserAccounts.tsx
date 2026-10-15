@@ -516,7 +516,9 @@ export function UserAccounts({
       if (result.ok) {
         setStatus(
           nextStatus === "approved"
-            ? "Account approved."
+            ? reviewing.approval_status === "approved"
+              ? "Classes updated."
+              : "Account approved."
             : "Account rejected.",
         );
 
@@ -673,21 +675,21 @@ export function UserAccounts({
                     user.role ===
                       "teacher" ? (
                       <div className="flex flex-wrap gap-2">
-                        {approval !==
-                        "approved" ? (
-                          <Button
-                            type="button"
-                            size="sm"
-                            onClick={() =>
-                              startReview(
-                                user,
-                              )
-                            }
-                          >
-                            <ShieldCheck className="size-4" />
-                            Review
-                          </Button>
-                        ) : null}
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant={
+                            approval === "approved"
+                              ? "outline"
+                              : "default"
+                          }
+                          onClick={() => startReview(user)}
+                        >
+                          <ShieldCheck className="size-4" />
+                          {approval === "approved"
+                            ? "Classes"
+                            : "Review"}
+                        </Button>
 
                         <Button
                           type="button"
@@ -733,7 +735,7 @@ export function UserAccounts({
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-xl font-bold">
-                Review account
+                {reviewing.approval_status === "approved" ? "Manage classes" : "Review account"}
               </h2>
 
               <p className="mt-1 text-sm text-muted-foreground">
@@ -748,7 +750,7 @@ export function UserAccounts({
               type="button"
               size="icon"
               variant="ghost"
-              aria-label="Close review"
+              aria-label={reviewing.approval_status === "approved" ? "Close classes" : "Close review"}
               onClick={cancelReview}
             >
               <X className="size-4" />
@@ -803,7 +805,9 @@ export function UserAccounts({
                 </p>
 
                 <p className="text-sm text-muted-foreground">
-                  The teacher requested the checked classes. Adjust them if needed before approval.
+                  {reviewing.approval_status === "approved"
+                    ? "Select the classes this teacher should be able to access."
+                    : "The teacher requested the checked classes. Adjust them if needed before approval."}
                 </p>
               </div>
 
@@ -859,22 +863,35 @@ export function UserAccounts({
               ) : (
                 <CheckCircle2 className="size-4" />
               )}
-              Approve
+              {reviewing.approval_status === "approved"
+                ? "Save classes"
+                : "Approve"}
             </Button>
 
-            <Button
-              type="button"
-              variant="destructive"
-              disabled={busy}
-              onClick={() =>
-                void updateApproval(
-                  "rejected",
-                )
-              }
-            >
-              <XCircle className="size-4" />
-              Reject
-            </Button>
+            {reviewing.approval_status === "approved" ? (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={busy}
+                onClick={cancelReview}
+              >
+                Cancel
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="destructive"
+                disabled={busy}
+                onClick={() =>
+                  void updateApproval(
+                    "rejected",
+                  )
+                }
+              >
+                <XCircle className="size-4" />
+                Reject
+              </Button>
+            )}
           </div>
         </section>
       ) : null}

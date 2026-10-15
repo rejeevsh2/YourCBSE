@@ -713,6 +713,41 @@ class AccountApprovalAccessTest extends TestCase
             ->assertJsonCount(2);
     }
 
+    public function test_admin_can_assign_class_to_existing_approved_student(): void
+    {
+        [, $grade7, $grade9] = $this->curriculum();
+
+        $student = User::factory()->create([
+            'role' => 'student',
+            'approval_status' => 'approved',
+            'approved_at' => now(),
+        ]);
+
+        $this->assertCount(0, $student->grades);
+
+        Sanctum::actingAs($this->admin());
+
+        $this->patchJson(
+            '/api/admin/users/' . $student->id . '/approval',
+            [
+                'status' => 'approved',
+                'grade_ids' => [$grade7->id],
+            ]
+        )
+            ->assertOk()
+            ->assertJsonPath('user.approval_status', 'approved')
+            ->assertJsonCount(1, 'user.grades');
+
+        $student->refresh();
+
+        $this->assertTrue(
+            $student->grades()->whereKey($grade7->id)->exists()
+        );
+
+        $this->assertFalse(
+            $student->grades()->whereKey($grade9->id)->exists()
+        );
+    }
     public function test_non_admin_cannot_approve_accounts(): void
     {
         [, $grade7] =
