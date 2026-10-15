@@ -33,6 +33,12 @@ import {
   type FieldErrors,
 } from "@/lib/auth";
 
+function interactiveAppReturnTo(): string | null {
+  if (typeof window === "undefined") return null;
+  const value = new URLSearchParams(window.location.search).get("returnTo");
+  return value && /^\/interactive-app\/[1-9][0-9]*$/.test(value) ? value : null;
+}
+
 const title = "Login — YourSchool";
 
 const description =
@@ -83,6 +89,12 @@ function LoginPage() {
       getStoredUser();
 
     if (!user) {
+      return;
+    }
+
+    const returnTo = interactiveAppReturnTo();
+    if (returnTo) {
+      window.location.replace(returnTo);
       return;
     }
 
@@ -180,6 +192,12 @@ function LoginPage() {
       );
 
       await router.invalidate();
+
+      const returnTo = interactiveAppReturnTo();
+      if (returnTo) {
+        window.location.replace(returnTo);
+        return;
+      }
 
       const role =
         result.data.user.role;

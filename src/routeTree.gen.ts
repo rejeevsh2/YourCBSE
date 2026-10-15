@@ -77,6 +77,7 @@ import { Route as ChapterChapterIdRouteImport } from './routes/chapter.$chapterI
 import { Route as ErrorCodeRouteImport } from './routes/error.$code'
 import { Route as LearnChapterSlugRouteImport } from './routes/learn.$chapterSlug'
 import { Route as LessonLessonIdRouteImport } from './routes/lesson.$lessonId'
+import { Route as InteractiveAppAppIdRouteImport } from './routes/interactive-app.$appId'
 import { Route as LibraryIndexRouteImport } from './routes/library.index'
 import { Route as LibraryDownloadsRouteImport } from './routes/library.downloads'
 import { Route as LibraryFavoritesRouteImport } from './routes/library.favorites'
@@ -483,6 +484,11 @@ const LessonLessonIdRoute = LessonLessonIdRouteImport.update({
   path: '/lesson/$lessonId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InteractiveAppAppIdRoute = InteractiveAppAppIdRouteImport.update({
+  id: '/interactive-app/$appId',
+  path: '/interactive-app/$appId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LibraryIndexRoute = LibraryIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -885,6 +891,7 @@ export interface FileRoutesByFullPath {
   '/error/$code': typeof ErrorCodeRoute
   '/learn/$chapterSlug': typeof LearnChapterSlugRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
+  '/interactive-app/$appId': typeof InteractiveAppAppIdRoute
   '/library/downloads': typeof LibraryDownloadsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
   '/library/recent': typeof LibraryRecentRoute
@@ -1016,6 +1023,7 @@ export interface FileRoutesByTo {
   '/error/$code': typeof ErrorCodeRoute
   '/learn/$chapterSlug': typeof LearnChapterSlugRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
+  '/interactive-app/$appId': typeof InteractiveAppAppIdRoute
   '/library/downloads': typeof LibraryDownloadsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
   '/library/recent': typeof LibraryRecentRoute
@@ -1152,6 +1160,7 @@ export interface FileRoutesById {
   '/error/$code': typeof ErrorCodeRoute
   '/learn/$chapterSlug': typeof LearnChapterSlugRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
+  '/interactive-app/$appId': typeof InteractiveAppAppIdRoute
   '/library/downloads': typeof LibraryDownloadsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
   '/library/recent': typeof LibraryRecentRoute
@@ -1289,6 +1298,7 @@ export interface FileRouteTypes {
     | '/error/$code'
     | '/learn/$chapterSlug'
     | '/lesson/$lessonId'
+    | '/interactive-app/$appId'
     | '/library/downloads'
     | '/library/favorites'
     | '/library/recent'
@@ -1420,6 +1430,7 @@ export interface FileRouteTypes {
     | '/error/$code'
     | '/learn/$chapterSlug'
     | '/lesson/$lessonId'
+    | '/interactive-app/$appId'
     | '/library/downloads'
     | '/library/favorites'
     | '/library/recent'
@@ -1555,6 +1566,7 @@ export interface FileRouteTypes {
     | '/error/$code'
     | '/learn/$chapterSlug'
     | '/lesson/$lessonId'
+    | '/interactive-app/$appId'
     | '/library/downloads'
     | '/library/favorites'
     | '/library/recent'
@@ -1658,6 +1670,7 @@ export interface RootRouteChildren {
   ErrorCodeRoute: typeof ErrorCodeRoute
   LearnChapterSlugRoute: typeof LearnChapterSlugRoute
   LessonLessonIdRoute: typeof LessonLessonIdRoute
+  InteractiveAppAppIdRoute: typeof InteractiveAppAppIdRoute
   PlayerChapterSlugRoute: typeof PlayerChapterSlugRoute
   SubjectSubjectIdRoute: typeof SubjectSubjectIdRoute
   UnitUnitIdRoute: typeof UnitUnitIdRoute
@@ -2139,6 +2152,13 @@ declare module '@tanstack/react-router' {
       path: '/lesson/$lessonId'
       fullPath: '/lesson/$lessonId'
       preLoaderRoute: typeof LessonLessonIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/interactive-app/$appId': {
+      id: '/interactive-app/$appId'
+      path: '/interactive-app/$appId'
+      fullPath: '/interactive-app/$appId'
+      preLoaderRoute: typeof InteractiveAppAppIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/library/': {
@@ -2861,6 +2881,7 @@ const rootRouteChildren: RootRouteChildren = {
   ErrorCodeRoute: ErrorCodeRoute,
   LearnChapterSlugRoute: LearnChapterSlugRoute,
   LessonLessonIdRoute: LessonLessonIdRoute,
+  InteractiveAppAppIdRoute: InteractiveAppAppIdRoute,
   PlayerChapterSlugRoute: PlayerChapterSlugRoute,
   SubjectSubjectIdRoute: SubjectSubjectIdRoute,
   UnitUnitIdRoute: UnitUnitIdRoute,

@@ -855,7 +855,7 @@ function InteractiveAppCard({
           >
             <a
               href={launchUrl}
-              target="_blank"
+              target={app.source_type === "external" ? "_blank" : "_self"}
               rel="noreferrer"
             >
               <PlayCircle className="size-4" />
