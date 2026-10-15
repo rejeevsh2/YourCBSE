@@ -122,6 +122,20 @@ class InteractiveAppFileController extends Controller
             'webm' => 'video/webm',
             'txt' => 'text/plain; charset=UTF-8',
             'xml' => 'application/xml',
+            'webmanifest' => 'application/manifest+json',
+            'map' => 'application/json',
+            'bin' => 'application/octet-stream',
+            'glb' => 'model/gltf-binary',
+            'gltf' => 'model/gltf+json',
+            'avif' => 'image/avif',
+            'bmp' => 'image/bmp',
+            'eot' => 'application/vnd.ms-fontobject',
+            'pdf' => 'application/pdf',
+            'csv' => 'text/csv; charset=UTF-8',
+            'vtt' => 'text/vtt; charset=UTF-8',
+            'glsl' => 'text/plain; charset=UTF-8',
+            'vert' => 'text/plain; charset=UTF-8',
+            'frag' => 'text/plain; charset=UTF-8',
         ];
 
         if (! isset($mimes[$extension])) {
