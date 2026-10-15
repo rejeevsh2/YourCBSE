@@ -89,6 +89,13 @@ Route::middleware('auth:sanctum')->group(function () {
         'me'
     ]);
 
+    // Read PowerPoint bytes with the same account/class rules as the
+    // lesson API, so the viewer can fetch cross-origin with a bearer token.
+    Route::get('/lesson-contents/{content}/presentation-file', [
+        \App\Http\Controllers\Api\LessonPresentationFileController::class,
+        'show',
+    ])->middleware('throttle:60,1');
+
     /*
     |--------------------------------------------------------------------------
     | Student Lesson Progress
