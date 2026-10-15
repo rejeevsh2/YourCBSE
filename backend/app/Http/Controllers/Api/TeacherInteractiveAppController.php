@@ -18,12 +18,19 @@ class TeacherInteractiveAppController extends InteractiveAppController
         $request = request();
 
         return InteractiveApp::query()
-            ->whereHas('lesson', function ($query) use ($request) {
-                $query->where(
-                    'created_by',
-                    $request->user()->id
-                );
-            })
+            ->whereHas(
+                'lesson',
+                function ($query) use ($request) {
+                    $query
+                        ->accessibleTo(
+                            $request->user()
+                        )
+                        ->where(
+                            'created_by',
+                            $request->user()->id
+                        );
+                }
+            )
             ->with([
                 'lesson.chapter.unit.subject.grade'
             ])
@@ -459,6 +466,7 @@ class TeacherInteractiveAppController extends InteractiveAppController
         int $id
     ): Lesson {
         return Lesson::query()
+            ->accessibleTo($request->user())
             ->where('id', $id)
             ->where(
                 'created_by',
@@ -476,10 +484,14 @@ class TeacherInteractiveAppController extends InteractiveAppController
             ->whereHas(
                 'lesson',
                 function ($query) use ($request) {
-                    $query->where(
-                        'created_by',
-                        $request->user()->id
-                    );
+                    $query
+                        ->accessibleTo(
+                            $request->user()
+                        )
+                        ->where(
+                            'created_by',
+                            $request->user()->id
+                        );
                 }
             )
             ->firstOrFail();

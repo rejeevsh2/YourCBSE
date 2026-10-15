@@ -3,26 +3,31 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\{LessonContent, ResourceState};
+use App\Models\{LessonContent, ResourceState, User};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ResourceLibraryController extends Controller
 {
-    private function available()
+    private function available(User $user)
     {
         return LessonContent::where('is_active', true)
             ->where('is_free', true)
             ->whereHas(
                 'lesson',
-                fn ($q) => $q->published()
+                fn ($q) =>
+                    $q
+                        ->published()
+                        ->accessibleTo($user)
             );
     }
 
-    private function item(int $id)
-    {
-        return $this->available()
+    private function item(
+        User $user,
+        int $id
+    ) {
+        return $this->available($user)
             ->with('lesson.chapter.unit.subject.grade')
             ->findOrFail($id);
     }
@@ -68,7 +73,7 @@ class ResourceLibraryController extends Controller
             'page' => 'nullable|integer|min:1',
         ]);
 
-        $q = $this->available()
+        $q = $this->available($r->user())
             ->with(
                 'lesson.chapter.unit.subject.grade'
             );
@@ -275,12 +280,17 @@ class ResourceLibraryController extends Controller
         ]);
     }
 
-    public function show(int $id)
-    {
+    public function show(
+        Request $request,
+        int $id
+    ) {
         return response()->json([
             'resource' =>
                 $this->representation(
-                    $this->item($id)
+                    $this->item(
+                        $request->user(),
+                        $id
+                    )
                 ),
         ]);
     }
@@ -289,7 +299,10 @@ class ResourceLibraryController extends Controller
         Request $request,
         int $id
     ) {
-        $c = $this->item($id);
+        $c = $this->item(
+            $request->user(),
+            $id
+        );
         $path = $c->file_path;
 
         if (
@@ -409,7 +422,11 @@ class ResourceLibraryController extends Controller
                             ->whereHas(
                                 'lesson',
                                 fn ($q) =>
-                                    $q->published()
+                                    $q
+                                        ->published()
+                                        ->accessibleTo(
+                                            $r->user()
+                                        )
                             )
                 )
                 ->with(
@@ -447,7 +464,10 @@ class ResourceLibraryController extends Controller
         Request $r,
         int $id
     ) {
-        $this->item($id);
+        $this->item(
+            $r->user(),
+            $id
+        );
 
         $data = $r->validate([
             'bookmarked' =>

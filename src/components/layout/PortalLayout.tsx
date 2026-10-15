@@ -168,6 +168,11 @@ const role = loggedInUser?.role
 
 const rootPath = `/${portal}`;
 
+const portalHome = rootPath as
+  | "/student"
+  | "/teacher"
+  | "/admin";
+
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -219,9 +224,17 @@ const rootPath = `/${portal}`;
           )}
         >
           {collapsed ? (
-            <Brand className="[&_span:last-child]:hidden" />
+            <Brand
+              to={portalHome}
+              nativeNavigation
+              className="[&_span:last-child]:hidden"
+            />
           ) : (
-            <Brand subtitle={title} />
+            <Brand
+              to={portalHome}
+              nativeNavigation
+              subtitle={title}
+            />
           )}
         </div>
 
@@ -290,7 +303,11 @@ const rootPath = `/${portal}`;
               </SheetTitle>
 
               <div className="border-b border-border p-4">
-                <Brand subtitle={title} />
+                <Brand
+                  to={portalHome}
+                  nativeNavigation
+                  subtitle={title}
+                />
               </div>
 
               <nav
