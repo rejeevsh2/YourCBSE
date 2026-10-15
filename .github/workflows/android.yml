@@ -36,6 +36,8 @@ jobs:
         run: npm run typecheck
       - name: Check registration error handling
         run: npm run test:auth
+      - name: Check native interactive links
+        run: npm run test:native
       - name: Check the website still builds
         run: npm run build
       - name: Package the Android web assets

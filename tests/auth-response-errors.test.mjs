@@ -5,6 +5,7 @@ import { statusToCode } from "../src/lib/auth/response-errors.ts";
 test("pending and rejected registrations do not request an email OTP", () => {
   assert.equal(statusToCode(403, { code: "account-pending-approval" }), "account-pending-approval");
   assert.equal(statusToCode(403, { code: "account-rejected" }), "account-rejected");
+  assert.equal(statusToCode(403, { code: "account-paused" }), "account-paused");
 });
 
 test("uncoded and unfamiliar forbidden responses do not imply an email was sent", () => {

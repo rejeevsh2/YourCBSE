@@ -76,6 +76,7 @@ import { Route as AdminWorksheetsRouteImport } from './routes/admin.worksheets'
 import { Route as BlogSlugRouteImport } from './routes/blog_.$slug'
 import { Route as ChapterChapterIdRouteImport } from './routes/chapter.$chapterId'
 import { Route as ErrorCodeRouteImport } from './routes/error.$code'
+import { Route as InteractiveAppAppIdRouteImport } from './routes/interactive-app.$appId'
 import { Route as LearnChapterSlugRouteImport } from './routes/learn.$chapterSlug'
 import { Route as LessonLessonIdRouteImport } from './routes/lesson.$lessonId'
 import { Route as LibraryIndexRouteImport } from './routes/library.index'
@@ -477,6 +478,11 @@ const ChapterChapterIdRoute = ChapterChapterIdRouteImport.update({
 const ErrorCodeRoute = ErrorCodeRouteImport.update({
   id: '/error/$code',
   path: '/error/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InteractiveAppAppIdRoute = InteractiveAppAppIdRouteImport.update({
+  id: '/interactive-app/$appId',
+  path: '/interactive-app/$appId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LearnChapterSlugRoute = LearnChapterSlugRouteImport.update({
@@ -890,6 +896,7 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/chapter/$chapterId': typeof ChapterChapterIdRoute
   '/error/$code': typeof ErrorCodeRoute
+  '/interactive-app/$appId': typeof InteractiveAppAppIdRoute
   '/learn/$chapterSlug': typeof LearnChapterSlugRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/library/downloads': typeof LibraryDownloadsRoute
@@ -1022,6 +1029,7 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/chapter/$chapterId': typeof ChapterChapterIdRoute
   '/error/$code': typeof ErrorCodeRoute
+  '/interactive-app/$appId': typeof InteractiveAppAppIdRoute
   '/learn/$chapterSlug': typeof LearnChapterSlugRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/library/downloads': typeof LibraryDownloadsRoute
@@ -1159,6 +1167,7 @@ export interface FileRoutesById {
   '/blog_/$slug': typeof BlogSlugRoute
   '/chapter/$chapterId': typeof ChapterChapterIdRoute
   '/error/$code': typeof ErrorCodeRoute
+  '/interactive-app/$appId': typeof InteractiveAppAppIdRoute
   '/learn/$chapterSlug': typeof LearnChapterSlugRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/library/downloads': typeof LibraryDownloadsRoute
@@ -1297,6 +1306,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/chapter/$chapterId'
     | '/error/$code'
+    | '/interactive-app/$appId'
     | '/learn/$chapterSlug'
     | '/lesson/$lessonId'
     | '/library/downloads'
@@ -1429,6 +1439,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/chapter/$chapterId'
     | '/error/$code'
+    | '/interactive-app/$appId'
     | '/learn/$chapterSlug'
     | '/lesson/$lessonId'
     | '/library/downloads'
@@ -1565,6 +1576,7 @@ export interface FileRouteTypes {
     | '/blog_/$slug'
     | '/chapter/$chapterId'
     | '/error/$code'
+    | '/interactive-app/$appId'
     | '/learn/$chapterSlug'
     | '/lesson/$lessonId'
     | '/library/downloads'
@@ -1669,6 +1681,7 @@ export interface RootRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
   ChapterChapterIdRoute: typeof ChapterChapterIdRoute
   ErrorCodeRoute: typeof ErrorCodeRoute
+  InteractiveAppAppIdRoute: typeof InteractiveAppAppIdRoute
   LearnChapterSlugRoute: typeof LearnChapterSlugRoute
   LessonLessonIdRoute: typeof LessonLessonIdRoute
   PlayerChapterSlugRoute: typeof PlayerChapterSlugRoute
@@ -2145,6 +2158,13 @@ declare module '@tanstack/react-router' {
       path: '/error/$code'
       fullPath: '/error/$code'
       preLoaderRoute: typeof ErrorCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/interactive-app/$appId': {
+      id: '/interactive-app/$appId'
+      path: '/interactive-app/$appId'
+      fullPath: '/interactive-app/$appId'
+      preLoaderRoute: typeof InteractiveAppAppIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/learn/$chapterSlug': {
@@ -2880,6 +2900,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogSlugRoute: BlogSlugRoute,
   ChapterChapterIdRoute: ChapterChapterIdRoute,
   ErrorCodeRoute: ErrorCodeRoute,
+  InteractiveAppAppIdRoute: InteractiveAppAppIdRoute,
   LearnChapterSlugRoute: LearnChapterSlugRoute,
   LessonLessonIdRoute: LessonLessonIdRoute,
   PlayerChapterSlugRoute: PlayerChapterSlugRoute,

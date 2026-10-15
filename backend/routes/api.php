@@ -73,6 +73,12 @@ Route::middleware('auth:sanctum')->group(function () {
     |--------------------------------------------------------------------------
     */
 
+    // Issue an authenticated one-time launch ticket for private HTML/ZIP apps.
+    Route::post('/interactive-apps/{app}/launch', [
+        \App\Http\Controllers\Api\InteractiveAppLaunchController::class,
+        'launch',
+    ])->middleware('throttle:30,1');
+
     Route::post('/logout', [
         AuthController::class,
         'logout'
@@ -580,6 +586,11 @@ Route::middleware([
     Route::put('/lesson-contents/{id}', [
         LessonContentController::class,
         'update'
+    ]);
+
+    Route::delete('/lesson-contents/{id}/file', [
+        LessonContentController::class,
+        'removeFile'
     ]);
 
     Route::delete('/lesson-contents/{id}', [
@@ -1232,6 +1243,18 @@ Route::middleware([
     Route::patch('/admin/users/{user}', [
         \App\Http\Controllers\Api\AdminWorkspaceController::class,
         'updateUser',
+    ]);
+    Route::patch('/admin/users/{user}/pause', [
+        \App\Http\Controllers\Api\AdminWorkspaceController::class,
+        'pauseUser',
+    ]);
+    Route::patch('/admin/users/{user}/reactivate', [
+        \App\Http\Controllers\Api\AdminWorkspaceController::class,
+        'reactivateUser',
+    ]);
+    Route::delete('/admin/users/{user}', [
+        \App\Http\Controllers\Api\AdminWorkspaceController::class,
+        'destroyUser',
     ]);
 });
 

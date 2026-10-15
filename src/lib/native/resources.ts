@@ -1,4 +1,5 @@
 import { Capacitor } from "@capacitor/core";
+import { localInteractiveAppPath } from "./interactive-app-links";
 
 export async function openExternalResource(value: string): Promise<void> {
   const url = new URL(value, window.location.href);
@@ -7,6 +8,11 @@ export async function openExternalResource(value: string): Promise<void> {
   }
 
   if (Capacitor.isNativePlatform()) {
+    const localPath = localInteractiveAppPath(url);
+    if (localPath) {
+      window.location.assign(localPath);
+      return;
+    }
     const { Browser } = await import("@capacitor/browser");
     await Browser.open({ url: url.href });
   } else {

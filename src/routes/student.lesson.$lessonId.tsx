@@ -40,6 +40,7 @@ type LessonContent = {
     | "text"
     | "video"
     | "pdf"
+    | "ppt"
     | "image"
     | "audio"
     | "quiz"
@@ -854,7 +855,7 @@ function InteractiveAppCard({
           >
             <a
               href={launchUrl}
-              target="_blank"
+              target={app.source_type === "external" ? "_blank" : "_self"}
               rel="noreferrer"
             >
               <PlayCircle className="size-4" />
@@ -930,6 +931,10 @@ function ContentBlock({
 
         {item.content_type === "audio" ? (
           <AudioContent item={item} />
+        ) : null}
+
+        {item.content_type === "ppt" ? (
+          <FileContent item={item} label="Open PowerPoint" />
         ) : null}
 
         {item.content_type === "pdf" ? (
@@ -1302,6 +1307,9 @@ function formatType(
     case "pdf":
       return "PDF";
 
+    case "ppt":
+      return "PowerPoint";
+
     case "video":
       return "Video";
 
@@ -1347,6 +1355,7 @@ function getContentIcon(
     case "activity":
       return Activity;
 
+    case "ppt":
     case "pdf":
       return FileText;
 

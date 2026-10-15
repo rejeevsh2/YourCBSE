@@ -1005,11 +1005,9 @@ function TeacherInteractiveAppsPage() {
                         size="sm"
                         variant="outline"
                         onClick={() =>
-                          window.open(
-                            app.entry_url!,
-                            "_blank",
-                            "noopener,noreferrer",
-                          )
+                          app.source_type === "external"
+                            ? window.open(app.entry_url!, "_blank", "noopener,noreferrer")
+                            : window.location.assign(app.entry_url!)
                         }
                       >
                         <ExternalLink className="mr-2 size-4" />

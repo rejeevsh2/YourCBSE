@@ -27,6 +27,19 @@ class InteractiveApp extends Model
     ];
 
     /**
+     * An uploaded app launches through YourSchool auth, never a public
+     * /storage link. The raw value still identifies its internal index.
+     */
+    public function getEntryUrlAttribute(?string $value): ?string
+    {
+        if (in_array($this->source_type, ['html', 'zip'], true) && $this->exists) {
+            return '/interactive-app/' . $this->getKey();
+        }
+
+        return $value;
+    }
+
+    /**
      * Interactive app belongs to a lesson.
      */
     public function lesson()

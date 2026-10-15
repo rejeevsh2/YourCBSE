@@ -75,6 +75,17 @@ disables mock login/data. Do not put secrets in any frontend build variable.
 
 ## First phone test
 
+Version 0.1.2 incorporates deployed main commit `1ffc57f`: protected uploaded
+interactive apps, account pause controls, PowerPoint attachments, and the
+current lesson attachment handling. School launcher links use the APK's login;
+the API issues a short-lived, one-use ticket that opens the activity in a
+separate browser tab. The bearer token stays out of the browser URL.
+
+Test an uploaded HTML/ZIP activity from an assigned lesson, return with Android
+Back, and verify paused/unapproved accounts are denied by the server. This
+version supports opening PowerPoint attachments; the inline slide viewer and
+draft R2 storage work are not deployed features of this build.
+
 Version 0.1.1 includes the current administrator-approval registration flow.
 New accounts wait for administrator approval and class assignment; this flow
 does not send an email OTP. Pending/rejected responses and other HTTP 403 errors
