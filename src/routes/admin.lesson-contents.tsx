@@ -777,6 +777,16 @@ if (form.resource_category) {
                   </div>
                 ) : null}
 
+                {selectedFile ? (
+                  <Button type="button" size="sm" variant="outline"
+                    onClick={() => {
+                      setSelectedFile(null);
+                      const input = document.getElementById("file") as HTMLInputElement | null;
+                      if (input) input.value = "";
+                    }}
+                  >Clear selected file</Button>
+                ) : null}
+
                 {!selectedFile &&
                 existingFile ? (
                   <div className="rounded-xl border bg-muted/30 p-3">
@@ -797,6 +807,22 @@ if (form.resource_category) {
                       Open current file
                       <ExternalLink className="size-3" />
                     </a>
+                    {editingId ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        className="mt-3"
+                        disabled={deletingId !== null || removingFileId !== null}
+                        onClick={() => {
+                          const item = items.find((entry) => entry.id === editingId);
+                          if (item) void handleRemoveFile(item);
+                        }}
+                      >
+                        <Trash2 className="size-4" />
+                        {removingFileId === editingId ? "Removing..." : "Remove uploaded file"}
+                      </Button>
+                    ) : null}
                   </div>
                 ) : null}
               </div>
@@ -866,7 +892,57 @@ if (form.resource_category) {
           </form>
         ) : null}
 
-        <div className="overflow-hidden rounded-3xl border bg-card">
+
+        {/* Mobile cards show Delete next to the resource, not off-screen
+            in the last column of a wide table. */}
+        {!loading && items.length > 0 ? (
+          <div className="space-y-3 lg:hidden">
+            {items.map((item) => (
+              <article key={item.id} className="rounded-2xl border bg-card p-4">
+                <h3 className="font-semibold">{item.title}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {item.lesson?.title ?? `Lesson ${item.lesson_id}`} · {item.content_type === "ppt" ? "PowerPoint" : item.content_type.toUpperCase()}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {item.file_path || item.external_url ? (
+                    <Button type="button" size="sm" variant="outline" asChild>
+                      <a href={item.file_path || item.external_url || "#"} target="_blank" rel="noreferrer">
+                        <ExternalLink className="size-4" />
+                        {item.file_path ? "Open file" : "Open link"}
+                      </a>
+                    </Button>
+                  ) : null}
+                  <Button type="button" size="sm" variant="outline" onClick={() => openEdit(item)}>
+                    <Pencil className="size-4" />
+                    Edit
+                  </Button>
+                  {item.file_path ? (
+                    <Button type="button" size="sm" variant="outline"
+                      disabled={deletingId !== null || removingFileId !== null}
+                      onClick={() => void handleRemoveFile(item)}>
+                      <Trash2 className="size-4" />
+                      {removingFileId === item.id ? "Removing..." : "Remove file"}
+                    </Button>
+                  ) : null}
+                  <Button type="button" size="sm" variant="destructive"
+                    disabled={deletingId !== null || removingFileId !== null}
+                    onClick={() => void handleDelete(item)}>
+                    <Trash2 className="size-4" />
+                    {deletingId === item.id ? "Deleting..." : "Delete content"}
+                  </Button>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : null}
+
+        {!loading && items.length === 0 ? (
+          <p className="rounded-2xl border bg-card p-6 text-center text-sm text-muted-foreground lg:hidden">
+            No lesson content yet. Click New content to add a PDF, presentation, image or video.
+          </p>
+        ) : null}
+
+        <div className="hidden overflow-hidden rounded-3xl border bg-card lg:block">
           {loading ? (
             <div className="p-8 text-center text-sm text-muted-foreground">
               Loading lesson content...
@@ -915,7 +991,7 @@ if (form.resource_category) {
                       Status
                     </th>
 
-                    <th className="px-4 py-3 text-right">
+                    <th className="sticky right-0 z-10 min-w-[185px] bg-muted px-4 py-3 text-right">
                       Actions
                     </th>
                   </tr>
@@ -993,8 +1069,8 @@ if (form.resource_category) {
                         </span>
                       </td>
 
-                      <td className="px-4 py-4">
-                        <div className="flex justify-end gap-2">
+                      <td className="sticky right-0 z-10 bg-card px-4 py-4">
+                        <div className="flex flex-wrap justify-end gap-2">
                           <Button
                             type="button"
                             size="sm"
@@ -1007,17 +1083,28 @@ if (form.resource_category) {
                             Edit
                           </Button>
 
+                          {item.file_path ? (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              disabled={deletingId !== null || removingFileId !== null}
+                              onClick={() => void handleRemoveFile(item)}
+                            >
+                              <Trash2 className="size-4" />
+                              {removingFileId === item.id ? "Removing..." : "Remove file"}
+                            </Button>
+                          ) : null}
+
                           <Button
                             type="button"
                             size="sm"
-                            variant="ghost"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() =>
-                              handleDelete(item)
-                            }
+                            variant="destructive"
+                            disabled={deletingId !== null || removingFileId !== null}
+                            onClick={() => void handleDelete(item)}
                           >
                             <Trash2 className="mr-1 size-4" />
-                            Delete
+                            {deletingId === item.id ? "Deleting..." : "Delete content"}
                           </Button>
                         </div>
                       </td>
