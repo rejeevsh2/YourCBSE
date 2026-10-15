@@ -103,7 +103,7 @@ class ProtectedInteractiveAppTest extends TestCase
         $this->assertNotNull($sessionCookie);
         $this->assertTrue($sessionCookie->isHttpOnly());
 
-        $this->withCookie($sessionCookie->getName(), $sessionCookie->getValue())
+        $this->withUnencryptedCookie($sessionCookie->getName(), $sessionCookie->getValue())
             ->get("/interactive-apps/{$app->id}/files/lab/game.js")
             ->assertOk()
             ->assertSee('console.log("ready")', false);
@@ -113,7 +113,7 @@ class ProtectedInteractiveAppTest extends TestCase
 
         $student->tokens()->delete();
 
-        $this->withCookie($sessionCookie->getName(), $sessionCookie->getValue())
+        $this->withUnencryptedCookie($sessionCookie->getName(), $sessionCookie->getValue())
             ->get("/interactive-apps/{$app->id}/files/lab/game.js")
             ->assertUnauthorized();
     }
@@ -123,6 +123,7 @@ class ProtectedInteractiveAppTest extends TestCase
         [$app, , $grade] = $this->sample();
         [$student, $token] = $this->student($grade);
 
+        $student->forceFill(['legacy_class_access' => false])->save();
         $student->grades()->detach($grade);
         $this->withToken($token->plainTextToken)
             ->postJson("/api/interactive-apps/{$app->id}/launch")
