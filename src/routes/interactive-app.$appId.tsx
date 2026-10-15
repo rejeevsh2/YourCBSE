@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { API_BASE_URL, authenticatedFetch } from "@/lib/auth/http";
-import { getAuthToken } from "@/lib/auth";
+import { clearSession, getAuthToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/interactive-app/$appId")({
   ssr: false,
@@ -40,6 +40,8 @@ function InteractiveAppLaunch() {
         );
 
         if (result.status === 401) {
+          // Expired/revoked tokens must not redirect in a login loop.
+          clearSession();
           window.location.replace(`/login?returnTo=${encodeURIComponent(returnTo)}`);
           return;
         }
