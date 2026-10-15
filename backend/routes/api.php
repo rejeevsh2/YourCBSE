@@ -1233,6 +1233,18 @@ Route::middleware([
         \App\Http\Controllers\Api\AdminWorkspaceController::class,
         'updateUser',
     ]);
+    Route::patch('/admin/users/{user}/pause', [
+        \App\Http\Controllers\Api\AdminWorkspaceController::class,
+        'pauseUser',
+    ]);
+    Route::patch('/admin/users/{user}/reactivate', [
+        \App\Http\Controllers\Api\AdminWorkspaceController::class,
+        'reactivateUser',
+    ]);
+    Route::delete('/admin/users/{user}', [
+        \App\Http\Controllers\Api\AdminWorkspaceController::class,
+        'destroyUser',
+    ]);
 });
 
 /*
