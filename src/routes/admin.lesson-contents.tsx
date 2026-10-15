@@ -103,6 +103,8 @@ function AdminLessonContentsPage() {
       Number(lesson.id) === Number(selectedLessonId),
   );  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [removingFileId, setRemovingFileId] = useState<number | null>(null);
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -394,40 +396,55 @@ if (form.resource_category) {
     }
   }
 
-  async function handleDelete(
-    item: LessonContent,
-  ) {
-    const confirmed = window.confirm(
-      `Delete "${item.title}"?`,
-    );
+  async function handleDelete(item: LessonContent) {
+    if (deletingId !== null || removingFileId !== null) return;
+    if (!window.confirm(
+      `Delete "${item.title}" from this lesson?\n\nIts uploaded file, if any, will also be deleted. External links will be removed from YourSchool without deleting the original YouTube or Drive resource.`,
+    )) return;
 
-    if (!confirmed) return;
-
+    setDeletingId(item.id);
     try {
-      const response = await apiFetch(
-        `${API}/lesson-contents/${item.id}`,
-        {
-          method: "DELETE",
-        },
-      );
-
+      const response = await apiFetch(`${API}/lesson-contents/${item.id}`, {
+        method: "DELETE",
+      });
       if (!response.ok) {
-        throw new Error(
-          "Could not delete lesson content.",
-        );
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.message ?? "Could not delete lesson content.");
       }
-
-      toast.success(
-        "Lesson content deleted.",
-      );
-
+      if (editingId === item.id) closeForm();
+      toast.success("Lesson content deleted.");
       await loadData();
     } catch (error) {
       console.error(error);
+      toast.error(error instanceof Error ? error.message : "Could not delete lesson content.");
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
-      toast.error(
-        "Could not delete lesson content.",
-      );
+  async function handleRemoveFile(item: LessonContent) {
+    if (!item.file_path || deletingId !== null || removingFileId !== null) return;
+    if (!window.confirm(
+      `Remove the uploaded file from "${item.title}"?\n\nThe lesson content, description, and any external link will remain.`,
+    )) return;
+
+    setRemovingFileId(item.id);
+    try {
+      const response = await apiFetch(`${API}/lesson-contents/${item.id}/file`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.message ?? "Could not remove the uploaded file.");
+      }
+      if (editingId === item.id) setExistingFile(null);
+      toast.success("Uploaded file removed. Lesson content preserved.");
+      await loadData();
+    } catch (error) {
+      console.error(error);
+      toast.error(error instanceof Error ? error.message : "Could not remove the file.");
+    } finally {
+      setRemovingFileId(null);
     }
   }
 
@@ -436,7 +453,7 @@ if (form.resource_category) {
       portalLabel="Admin"
       portalPath="/admin"
       title="Lesson Content"
-      description="Create text, videos, PDFs, images, audio, worksheets and activities for each lesson."
+      description="Add PDFs, images, PowerPoint presentations, videos and other resources. Edit or delete each item independently."
     >
       <div className="space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -581,6 +598,10 @@ if (form.resource_category) {
                     PDF
                   </option>
 
+                  <option value="ppt">
+                    PowerPoint (PPT / PPTX)
+                  </option>
+
                   <option value="image">
                     Image
                   </option>
@@ -705,25 +726,34 @@ if (form.resource_category) {
 
               <div className="space-y-2">
                 <Label htmlFor="file">
-                  Upload file
+                  Upload file (PDF, image, PowerPoint or video)
                 </Label>
 
                 <Input
                   id="file"
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.mp3,.wav,.ogg,.m4a,.mp4,.webm,.mov,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
-                  onChange={(event) =>
-                    setSelectedFile(
-                      event.target.files?.[0] ??
-                        null,
-                    )
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null;
+                    setSelectedFile(file);
+                    if (!file) return;
+                    const extension = file.name.toLowerCase().split(".").pop();
+                    const newType = extension === "ppt" || extension === "pptx"
+                      ? "ppt"
+                      : extension === "pdf" ? "pdf"
+                      : ["jpg", "jpeg", "png", "gif", "webp"].includes(extension ?? "") ? "image"
+                      : ["mp4", "webm", "mov"].includes(extension ?? "") ? "video"
+                      : null;
+                    if (newType) {
+                      setForm((current) => ({ ...current, content_type: newType }));
+                    }
                   }
                 />
 
                 <p className="text-xs text-muted-foreground">
-                  PDF, image, audio, video,
-                  worksheet or document. Maximum
-                  size: 100 MB.
+                  PDF, image, audio, video, PowerPoint (.ppt/.pptx),
+                  worksheet or document. Maximum size: 100 MB.
+                  Presentations open or download in a compatible viewer.
                 </p>
 
                 {selectedFile ? (
@@ -913,7 +943,7 @@ if (form.resource_category) {
                       </td>
 
                       <td className="px-4 py-4 capitalize">
-                        {item.content_type}
+                        {item.content_type === "ppt" ? "PowerPoint" : item.content_type}
                       </td>
 
                       <td className="px-4 py-4">
