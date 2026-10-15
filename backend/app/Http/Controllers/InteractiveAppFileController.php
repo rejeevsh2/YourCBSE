@@ -195,7 +195,6 @@ class InteractiveAppFileController extends Controller
         $path = strtolower($path);
 
         return str_ends_with($path, '.html') ||
-            str_ends_with($path, '.htm') ||
-            str_contains($request->header('Accept', ''), 'text/html');
+            str_ends_with($path, '.htm');
     }
 }
