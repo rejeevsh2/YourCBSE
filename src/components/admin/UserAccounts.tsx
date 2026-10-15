@@ -9,6 +9,9 @@ import {
   CheckCircle2,
   Loader2,
   Pencil,
+  PauseCircle,
+  PlayCircle,
+  Trash2,
   Save,
   ShieldCheck,
   X,
@@ -42,6 +45,9 @@ type User = {
   email: string;
   role: string;
   approval_status?: ApprovalStatus;
+  paused_at?: string | null;
+  is_super_admin?: boolean;
+  lifecycle_manageable?: boolean;
   approved_at?: string | null;
   grades?: Grade[];
   created_at?: string;
@@ -50,6 +56,7 @@ type User = {
 type UserResponse = {
   user?: User;
   users?: User[];
+  can_delete_accounts?: boolean;
   message?: string;
 };
 
@@ -58,6 +65,7 @@ type GradesResponse = {
 };
 
 function classNames(user: User) {
+  if (user.role === "admin") return "—";
   if (!user.grades?.length) {
     return "Not assigned";
   }
@@ -101,6 +109,10 @@ export function UserAccounts({
 
   const [busy, setBusy] =
     useState(false);
+  const [canDeleteAccounts, setCanDeleteAccounts] = useState(false);
+  const [deleting, setDeleting] = useState<User | null>(null);
+  const [deleteStage, setDeleteStage] = useState<1 | 2>(1);
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
   const [name, setName] =
     useState("");
@@ -160,7 +172,7 @@ export function UserAccounts({
       ? "Review, approve and manage student accounts."
       : role === "teacher"
         ? "Review, approve and manage teacher accounts."
-        : "Review, approve and manage student and teacher accounts.";
+        : "Review and manage student, teacher and school-admin accounts.";
 
   const pendingCount = useMemo(
     () =>
@@ -212,6 +224,7 @@ export function UserAccounts({
         setUsers(
           result.data.users ?? [],
         );
+        setCanDeleteAccounts(Boolean(result.data.can_delete_accounts));
 
         setLoaded(true);
         return;
@@ -574,6 +587,77 @@ export function UserAccounts({
     }
   }
 
+
+  async function togglePause(user: User) {
+    const isPaused = Boolean(user.paused_at);
+    if (!isPaused && !window.confirm(
+      `Pause ${user.name}? They will be signed out and cannot log in until reactivated.`
+    )) {
+      return;
+    }
+
+    setBusy(true);
+    setError("");
+    setStatus("");
+    try {
+      const result = await apiRequest<UserResponse>(
+        `/admin/users/${user.id}/${isPaused ? "reactivate" : "pause"}`,
+        { method: "PATCH" },
+      );
+
+      if (!result.ok) {
+        setError(result.message ?? "Unable to update account access.");
+      } else {
+        setStatus(isPaused ? "Account reactivated." : "Account paused; active sessions revoked.");
+        await load(search);
+      }
+    } catch {
+      setError("Unable to update account access.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function startDelete(user: User) {
+    setDeleting(user);
+    setDeleteStage(1);
+    setDeleteConfirmation("");
+    setError("");
+    setStatus("");
+  }
+
+  async function confirmDelete() {
+    if (!deleting || deleteStage !== 2 || deleteConfirmation !== `DELETE ${deleting.email}`) return;
+
+    setBusy(true);
+    setError("");
+    try {
+      const result = await apiRequest<UserResponse>(
+        `/admin/users/${deleting.id}`,
+        {
+          method: "DELETE",
+          body: {
+            confirmation: "DELETE",
+            confirm_email: deleting.email,
+          },
+        },
+      );
+
+      if (!result.ok) {
+        setError(result.message ?? "Unable to delete account.");
+      } else {
+        setStatus("Account deleted. Historical educational records and the audit trail are preserved.");
+        setDeleting(null);
+        setDeleteConfirmation("");
+        await load(search);
+      }
+    } catch {
+      setError("Unable to delete account.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <PortalPage
       portalLabel="Admin"
@@ -714,11 +798,11 @@ export function UserAccounts({
                   </td>
 
                   <td className="p-2 capitalize">
-                    {user.role}
+                    {user.is_super_admin ? "Super Admin" : user.role === "admin" ? "School Admin" : user.role}
                   </td>
 
                   <td className="p-2 capitalize">
-                    {approval}
+                    {user.paused_at ? "Paused" : approval}
                   </td>
 
                   <td className="p-2 text-sm">
@@ -766,6 +850,36 @@ export function UserAccounts({
                         Roles & Permissions
                       </span>
                     )}
+                    {user.lifecycle_manageable ? (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={busy}
+                          onClick={() => void togglePause(user)}
+                        >
+                          {user.paused_at ? (
+                            <PlayCircle className="size-4" />
+                          ) : (
+                            <PauseCircle className="size-4" />
+                          )}
+                          {user.paused_at ? "Reactivate" : "Pause"}
+                        </Button>
+                        {canDeleteAccounts ? (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="destructive"
+                            disabled={busy}
+                            onClick={() => startDelete(user)}
+                          >
+                            <Trash2 className="size-4" />
+                            Delete
+                          </Button>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </td>
                 </tr>
               );
@@ -785,6 +899,65 @@ export function UserAccounts({
           </tbody>
         </table>
       </section>
+
+      {deleting ? (
+        <section
+          className="tile max-w-2xl space-y-4 border border-destructive/40 p-6"
+          aria-label="Confirm account deletion"
+        >
+          <h2 className="text-xl font-bold text-destructive">
+            {deleteStage === 1 ? "Warning 1 of 2 — Delete account" : "Warning 2 of 2 — Final confirmation"}
+          </h2>
+          <p>
+            Account: <strong>{deleting.name}</strong> ({deleting.email})
+          </p>
+          {deleteStage === 1 ? (
+            <>
+              <p>
+                Deleting will immediately block access and remove the account from the normal
+                account list. Its historical educational and audit records will remain stored.
+                This is different from a temporary pause.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" variant="outline" onClick={() => setDeleting(null)}>
+                  Cancel
+                </Button>
+                <Button type="button" variant="destructive" onClick={() => setDeleteStage(2)}>
+                  I understand — Continue
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p>
+                <strong>Final warning:</strong> This account will lose access and cannot be
+                reactivated using the Pause/Reactivate control. To confirm this deletion,
+                type <strong>DELETE {deleting.email}</strong> exactly.
+              </p>
+              <Input
+                aria-label="Type DELETE followed by the account email"
+                autoComplete="off"
+                value={deleteConfirmation}
+                onChange={(event) => setDeleteConfirmation(event.target.value)}
+              />
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" variant="outline" disabled={busy} onClick={() => setDeleting(null)}>
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  disabled={busy || deleteConfirmation !== `DELETE ${deleting.email}`}
+                  onClick={() => void confirmDelete()}
+                >
+                  <Trash2 className="size-4" />
+                  Delete this account
+                </Button>
+              </div>
+            </>
+          )}
+        </section>
+      ) : null}
 
       {reviewing ? (
         <section className="tile max-w-2xl space-y-5 p-6">

@@ -232,6 +232,23 @@ class AuthController extends Controller
         /** @var User $user */
         $user = auth()->user();
 
+        if ($user->paused_at !== null) {
+            auth()->logout();
+
+            $this->recordLoginEvent(
+                $request,
+                $email,
+                'failed',
+                'account_paused',
+                $user
+            );
+
+            return response()->json([
+                'message' => 'This account is temporarily paused. Please contact your school administrator.',
+                'code' => 'account-paused',
+            ], 403);
+        }
+
         if (
             in_array(
                 $user->role,

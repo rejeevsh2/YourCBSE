@@ -91,6 +91,7 @@ function isAuthErrorCode(
     "account-locked",
     "account-pending-approval",
     "account-rejected",
+    "account-paused",
   ].includes(value);
 }
 

@@ -357,6 +357,7 @@ class AdminWorkspaceController extends Controller
                 Rule::in([
                     'student',
                     'teacher',
+                    'admin',
                 ]),
             ],
             'approval_status' => [
@@ -369,7 +370,19 @@ class AdminWorkspaceController extends Controller
             ],
         ]);
 
+        $superAdminIds = DB::table('admin_role_user as aru')
+            ->join('admin_roles as ar', 'ar.id', '=', 'aru.role_id')
+            ->where('ar.slug', 'super-admin')
+            ->pluck('aru.user_id')
+            ->all();
+
+        $canDeleteAccounts = in_array(
+            $request->user()->id,
+            $superAdminIds
+        );
+
         $users = User::query()
+            ->whereIn('role', ['student', 'teacher', 'admin'])
             ->with([
                 'grades:id,name,grade_number',
             ])
@@ -425,11 +438,21 @@ class AdminWorkspaceController extends Controller
                 'approval_status',
                 'approved_at',
                 'approved_by',
+                'paused_at',
+                'paused_by',
                 'created_at',
-            ]);
+            ])
+            ->map(function (User $user) use ($superAdminIds, $request) {
+                $user->is_super_admin = in_array($user->id, $superAdminIds);
+                $user->lifecycle_manageable = $user->id !== $request->user()->id
+                    && ! $user->is_super_admin;
+
+                return $user;
+            });
 
         return response()->json([
             'users' => $users,
+            'can_delete_accounts' => $canDeleteAccounts,
         ]);
     }
 
@@ -716,6 +739,124 @@ class AdminWorkspaceController extends Controller
             'user' => $user->fresh(
                 'grades:id,name,grade_number'
             ),
+        ]);
+    }
+
+
+    /**
+     * School admins may pause/reactivate accounts, but cannot touch their
+     * own account or a Super Admin account. Existing approval stays intact.
+     */
+    private function ensureLifecycleTarget(Request $request, User $user): void
+    {
+        abort_unless(
+            in_array($user->role, ['student', 'teacher', 'admin'], true),
+            422,
+            'This account type cannot be managed here.'
+        );
+
+        abort_if(
+            $user->id === $request->user()->id,
+            403,
+            'You cannot pause or delete your own account.'
+        );
+
+        abort_if(
+            $this->isSuperAdminAccount($user),
+            403,
+            'Super Admin accounts are protected.'
+        );
+    }
+
+    private function isSuperAdminAccount(User $user): bool
+    {
+        return DB::table('admin_role_user as aru')
+            ->join('admin_roles as ar', 'ar.id', '=', 'aru.role_id')
+            ->where('aru.user_id', $user->id)
+            ->where('ar.slug', 'super-admin')
+            ->exists();
+    }
+
+    public function pauseUser(Request $request, User $user)
+    {
+        $this->ensureLifecycleTarget($request, $user);
+
+        if ($user->paused_at !== null) {
+            return response()->json([
+                'message' => 'This account is already paused.',
+            ], 409);
+        }
+
+        DB::transaction(function () use ($request, $user) {
+            $user->forceFill([
+                'paused_at' => now(),
+                'paused_by' => $request->user()->id,
+            ])->save();
+
+            // Immediately invalidate every existing API login.
+            $user->tokens()->delete();
+        });
+
+        return response()->json([
+            'message' => 'Account paused. Existing sessions have been revoked.',
+            'user' => $user->fresh(),
+        ]);
+    }
+
+    public function reactivateUser(Request $request, User $user)
+    {
+        $this->ensureLifecycleTarget($request, $user);
+
+        if ($user->paused_at === null) {
+            return response()->json([
+                'message' => 'This account is already active.',
+            ], 409);
+        }
+
+        $user->forceFill([
+            'paused_at' => null,
+            'paused_by' => null,
+        ])->save();
+
+        return response()->json([
+            'message' => 'Account reactivated. Previous approval state preserved.',
+            'user' => $user->fresh(),
+        ]);
+    }
+
+    /**
+     * Soft deletion retains historical educational records and audit history,
+     * while completely removing the account from login and normal queries.
+     * Only a real Super Admin assignment permits this action.
+     */
+    public function destroyUser(Request $request, User $user)
+    {
+        abort_unless(
+            $this->isSuperAdminAccount($request->user()),
+            403,
+            'Only a Super Admin may delete accounts.'
+        );
+
+        $this->ensureLifecycleTarget($request, $user);
+
+        $data = $request->validate([
+            'confirmation' => ['required', Rule::in(['DELETE'])],
+            'confirm_email' => ['required', 'string'],
+        ]);
+
+        if (! hash_equals($user->email, $data['confirm_email'])) {
+            return response()->json([
+                'message' => 'The second confirmation did not match the account email.',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($user) {
+            $user->tokens()->delete();
+            $user->delete();
+        });
+
+        return response()->json([
+            'message' => 'Account deleted. Historical records are preserved.',
         ]);
     }
 

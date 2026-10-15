@@ -38,7 +38,8 @@ export type AuthErrorCode =
   | "email-not-verified"
   | "account-locked"
   | "account-pending-approval"
-  | "account-rejected";
+  | "account-rejected"
+  | "account-paused";
 
 /** Field-level messages keyed by form field name (Laravel `errors` shape). */
 export type FieldErrors = Record<string, string | undefined>;
@@ -117,6 +118,7 @@ export const authErrorMessages: Record<AuthErrorCode, string> = {
   "account-locked": "Your account has been temporarily locked for security.",
   "account-pending-approval": "Your account is waiting for administrator approval.",
   "account-rejected": "This account was not approved. Please contact the YourSchool administrator.",
+  "account-paused": "This account is temporarily paused. Please contact your school administrator.",
 };
 
 export function authSuccess<TData>(message: string, data?: TData): AuthSuccess<TData> {
