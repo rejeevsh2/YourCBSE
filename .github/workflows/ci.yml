@@ -41,7 +41,7 @@ jobs:
         run: php artisan test
 
   frontend:
-    name: TypeScript and production build (Node 22)
+    name: TypeScript and production build (Node 24)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
