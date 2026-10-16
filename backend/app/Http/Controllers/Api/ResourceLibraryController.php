@@ -57,6 +57,7 @@ class ResourceLibraryController extends Controller
             ),
             'hasFile' => (bool) (
                 $c->file_path ||
+                $c->file_object_key ||
                 $c->external_url ||
                 $c->content
             ),
