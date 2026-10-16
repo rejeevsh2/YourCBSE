@@ -593,6 +593,11 @@ Route::middleware([
         'removeFile'
     ]);
 
+    Route::post('/lesson-contents/{id}/preview/retry', [
+        LessonContentController::class,
+        'retryPreview'
+    ]);
+
     Route::delete('/lesson-contents/{id}', [
         LessonContentController::class,
         'destroy'
@@ -669,6 +674,11 @@ Route::middleware(['auth:sanctum', 'role:admin', 'permission'])->prefix('admin')
 Route::get('/lesson-attachments/{content}/temporary-url', [
     \App\Http\Controllers\Api\LessonAttachmentAccessController::class,
     'show',
+])->middleware(['auth:sanctum', 'throttle:60,1']);
+
+Route::get('/lesson-attachments/{content}/slides', [
+    \App\Http\Controllers\Api\LessonAttachmentAccessController::class,
+    'slides',
 ])->middleware(['auth:sanctum', 'throttle:60,1']);
 
 Route::get('/library/catalog', [\App\Http\Controllers\Api\ResourceLibraryController::class,'index'])

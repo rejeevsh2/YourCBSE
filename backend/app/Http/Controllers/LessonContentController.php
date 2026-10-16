@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LessonContent;
 use App\Services\LessonAttachmentStorage;
+use App\Services\PresentationPreviewService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -106,6 +107,9 @@ class LessonContentController extends Controller
             throw $e;
         }
 
+        // Conversion is best-effort; it must never make the uploaded lesson fail.
+        app(PresentationPreviewService::class)->requestConversion($lessonContent);
+
         return response()->json(
             $lessonContent,
             201
@@ -202,8 +206,10 @@ class LessonContentController extends Controller
         }
 
         if ($file) {
-            // Metadata now references the replacement. Retire the old object.
+            // Preview objects belong to one immutable source file version.
+            app(PresentationPreviewService::class)->deletePreviews($previousFile);
             $attachments->deleteModel($previousFile);
+            app(PresentationPreviewService::class)->requestConversion($lessonContent->fresh());
         }
 
         return response()->json(
@@ -233,12 +239,29 @@ class LessonContentController extends Controller
             'file_mime_type' => null,
             'file_size_bytes' => null,
         ]);
+        app(PresentationPreviewService::class)->deletePreviews($oldFile);
         $attachments->deleteModel($oldFile);
 
         return response()->json([
             'message' => 'Uploaded file removed. Lesson content preserved.',
             'content' => $lessonContent->fresh(),
         ]);
+    }
+
+    /**
+     * Requeue a presentation preview when a converter restarted or failed.
+     * The existing admin content routes enforce admin authentication/permissions.
+     */
+    public function retryPreview($id, PresentationPreviewService $previews)
+    {
+        $content = LessonContent::findOrFail($id);
+        abort_unless($previews->enabled() && $previews->prefix($content), 422);
+
+        if (! $previews->requestConversion($content)) {
+            return response()->json(['message' => 'Preview worker is unavailable.'], 503);
+        }
+
+        return response()->json(['message' => 'Presentation preview requested.'], 202);
     }
 
     /**
@@ -251,6 +274,7 @@ class LessonContentController extends Controller
         // Remove the database record before its storage attachment.
         $oldFile = clone $lessonContent;
         $lessonContent->delete();
+        app(PresentationPreviewService::class)->deletePreviews($oldFile);
         $attachments->deleteModel($oldFile);
 
         return response()->json([

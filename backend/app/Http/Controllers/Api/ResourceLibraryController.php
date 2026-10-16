@@ -314,6 +314,10 @@ class ResourceLibraryController extends Controller
             abort_unless($user->role === 'admin' ||
                 (in_array($user->role, ['student', 'teacher'], true) &&
                  $user->approval_status === 'approved'), 403);
+            // Resource Library must not become a bypass for original PPTX
+            // downloads once student-only slide previews are enabled.
+            abort_if(config('presentation_previews.enabled', false) &&
+                $c->content_type === 'ppt' && $user->role === 'student', 403);
             abort_unless(is_string($c->file_object_key) &&
                 str_starts_with($c->file_object_key, "lessons/{$c->lesson_id}/files/") &&
                 ! str_contains($c->file_object_key, '..'), 404);
