@@ -141,6 +141,7 @@ const typeNames: Record<string, string> = {
   worksheet: "Worksheets",
   activity: "Activities",
   quiz: "Quizzes",
+  ppt: "PowerPoint slides",
 };
 export function LiveLibrary({
   mode = "all",
@@ -427,7 +428,17 @@ export function LiveLibrary({
                         : "Save"}
                     </Button>
                   )}
-                  {r.hasFile && (
+                  {r.hasFile && (r.type === "ppt" ? (
+                    <Button asChild size="sm" variant="outline">
+                      <Link
+                        to="/student/lesson/$lessonId"
+                        params={{ lessonId: r.lessonId }}
+                        hash={"lesson-content-" + r.id}
+                      >
+                        View slides
+                      </Link>
+                    </Button>
+                  ) : (
                     <Button
                       type="button"
                       size="sm"
@@ -448,7 +459,7 @@ export function LiveLibrary({
                     >
                       File / link
                     </Button>
-                  )}
+                  ))}
                 </div>
               </article>
             ))}
@@ -522,7 +533,17 @@ export function LiveResource({ id }: { id: string }) {
         )}
         <p className="text-sm text-muted-foreground">Updated {resource.updatedAt}</p>
         <div className="flex flex-wrap gap-3">
-          {resource.hasFile && (
+          {resource.hasFile && (resource.type === "ppt" ? (
+            <Button asChild>
+              <Link
+                to="/student/lesson/$lessonId"
+                params={{ lessonId: resource.lessonId }}
+                hash={"lesson-content-" + resource.id}
+              >
+                View slides in lesson
+              </Link>
+            </Button>
+          ) : (
             <Button
               type="button"
               onClick={() => {
@@ -553,7 +574,7 @@ export function LiveResource({ id }: { id: string }) {
             >
               Open file / resource link
             </Button>
-          )}
+          ))}
           <Button asChild variant="outline">
             <Link to="/student/lesson/$lessonId" params={{ lessonId: resource.lessonId }}>
               Open lesson
