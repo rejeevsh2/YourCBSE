@@ -110,7 +110,16 @@ function LessonPage() {
                 </div>
               ) : null}
 
-              {item.has_uploaded_file && !item.file_path ? (
+              {item.content_type === "ppt" ? (
+                item.has_uploaded_file && !item.file_path ? (
+                  <PrivateLessonAttachment item={item} />
+                ) : (
+                  <p className="mt-4 rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
+                    This PowerPoint needs to be uploaded to YourSchool private storage
+                    before it can be viewed as online slides. Ask your teacher to re-upload it.
+                  </p>
+                )
+              ) : item.has_uploaded_file && !item.file_path ? (
                 <PrivateLessonAttachment item={item} />
               ) : item.file_path ? (
                 <a href={item.file_path} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block font-medium text-primary hover:underline">
@@ -118,7 +127,7 @@ function LessonPage() {
                 </a>
               ) : null}
 
-              {item.external_url ? (
+              {item.content_type !== "ppt" && item.external_url ? (
                 <a
                   href={item.external_url}
                   target="_blank"
