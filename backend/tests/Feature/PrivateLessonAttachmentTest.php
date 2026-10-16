@@ -96,7 +96,7 @@ class PrivateLessonAttachmentTest extends TestCase
         $student->grades()->sync([$grade->id]);
         Sanctum::actingAs($student);
         $this->getJson($urlPath)->assertOk()->assertJsonPath('url', 'https://temporary.example.test/object?signature=test')
-            ->assertHeader('Cache-Control', 'private, no-store');
+            ->assertHeader('Cache-Control', 'no-store, private');
 
         $student->grades()->detach();
         $this->getJson($urlPath)->assertForbidden();
