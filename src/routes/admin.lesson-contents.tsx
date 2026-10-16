@@ -107,6 +107,7 @@ function AdminLessonContentsPage() {
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [removingFileId, setRemovingFileId] = useState<number | null>(null);
+  const [previewRetryId, setPreviewRetryId] = useState<number | null>(null);
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -425,6 +426,23 @@ if (form.resource_category) {
       toast.error(error instanceof Error ? error.message : "Could not delete lesson content.");
     } finally {
       setDeletingId(null);
+    }
+  }
+
+  async function handleRetryPreview(item: LessonContent) {
+    if (previewRetryId !== null) return;
+    setPreviewRetryId(item.id);
+    try {
+      const response = await apiFetch(API + "/lesson-contents/" + item.id + "/preview/retry", { method: "POST" });
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.message || "Could not request slide conversion.");
+      }
+      toast.success("Slide conversion requested. Open the lesson to check progress.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not start conversion.");
+    } finally {
+      setPreviewRetryId(null);
     }
   }
 
@@ -928,6 +946,14 @@ if (form.resource_category) {
                     <Pencil className="size-4" />
                     Edit
                   </Button>
+                  {item.content_type === "ppt" && item.has_uploaded_file && !item.file_path ? (
+                    <Button type="button" size="sm" variant="outline"
+                      disabled={previewRetryId !== null}
+                      onClick={() => void handleRetryPreview(item)}>
+                      <RefreshCw className="size-4" />
+                      {previewRetryId === item.id ? "Requesting..." : "Retry slides"}
+                    </Button>
+                  ) : null}
                   {item.has_uploaded_file || item.file_path ? (
                     <Button type="button" size="sm" variant="outline"
                       disabled={deletingId !== null || removingFileId !== null}
@@ -1096,6 +1122,15 @@ if (form.resource_category) {
                             <Pencil className="mr-1 size-4" />
                             Edit
                           </Button>
+
+                          {item.content_type === "ppt" && item.has_uploaded_file && !item.file_path ? (
+                            <Button type="button" size="sm" variant="outline"
+                              disabled={previewRetryId !== null}
+                              onClick={() => void handleRetryPreview(item)}>
+                              <RefreshCw className="size-4" />
+                              {previewRetryId === item.id ? "Requesting..." : "Retry slides"}
+                            </Button>
+                          ) : null}
 
                           {item.has_uploaded_file || item.file_path ? (
                             <Button
