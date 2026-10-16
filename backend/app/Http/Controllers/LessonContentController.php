@@ -160,6 +160,17 @@ class LessonContentController extends Controller
             ],
         ]);
 
+        // An R2 object key belongs to exactly one lesson. Moving an
+        // existing attachment without re-uploading it would invalidate
+        // both namespace checks and class-scoped download permissions.
+        abort_if(
+            $lessonContent->file_disk === 'r2' &&
+            (int) $lessonContent->lesson_id !== (int) $validated['lesson_id'] &&
+            ! $request->hasFile('file'),
+            422,
+            'Upload a replacement file when moving a private attachment to another lesson.'
+        );
+
         $previousFile = clone $lessonContent;
         $file = $request->file('file');
         $fileDetails = $file
