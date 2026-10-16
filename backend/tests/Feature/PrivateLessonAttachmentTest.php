@@ -134,6 +134,101 @@ class PrivateLessonAttachmentTest extends TestCase
         $this->getJson($url)->assertNotFound();
     }
 
+    public function test_restricted_students_and_students_from_other_classes_cannot_get_private_links(): void
+    {
+        Storage::fake('r2');
+        config()->set('educational_storage.r2_new_uploads_enabled', true);
+        config()->set('educational_storage.r2_signed_reads_enabled', true);
+        [$lesson, $grade] = $this->lesson();
+        $content = $this->upload($lesson);
+        Storage::disk('r2')->buildTemporaryUrlsUsing(
+            fn ($path, $expiration, $options) => 'https://temporary.example.test/class-only'
+        );
+
+        $other = Grade::create([
+            'board_id' => $grade->board_id,
+            'name' => 'Class 8',
+            'grade_number' => 8,
+        ]);
+        $student = User::factory()->create(['role' => 'student', 'approval_status' => 'approved']);
+        $student->grades()->sync([$other->id]);
+        Sanctum::actingAs($student);
+
+        $url = "/api/lesson-attachments/{$content->id}/temporary-url";
+        $this->getJson($url)->assertForbidden();
+
+        $student->grades()->sync([$grade->id]);
+        $content->update(['is_free' => false]);
+        $this->getJson($url)->assertForbidden();
+
+        $content->update(['is_free' => true]);
+        $this->getJson($url)->assertOk();
+    }
+
+    public function test_private_file_cannot_change_owner_lesson_without_a_replacement_upload(): void
+    {
+        Storage::fake('r2');
+        config()->set('educational_storage.r2_new_uploads_enabled', true);
+        [$lesson] = $this->lesson();
+        $content = $this->upload($lesson);
+
+        $newLesson = Lesson::create([
+            'chapter_id' => $lesson->chapter_id,
+            'title' => 'Different lesson',
+            'slug' => 'different-lesson',
+            'lesson_number' => 2,
+            'is_published' => true,
+            'is_active' => true,
+        ]);
+        $previousKey = $content->file_object_key;
+
+        $this->putJson("/api/lesson-contents/{$content->id}", [
+            'lesson_id' => $newLesson->id,
+            'title' => 'Private notes',
+            'content_type' => 'pdf',
+        ])->assertUnprocessable();
+
+        $this->assertDatabaseHas('lesson_contents', [
+            'id' => $content->id,
+            'lesson_id' => $lesson->id,
+            'file_object_key' => $previousKey,
+        ]);
+        Storage::disk('r2')->assertExists($previousKey);
+
+        $this->put("/api/lesson-contents/{$content->id}", [
+            'lesson_id' => $newLesson->id,
+            'title' => 'Updated notes',
+            'content_type' => 'pdf',
+            'file' => UploadedFile::fake()->create('replacement.pdf', 6, 'application/pdf'),
+        ])->assertOk();
+
+        $current = $content->fresh();
+        $this->assertStringStartsWith("lessons/{$newLesson->id}/files/", $current->file_object_key);
+        Storage::disk('r2')->assertExists($current->file_object_key);
+        Storage::disk('r2')->assertMissing($previousKey);
+    }
+
+    public function test_resource_library_sends_a_signed_link_instead_of_streaming_r2_bytes(): void
+    {
+        Storage::fake('r2');
+        config()->set('educational_storage.r2_new_uploads_enabled', true);
+        config()->set('educational_storage.r2_signed_reads_enabled', true);
+        [$lesson, $grade] = $this->lesson();
+        $content = $this->upload($lesson);
+
+        Storage::disk('r2')->buildTemporaryUrlsUsing(
+            fn ($path, $expiration, $options) => 'https://temporary.example.test/library-file'
+        );
+        $student = User::factory()->create(['role' => 'student', 'approval_status' => 'approved']);
+        $student->grades()->sync([$grade->id]);
+        Sanctum::actingAs($student);
+
+        $this->getJson("/api/library/resources/{$content->id}/file")
+            ->assertOk()
+            ->assertJsonPath('type', 'signed')
+            ->assertJsonPath('url', 'https://temporary.example.test/library-file');
+    }
+
     public function test_old_uploaded_files_remain_on_public_storage_when_flag_off(): void
     {
         Storage::fake('public');
