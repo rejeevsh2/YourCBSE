@@ -22,6 +22,12 @@ class LessonAttachmentAccessController extends Controller
         $user = $request->user()?->fresh();
         abort_unless($user && $user->paused_at === null, 403);
 
+        if ($user->role === 'student') {
+            // Without an entitlement/subscription system, restricted
+            // resources must not be exposed through a new signed URL.
+            abort_unless($content->is_free, 403);
+        }
+
         if ($user->role !== 'admin') {
             abort_unless(in_array($user->role, ['student', 'teacher'], true) &&
                 $user->approval_status === 'approved', 403);
