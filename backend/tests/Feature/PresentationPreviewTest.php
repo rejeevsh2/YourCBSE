@@ -135,7 +135,7 @@ class PresentationPreviewTest extends TestCase
         $this->getJson("/api/lesson-attachments/{$content->id}/slides")->assertForbidden();
 
         $student->grades()->sync([$grade->id]);
-        $student->update(['paused_at' => now()]);
+        $student->forceFill(['paused_at' => now()])->save();
         $this->getJson("/api/lesson-attachments/{$content->id}/slides")->assertForbidden();
     }
 
