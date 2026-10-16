@@ -136,7 +136,7 @@ def convert_presentation(req: ConversionRequest) -> None:
         # Do not assume page-1.jpg when a presentation has 10+ slides.
         rendered = sorted(
             slidesdir.glob("page-*.jpg"),
-            key=lambda path: int(re.fullmatch(r"page-(\\d+)\\.jpg", path.name).group(1)),
+            key=lambda path: int(re.fullmatch(r"page-([0-9]+)[.]jpg", path.name).group(1)),
         )
         if len(rendered) != pages:
             raise ValueError("Slide rendering produced an incomplete result.")
