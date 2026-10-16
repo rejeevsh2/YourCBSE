@@ -893,7 +893,7 @@ function ContentBlock({
   const Icon = getContentIcon(item.content_type);
 
   return (
-    <article className="tile overflow-hidden">
+    <article id={"lesson-content-" + item.id} className="tile scroll-mt-24 overflow-hidden">
       <header className="flex flex-wrap items-center gap-3 border-b border-border/70 p-4 sm:px-6">
         <span className="flex size-10 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
           <Icon className="size-5" />
@@ -920,7 +920,17 @@ function ContentBlock({
       </header>
 
       <div className="p-5 sm:p-6">
-        {item.has_uploaded_file && !item.file_path ? (
+        {item.content_type === "ppt" ? (
+          item.has_uploaded_file && !item.file_path ? (
+            <PrivateLessonAttachment item={item} />
+          ) : (
+            <p className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
+              This older or externally linked PowerPoint is not available as secure
+              online slides. Ask your teacher or administrator to re-upload the
+              presentation in YourSchool so it can be converted for viewing here.
+            </p>
+          )
+        ) : item.has_uploaded_file && !item.file_path ? (
           <PrivateLessonAttachment item={item} />
         ) : (
           <>
@@ -938,10 +948,6 @@ function ContentBlock({
 
         {item.content_type === "audio" ? (
           <AudioContent item={item} />
-        ) : null}
-
-        {item.content_type === "ppt" ? (
-          <FileContent item={item} label="Open PowerPoint" />
         ) : null}
 
         {item.content_type === "pdf" ? (
