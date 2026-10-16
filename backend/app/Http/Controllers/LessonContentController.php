@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LessonContent;
+use App\Services\LessonAttachmentStorage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -31,7 +32,7 @@ class LessonContentController extends Controller
     /**
      * Create new lesson content.
      */
-    public function store(Request $request)
+    public function store(Request $request, LessonAttachmentStorage $attachments)
     {
         $validated = $request->validate([
             'lesson_id' => 'required|exists:lessons,id',
@@ -75,29 +76,35 @@ class LessonContentController extends Controller
             ],
         ]);
 
-        $fileUrl = null;
+        $file = $request->file('file');
+        $fileDetails = $file
+            ? $attachments->upload($file, (int) $validated['lesson_id'])
+            : [];
 
-        if ($request->hasFile('file')) {
-            $path = $request->file('file')->store(
-                'lesson-content',
-                'public'
-            );
-
-            $fileUrl = asset('storage/' . $path);
+        try {
+            $lessonContent = LessonContent::create(array_merge([
+                'lesson_id' => $validated['lesson_id'],
+                'title' => $validated['title'],
+                'content_type' => $validated['content_type'],
+                'resource_category' => $validated['resource_category'] ?? null,
+                'content' => $validated['content'] ?? null,
+                'file_path' => null,
+                'external_url' => $validated['external_url'] ?? null,
+                'display_order' => $validated['display_order'] ?? 1,
+                'is_free' => $validated['is_free'] ?? true,
+                'is_active' => $validated['is_active'] ?? true,
+            ], $fileDetails));
+        } catch (\Throwable $e) {
+            if ($file) {
+                $attachments->delete(
+                    $fileDetails['file_disk'],
+                    $fileDetails['file_object_key'],
+                    $fileDetails['file_path'],
+                    (int) $validated['lesson_id']
+                );
+            }
+            throw $e;
         }
-
-        $lessonContent = LessonContent::create([
-            'lesson_id' => $validated['lesson_id'],
-            'title' => $validated['title'],
-            'content_type' => $validated['content_type'],
-            'resource_category' => $validated['resource_category'] ?? null,
-            'content' => $validated['content'] ?? null,
-            'file_path' => $fileUrl,
-            'external_url' => $validated['external_url'] ?? null,
-            'display_order' => $validated['display_order'] ?? 1,
-            'is_free' => $validated['is_free'] ?? true,
-            'is_active' => $validated['is_active'] ?? true,
-        ]);
 
         return response()->json(
             $lessonContent,
@@ -108,7 +115,7 @@ class LessonContentController extends Controller
     /**
      * Update existing lesson content.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id, LessonAttachmentStorage $attachments)
     {
         $lessonContent = LessonContent::findOrFail($id);
 
@@ -153,33 +160,39 @@ class LessonContentController extends Controller
             ],
         ]);
 
-        $fileUrl = $lessonContent->file_path;
-        $previousFileUrl = $fileUrl;
+        $previousFile = clone $lessonContent;
+        $file = $request->file('file');
+        $fileDetails = $file
+            ? $attachments->upload($file, (int) $validated['lesson_id'])
+            : [];
 
-        if ($request->hasFile('file')) {
-            $path = $request->file('file')->store(
-                'lesson-content',
-                'public'
-            );
-
-            $fileUrl = asset('storage/' . $path);
+        try {
+            $lessonContent->update(array_merge([
+                'lesson_id' => $validated['lesson_id'],
+                'title' => $validated['title'],
+                'content_type' => $validated['content_type'],
+                'resource_category' => $validated['resource_category'] ?? null,
+                'content' => $validated['content'] ?? null,
+                'external_url' => $validated['external_url'] ?? null,
+                'display_order' => $validated['display_order'] ?? 1,
+                'is_free' => $validated['is_free'] ?? true,
+                'is_active' => $validated['is_active'] ?? true,
+            ], $fileDetails));
+        } catch (\Throwable $e) {
+            if ($file) {
+                $attachments->delete(
+                    $fileDetails['file_disk'],
+                    $fileDetails['file_object_key'],
+                    $fileDetails['file_path'],
+                    (int) $validated['lesson_id']
+                );
+            }
+            throw $e;
         }
 
-        $lessonContent->update([
-            'lesson_id' => $validated['lesson_id'],
-            'title' => $validated['title'],
-            'content_type' => $validated['content_type'],
-            'resource_category' => $validated['resource_category'] ?? null,
-            'content' => $validated['content'] ?? null,
-            'file_path' => $fileUrl,
-            'external_url' => $validated['external_url'] ?? null,
-            'display_order' => $validated['display_order'] ?? 1,
-            'is_free' => $validated['is_free'] ?? true,
-            'is_active' => $validated['is_active'] ?? true,
-        ]);
-
-        if ($request->hasFile('file')) {
-            $this->deleteLocalFile($previousFileUrl);
+        if ($file) {
+            // Metadata now references the replacement. Retire the old object.
+            $attachments->deleteModel($previousFile);
         }
 
         return response()->json(
@@ -191,19 +204,25 @@ class LessonContentController extends Controller
      * Remove just the locally uploaded attachment, without deleting the
      * lesson content record, description or external resource URL.
      */
-    public function removeFile($id)
+    public function removeFile($id, LessonAttachmentStorage $attachments)
     {
         $lessonContent = LessonContent::findOrFail($id);
 
-        if (! $lessonContent->file_path) {
+        if (! $lessonContent->file_path && ! $lessonContent->file_object_key) {
             return response()->json([
                 'message' => 'This content has no uploaded file.',
             ], 422);
         }
 
-        $oldFileUrl = $lessonContent->file_path;
-        $lessonContent->update(['file_path' => null]);
-        $this->deleteLocalFile($oldFileUrl);
+        $oldFile = clone $lessonContent;
+        $lessonContent->update([
+            'file_path' => null,
+            'file_disk' => null,
+            'file_object_key' => null,
+            'file_mime_type' => null,
+            'file_size_bytes' => null,
+        ]);
+        $attachments->deleteModel($oldFile);
 
         return response()->json([
             'message' => 'Uploaded file removed. Lesson content preserved.',
@@ -212,53 +231,16 @@ class LessonContentController extends Controller
     }
 
     /**
-     * Never remove an arbitrary external URL from the storage disk.
-     * Uploaded files are always inside our lesson-content directory.
-     */
-    private function deleteLocalFile(?string $url): void
-    {
-        if (! $url) {
-            return;
-        }
-
-        $path = parse_url($url, PHP_URL_PATH);
-
-        if (
-            ! is_string($path) ||
-            ! str_starts_with($path, '/storage/lesson-content/')
-        ) {
-            return;
-        }
-
-        // File URLs created by this app point to the current asset host.
-        $host = parse_url($url, PHP_URL_HOST);
-        $assetHost = parse_url(asset('storage/'), PHP_URL_HOST);
-
-        if ($host && $assetHost && strcasecmp($host, $assetHost) !== 0) {
-            return;
-        }
-
-        $relativePath = substr($path, strlen('/storage/'));
-
-        if (
-            $relativePath !== false &&
-            ! str_contains($relativePath, '..')
-        ) {
-            Storage::disk('public')->delete($relativePath);
-        }
-    }
-
-    /**
      * Delete lesson content.
      */
-    public function destroy($id)
+    public function destroy($id, LessonAttachmentStorage $attachments)
     {
         $lessonContent = LessonContent::findOrFail($id);
 
         // Remove the database record before its storage attachment.
-        $fileUrl = $lessonContent->file_path;
+        $oldFile = clone $lessonContent;
         $lessonContent->delete();
-        $this->deleteLocalFile($fileUrl);
+        $attachments->deleteModel($oldFile);
 
         return response()->json([
             'message' =>
