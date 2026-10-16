@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, Expand, FileDown, Loader2, RefreshCw } from "lucide-react";
+import { ArrowLeft, ArrowRight, Expand, FileDown, Loader2, Minimize2, RefreshCw } from "lucide-react";
 import { API_BASE_URL, authenticatedFetch } from "@/lib/auth/http";
 import { Button } from "@/components/ui/button";
 
@@ -17,6 +17,7 @@ export function PresentationSlides({ id, title }: { id: number; title: string })
   const [index, setIndex] = useState(0);
   const [error, setError] = useState("");
   const [originalLoading, setOriginalLoading] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -25,6 +26,15 @@ export function PresentationSlides({ id, title }: { id: number; title: string })
     setSlides([]);
     setError("");
   }, [id]);
+
+  useEffect(() => {
+    const syncFullscreenState = () => {
+      setIsFullscreen(document.fullscreenElement === container.current);
+    };
+
+    document.addEventListener("fullscreenchange", syncFullscreenState);
+    return () => document.removeEventListener("fullscreenchange", syncFullscreenState);
+  }, []);
 
   async function loadSlides() {
     setMode("loading");
@@ -90,6 +100,15 @@ export function PresentationSlides({ id, title }: { id: number; title: string })
     } finally {
       setOriginalLoading(false);
     }
+  }
+
+  async function toggleFullscreen() {
+    if (document.fullscreenElement === container.current) {
+      await document.exitFullscreen?.();
+      return;
+    }
+
+    await container.current?.requestFullscreen?.();
   }
 
   return (
@@ -159,8 +178,9 @@ export function PresentationSlides({ id, title }: { id: number; title: string })
             <Button type="button" size="sm" variant="outline" onClick={() => void loadSlides()}>
               <RefreshCw className="size-4" /> Refresh access
             </Button>
-            <Button type="button" size="sm" variant="outline" onClick={() => void container.current?.requestFullscreen?.()}>
-              <Expand className="size-4" /> Fullscreen
+            <Button type="button" size="sm" variant="outline" onClick={() => void toggleFullscreen()}>
+              {isFullscreen ? <Minimize2 className="size-4" /> : <Expand className="size-4" />}
+              {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
