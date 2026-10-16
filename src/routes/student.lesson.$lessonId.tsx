@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 import { PortalPage } from "@/components/layout/PortalPage";
+import { PrivateLessonAttachment } from "@/components/lessons/PrivateLessonAttachment";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getAuthToken } from "@/lib/auth";
@@ -48,6 +49,8 @@ type LessonContent = {
     | "activity";
   content: string | null;
   file_path: string | null;
+  file_mime_type?: string | null;
+  has_uploaded_file?: boolean;
   external_url: string | null;
   display_order: number | null;
   is_free: boolean;
@@ -917,6 +920,10 @@ function ContentBlock({
       </header>
 
       <div className="p-5 sm:p-6">
+        {item.has_uploaded_file && !item.file_path ? (
+          <PrivateLessonAttachment item={item} />
+        ) : (
+          <>
         {item.content_type === "text" ? (
           <TextContent item={item} />
         ) : null}
@@ -958,6 +965,8 @@ function ContentBlock({
         {item.content_type === "activity" ? (
           <GeneralContent item={item} />
         ) : null}
+          </>
+        )}
       </div>
     </article>
   );

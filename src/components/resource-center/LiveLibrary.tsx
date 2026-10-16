@@ -63,7 +63,7 @@ async function openResourceFile(
       };
 
     if (
-      data.type === "external" &&
+      (data.type === "external" || data.type === "signed") &&
       data.url
     ) {
       window.open(

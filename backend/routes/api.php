@@ -666,6 +666,11 @@ Route::middleware(['auth:sanctum', 'role:admin', 'permission'])->prefix('admin')
     Route::patch('/practice-sets/{id}', [$controller, 'publishPracticeSet']);
 });
 
+Route::get('/lesson-attachments/{content}/temporary-url', [
+    \App\Http\Controllers\Api\LessonAttachmentAccessController::class,
+    'show',
+])->middleware(['auth:sanctum', 'throttle:60,1']);
+
 Route::get('/library/catalog', [\App\Http\Controllers\Api\ResourceLibraryController::class,'index'])
     ->middleware('auth:sanctum');
 

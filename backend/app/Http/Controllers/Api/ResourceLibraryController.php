@@ -57,6 +57,7 @@ class ResourceLibraryController extends Controller
             ),
             'hasFile' => (bool) (
                 $c->file_path ||
+                $c->file_object_key ||
                 $c->external_url ||
                 $c->content
             ),
@@ -303,6 +304,37 @@ class ResourceLibraryController extends Controller
             $request->user(),
             $id
         );
+        if ($c->file_disk === 'r2') {
+            abort_unless(config('educational_storage.r2_signed_reads_enabled', false), 404);
+
+            // item() already validated published lesson and grade assignment,
+            // but check paused/approved status again for private file delivery.
+            $user = $request->user()->fresh();
+            abort_unless($user && $user->paused_at === null, 403);
+            abort_unless($user->role === 'admin' ||
+                (in_array($user->role, ['student', 'teacher'], true) &&
+                 $user->approval_status === 'approved'), 403);
+            abort_unless(is_string($c->file_object_key) &&
+                str_starts_with($c->file_object_key, "lessons/{$c->lesson_id}/files/") &&
+                ! str_contains($c->file_object_key, '..'), 404);
+
+            $url = Storage::disk('r2')->temporaryUrl(
+                $c->file_object_key,
+                now()->addSeconds((int) config('educational_storage.r2_url_ttl_seconds', 120)),
+                ['ResponseContentDisposition' => 'inline']
+            );
+
+            $response = $request->expectsJson()
+                ? response()->json(['type' => 'signed', 'url' => $url])
+                : redirect()->away($url);
+
+            return $response->withHeaders([
+                'Cache-Control' => 'private, no-store',
+                'Referrer-Policy' => 'no-referrer',
+                'X-Content-Type-Options' => 'nosniff',
+            ]);
+        }
+
         $path = $c->file_path;
 
         if (
