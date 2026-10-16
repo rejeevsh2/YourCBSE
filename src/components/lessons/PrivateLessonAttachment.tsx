@@ -115,6 +115,25 @@ export function PrivateLessonAttachment({ item }: { item: PrivateLessonItem }) {
   );
 }
 
+/** Direct launch from admin tables or resource menus; no persistent URL storage. */
+export async function openPrivateAttachmentInNewTab(id: number): Promise<void> {
+  const tab = window.open("about:blank", "_blank");
+  if (tab) tab.opener = null;
+
+  try {
+    const url = await getSignedUrl(id);
+    if (tab && !tab.closed) {
+      tab.location.replace(url);
+    } else {
+      // If a browser blocks the popup, avoid silently navigating away.
+      throw new Error("Please allow popups for YourSchool to open this private file.");
+    }
+  } catch (error) {
+    if (tab && !tab.closed) tab.close();
+    throw error;
+  }
+}
+
 /** For the admin content table: open a blank tab synchronously to avoid popup blockers. */
 export function PrivateLessonOpenAction({ id, title }: { id: number; title: string }) {
   const [loading, setLoading] = useState(false);
