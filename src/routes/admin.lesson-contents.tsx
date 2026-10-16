@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 
 import { PortalPage } from "@/components/layout/PortalPage";
+import { PrivateLessonOpenAction } from "@/components/lessons/PrivateLessonAttachment";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,6 +54,7 @@ type LessonContent = {
   resource_category: string | null;
   content: string | null;
   file_path: string | null;
+  has_uploaded_file?: boolean;
   external_url: string | null;
   display_order: number | null;
   is_free: boolean;
@@ -116,6 +118,7 @@ function AdminLessonContentsPage() {
 
   const [existingFile, setExistingFile] =
     useState<string | null>(null);
+  const [existingPrivate, setExistingPrivate] = useState(false);
 
   const API = API_BASE_URL;
 
@@ -217,6 +220,7 @@ if (selectedLessonId) {
 
   setSelectedFile(null);
   setExistingFile(null);
+  setExistingPrivate(false);
   setShowForm(true);
 }
 
@@ -241,6 +245,7 @@ content: item.content ?? "",
     });
 
     setExistingFile(item.file_path ?? null);
+    setExistingPrivate(Boolean(item.has_uploaded_file && !item.file_path));
     setSelectedFile(null);
     setShowForm(true);
   }
@@ -251,6 +256,7 @@ content: item.content ?? "",
     setForm(emptyForm);
     setSelectedFile(null);
     setExistingFile(null);
+    setExistingPrivate(false);
   }
 
   async function handleSubmit(
@@ -423,7 +429,7 @@ if (form.resource_category) {
   }
 
   async function handleRemoveFile(item: LessonContent) {
-    if (!item.file_path || deletingId !== null || removingFileId !== null) return;
+    if (!(item.has_uploaded_file || item.file_path) || deletingId !== null || removingFileId !== null) return;
     if (!window.confirm(
       `Remove the uploaded file from "${item.title}"?\n\nThe lesson content, description, and any external link will remain.`,
     )) return;
@@ -437,7 +443,10 @@ if (form.resource_category) {
         const payload = await response.json().catch(() => null);
         throw new Error(payload?.message ?? "Could not remove the uploaded file.");
       }
-      if (editingId === item.id) setExistingFile(null);
+      if (editingId === item.id) {
+        setExistingFile(null);
+        setExistingPrivate(false);
+      }
       toast.success("Uploaded file removed. Lesson content preserved.");
       await loadData();
     } catch (error) {
@@ -788,7 +797,7 @@ if (form.resource_category) {
                 ) : null}
 
                 {!selectedFile &&
-                existingFile ? (
+                (existingFile || existingPrivate) ? (
                   <div className="rounded-xl border bg-muted/30 p-3">
                     <div className="flex items-center gap-2">
                       <FileText className="size-4" />
@@ -798,15 +807,16 @@ if (form.resource_category) {
                       </span>
                     </div>
 
-                    <a
-                      href={existingFile}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mt-2 inline-flex items-center gap-1 text-xs font-medium underline"
-                    >
-                      Open current file
-                      <ExternalLink className="size-3" />
-                    </a>
+                    {existingPrivate && editingId ? (
+                      <div className="mt-2">
+                        <PrivateLessonOpenAction id={editingId} title="Open private file" />
+                      </div>
+                    ) : existingFile ? (
+                      <a href={existingFile} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-medium underline">
+                        Open current file
+                        <ExternalLink className="size-3" />
+                      </a>
+                    ) : null}
                     {editingId ? (
                       <Button
                         type="button"
@@ -904,7 +914,9 @@ if (form.resource_category) {
                   {item.lesson?.title ?? `Lesson ${item.lesson_id}`} · {item.content_type === "ppt" ? "PowerPoint" : item.content_type.toUpperCase()}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {item.file_path || item.external_url ? (
+                  {item.has_uploaded_file && !item.file_path ? (
+                    <PrivateLessonOpenAction id={item.id} title="Open private file" />
+                  ) : item.file_path || item.external_url ? (
                     <Button type="button" size="sm" variant="outline" asChild>
                       <a href={item.file_path || item.external_url || "#"} target="_blank" rel="noreferrer">
                         <ExternalLink className="size-4" />
@@ -916,7 +928,7 @@ if (form.resource_category) {
                     <Pencil className="size-4" />
                     Edit
                   </Button>
-                  {item.file_path ? (
+                  {item.has_uploaded_file || item.file_path ? (
                     <Button type="button" size="sm" variant="outline"
                       disabled={deletingId !== null || removingFileId !== null}
                       onClick={() => void handleRemoveFile(item)}>
@@ -1028,7 +1040,9 @@ if (form.resource_category) {
                       </td>
 
                       <td className="px-4 py-4">
-                        {item.file_path ? (
+                        {item.has_uploaded_file && !item.file_path ? (
+                          <PrivateLessonOpenAction id={item.id} title="Open private file" />
+                        ) : item.file_path ? (
                           <a
                             href={
                               item.file_path
@@ -1083,7 +1097,7 @@ if (form.resource_category) {
                             Edit
                           </Button>
 
-                          {item.file_path ? (
+                          {item.has_uploaded_file || item.file_path ? (
                             <Button
                               type="button"
                               size="sm"
