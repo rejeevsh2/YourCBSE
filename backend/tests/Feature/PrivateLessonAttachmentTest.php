@@ -229,6 +229,28 @@ class PrivateLessonAttachmentTest extends TestCase
             ->assertJsonPath('url', 'https://temporary.example.test/library-file');
     }
 
+    public function test_resource_library_catalog_marks_private_files_present(): void
+    {
+        Storage::fake('r2');
+        config()->set('educational_storage.r2_new_uploads_enabled', true);
+        [$lesson, $grade] = $this->lesson();
+        $content = $this->upload($lesson);
+
+        $student = User::factory()->create([
+            'role' => 'student',
+            'approval_status' => 'approved',
+        ]);
+        $student->grades()->sync([$grade->id]);
+        Sanctum::actingAs($student);
+
+        $this->getJson('/api/library/catalog')
+            ->assertOk()
+            ->assertJsonFragment([
+                'id' => (string) $content->id,
+                'hasFile' => true,
+            ]);
+    }
+
     public function test_old_uploaded_files_remain_on_public_storage_when_flag_off(): void
     {
         Storage::fake('public');
