@@ -132,10 +132,18 @@ def convert_presentation(req: ConversionRequest) -> None:
             check=True, timeout=180, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
         )
 
+        # pdftoppm zero-pads its filenames according to document length.
+        # Do not assume page-1.jpg when a presentation has 10+ slides.
+        rendered = sorted(
+            slidesdir.glob("page-*.jpg"),
+            key=lambda path: int(re.fullmatch(r"page-(\\d+)\\.jpg", path.name).group(1)),
+        )
+        if len(rendered) != pages:
+            raise ValueError("Slide rendering produced an incomplete result.")
+
         objects = []
-        for index in range(1, pages + 1):
-            path = slidesdir / f"page-{index}.jpg"
-            if not path.is_file() or path.stat().st_size > 10 * 1024 * 1024:
+        for index, path in enumerate(rendered, start=1):
+            if not path.is_file() or not path.stat().st_size or path.stat().st_size > 10 * 1024 * 1024:
                 raise ValueError("Could not render a slide safely.")
             key = f"{req.preview_prefix}/slides/slide-{index:04d}.jpg"
             with path.open("rb") as image_file:
