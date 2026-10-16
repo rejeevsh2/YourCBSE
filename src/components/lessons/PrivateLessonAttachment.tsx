@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ExternalLink, FileText, Loader2, RefreshCw } from "lucide-react";
 import { API_BASE_URL, authenticatedFetch } from "@/lib/auth/http";
+import { PresentationSlides } from "@/components/lessons/PresentationSlides";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -39,6 +40,16 @@ async function getSignedUrl(id: number): Promise<string> {
 
 /** For student/teacher previews: fetch on demand, not while listing lessons. */
 export function PrivateLessonAttachment({ item }: { item: PrivateLessonItem }) {
+  // Render slide images instead of handing the original PPTX to student browsers.
+  // The presentation component preserves legacy behavior until Phase 3 is enabled.
+  return item.content_type === "ppt" ? (
+    <PresentationSlides id={item.id} title={item.title} />
+  ) : (
+    <StandardPrivateLessonAttachment item={item} />
+  );
+}
+
+function StandardPrivateLessonAttachment({ item }: { item: PrivateLessonItem }) {
   const [url, setUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
