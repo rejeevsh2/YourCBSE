@@ -102,10 +102,10 @@ class PrivateLessonAttachmentTest extends TestCase
         $this->getJson($urlPath)->assertForbidden();
 
         $student->grades()->sync([$grade->id]);
-        $student->update(['approval_status' => 'pending']);
+        $student->forceFill(['approval_status' => 'pending'])->save();
         $this->getJson($urlPath)->assertForbidden();
 
-        $student->update(['approval_status' => 'approved', 'paused_at' => now()]);
+        $student->forceFill(['approval_status' => 'approved', 'paused_at' => now()])->save();
         $this->getJson($urlPath)->assertForbidden();
     }
 
