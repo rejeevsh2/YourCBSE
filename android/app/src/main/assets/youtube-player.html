@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>YouTube lesson video</title>
+  <style>
+    html, body { margin: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+    #player { display: block; width: 100%; height: 100%; border: 0; }
+    #error { color: #fff; font: 16px sans-serif; padding: 24px; }
+  </style>
+</head>
+<body>
+  <div id="player"></div>
+  <script>
+    // This file is served locally at the installed app ID's HTTPS origin.
+    // The YouTube frame receives that origin as both Referer and player origin.
+    // It has no Capacitor bridge, API token or access to the app's storage.
+    const params = new URLSearchParams(location.search);
+    const videoId = params.get('videoId') || '';
+    const start = Number(params.get('start') || 0);
+    let player;
+    let ready = false;
+    let pauseRequested = false;
+    function report(event, code) {
+      parent.postMessage({ type: 'yourschool:youtube', event, code }, 'https://localhost');
+    }
+    window.addEventListener('message', function (event) {
+      if (event.origin !== 'https://localhost' || event.source !== parent || event.data?.type !== 'yourschool:pause') return;
+      pauseRequested = true;
+      if (ready) player.pauseVideo();
+    });
+    window.onYouTubeIframeAPIReady = function () {
+      if (!/^[\w-]{11}$/.test(videoId)) {
+        document.getElementById('player').textContent = 'Invalid video link.';
+        document.getElementById('player').id = 'error';
+        report('error', 2);
+        return;
+      }
+      player = new YT.Player('player', {
+        width: '100%', height: '100%', videoId,
+        playerVars: {
+          playsinline: 1, controls: 1, fs: 1, autoplay: 0,
+          origin: location.origin,
+          start: Number.isSafeInteger(start) && start >= 0 && start <= 2147483647 ? start : 0
+        },
+        events: {
+          onReady: function () {
+            ready = true;
+            if (pauseRequested) { player.pauseVideo(); pauseRequested = false; }
+            report('ready');
+          },
+          onError: function (event) { report('error', event.data); },
+          onStateChange: function (event) { if (event.data === 1) report('playing'); }
+        }
+      });
+    };
+    const script = document.createElement('script');
+    script.src = 'https://www.youtube.com/iframe_api';
+    script.onerror = function () { report('error', 0); };
+    // Old WebViews may expose the legacy native bridge to every frame. Do not
+    // load third-party scripts unless this frame is isolated from that bridge.
+    if (window.androidBridge) report('error', 'webview');
+    else document.head.appendChild(script);
+  </script>
+</body>
+</html>

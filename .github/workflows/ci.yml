@@ -70,7 +70,7 @@ jobs:
       - name: Check registration error handling
         run: npm run test:auth
 
-      - name: Check native interactive links
+      - name: Check native links, gestures and video playback
         run: npm run test:native
 
       - name: Build frontend

@@ -36,7 +36,7 @@ jobs:
         run: npm run typecheck
       - name: Check registration error handling
         run: npm run test:auth
-      - name: Check native interactive links
+      - name: Check native links, gestures and video playback
         run: npm run test:native
       - name: Check the website still builds
         run: npm run build

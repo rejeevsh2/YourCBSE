@@ -4,6 +4,7 @@ import { Capacitor, type PluginListenerHandle } from "@capacitor/core";
 import { App } from "@capacitor/app";
 import { toast } from "sonner";
 import { openExternalResource } from "@/lib/native/resources";
+import { exitNativeVideoFullscreen } from "@/lib/native/video";
 
 export function NativeAppSupport() {
   const router = useRouter();
@@ -13,8 +14,16 @@ export function NativeAppSupport() {
     if (!Capacitor.isNativePlatform()) return;
     let disposed = false;
     let backListener: PluginListenerHandle | undefined;
+    let pauseListener: PluginListenerHandle | undefined;
 
-    void App.addListener("backButton", ({ canGoBack }) => {
+    void App.addListener("backButton", async ({ canGoBack }) => {
+      // Native video fullscreen can be active even when the main document
+      // does not expose a fullscreenElement (the player is in a subframe).
+      try {
+        if (await exitNativeVideoFullscreen()) return;
+      } catch {
+        /* Keep the normal Back behavior if the plugin is unavailable. */
+      }
       if (document.fullscreenElement) {
         void document
           .exitFullscreen()
@@ -37,6 +46,15 @@ export function NativeAppSupport() {
         else backListener = handle;
       })
       .catch(() => toast.error("Android navigation could not start. Please reopen the app."));
+
+    void App.addListener("pause", () => {
+      window.dispatchEvent(new Event("yourschool:pause-videos"));
+    })
+      .then((handle) => {
+        if (disposed) void handle.remove();
+        else pauseListener = handle;
+      })
+      .catch(() => undefined);
 
     const updateConnection = () => setOffline(!navigator.onLine);
     updateConnection();
@@ -63,6 +81,7 @@ export function NativeAppSupport() {
     return () => {
       disposed = true;
       void backListener?.remove();
+      void pauseListener?.remove();
       window.removeEventListener("online", updateConnection);
       window.removeEventListener("offline", updateConnection);
       document.removeEventListener("click", openLink, true);

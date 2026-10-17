@@ -55,8 +55,10 @@ or uploads an app to Google Play.
   required by this branch.
 - Only the Android build enables Android back-button handling, external-link
   browser tabs and the offline connection message.
-- YouTube videos open through the Open video button. PDF notes and external
-  interactive activities open separately, leaving the lesson in the app.
+- YouTube videos play inside student lessons and teacher previews, with the
+  official player controls and fullscreen. Open in YouTube remains available.
+  PDF notes and external interactive activities open separately, leaving the
+  lesson in the app.
   API-served library files use Android's save/share sheet. Large files should
   remain external links, as planned.
 - Activity scores from external applications still need an integration before
@@ -74,6 +76,35 @@ The Android build intentionally ignores the website's root `.env.local` and
 disables mock login/data. Do not put secrets in any frontend build variable.
 
 ## First phone test
+
+Version 0.1.5 adds embedded YouTube playback using existing lesson URLs (watch,
+short links, Shorts, live and embed URLs). The Android-only wrapper is served
+from a local HTTPS origin matching the installed package ID; this supplies
+YouTube's required app identity in the Referer/origin without changing the
+main app origin, sign-in storage, or backend. It is not a remotely hosted page.
+The player uses the official IFrame API, retains YouTube branding/controls,
+does not autoplay, and pauses when the app is backgrounded. Loading errors have
+Retry video and Open in YouTube alternatives outside the player.
+
+Android's WebChromeClient now handles video fullscreen: it displays the custom
+view, hides the phone bars, keeps the screen awake, and restores prior window
+state on exit. Fullscreen survives rotation; Android Back exits the player
+before navigating the lesson. The normal Capacitor client remains in use for
+permissions, file selection, and main-frame navigation. No extra permissions,
+YouTube credentials or API keys are required for these lesson embeds.
+
+Phone checks for 0.1.5: play a channel video inside the lesson; seek and pause;
+enter/exit fullscreen using both the player button and Android Back; rotate
+both ways without losing the playback position; background/reopen the app;
+try another lesson; test a private/embedding-disabled video and an offline retry;
+check the Open in YouTube fallback and a teacher preview. Recheck slide pinch
+and swipe, login, PDFs and interactive links. Passing a build does not prove
+that a real phone's YouTube playback or fullscreen works.
+
+YouTube settings: videos must permit embedding and be playable by the viewer.
+Public/unlisted videos are appropriate for normal student playback. Unlisted
+links can be shared outside YourSchool; they are not student-only protection.
+
 
 Version 0.1.4 adds an immersive slide viewer. A local Android plugin hides the
 status and navigation bars, uses black surroundings, re-applies immersion after
@@ -127,7 +158,8 @@ APK. This clears local app data; account data saved on the server is retained.
 
 1. Sign in with a test student account; check the dashboard.
 2. Open a class, subject, chapter and lesson.
-3. Open a YouTube video, a PDF and an interactive activity; return to the lesson.
+3. Play a YouTube video inside a lesson, including fullscreen; open a PDF and
+   an interactive activity separately and return to the lesson.
 4. Save progress or a bookmark in the app, then reload the website and check it.
 5. Check Android Back, menus, keyboard, screen rotation, and a network disconnect.
 6. Sign out, relaunch, and confirm that private pages require sign-in again.
@@ -143,3 +175,7 @@ native-feature changes require a new APK/app release.
 References: [Capacitor setup](https://capacitorjs.com/docs/getting-started),
 [native HTTP](https://capacitorjs.com/docs/apis/http), and
 [TanStack Start SPA mode](https://tanstack.com/start/latest/docs/framework/react/guide/spa-mode).
+
+YouTube references: [embedded player identity](https://developers.google.com/youtube/terms/required-minimum-functionality#api-client-identity-and-credentials),
+[IFrame API](https://developers.google.com/youtube/iframe_api_reference), and
+[Android fullscreen custom views](https://developer.android.com/reference/android/webkit/WebChromeClient#onShowCustomView(android.view.View,%20android.webkit.WebChromeClient.CustomViewCallback)).
