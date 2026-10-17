@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { API_BASE_URL, authenticatedFetch } from "@/lib/auth/http";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { NativePresentationViewer } from "@/components/lessons/NativePresentationViewer";
 
 type Slide = { number: number; url: string };
 type SlideResponse = {
@@ -29,6 +29,7 @@ export function PresentationSlides({ id, title }: { id: number; title: string })
   const [error, setError] = useState("");
   const [originalLoading, setOriginalLoading] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [slidesLoading, setSlidesLoading] = useState(false);
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,6 +41,7 @@ export function PresentationSlides({ id, title }: { id: number; title: string })
   }, [id]);
 
   useEffect(() => {
+    if (import.meta.env.VITE_NATIVE_APP === "true") return;
     const syncFullscreenState = () => {
       setIsFullscreen(document.fullscreenElement === container.current);
     };
@@ -48,9 +50,13 @@ export function PresentationSlides({ id, title }: { id: number; title: string })
     return () => document.removeEventListener("fullscreenchange", syncFullscreenState);
   }, []);
 
-  async function loadSlides() {
-    if (import.meta.env.VITE_NATIVE_APP === "true") setIsFullscreen(false);
-    setMode("loading");
+  async function loadSlides(keepFullscreen = false) {
+    if (slidesLoading) return;
+    setSlidesLoading(true);
+    if (!keepFullscreen) {
+      if (import.meta.env.VITE_NATIVE_APP === "true") setIsFullscreen(false);
+      setMode("loading");
+    }
     setError("");
 
     try {
@@ -62,6 +68,7 @@ export function PresentationSlides({ id, title }: { id: number; title: string })
       // The preview feature is intentionally OFF until the converter is ready.
       // Preserve existing presentation access during that deployment stage.
       if (result.status === 404) {
+        setIsFullscreen(false);
         setMode("legacy");
         return;
       }
@@ -76,6 +83,7 @@ export function PresentationSlides({ id, title }: { id: number; title: string })
 
       const data = (await result.json()) as SlideResponse;
       if (data.status === "processing") {
+        setIsFullscreen(false);
         setMode("processing");
         return;
       }
@@ -93,8 +101,11 @@ export function PresentationSlides({ id, title }: { id: number; title: string })
       setIndex((old) => Math.min(old, data.slides!.length - 1));
       setMode("ready");
     } catch (reason) {
+      setIsFullscreen(false);
       setError(reason instanceof Error ? reason.message : "Could not open slides.");
       setMode("error");
+    } finally {
+      setSlidesLoading(false);
     }
   }
 
@@ -127,7 +138,7 @@ export function PresentationSlides({ id, title }: { id: number; title: string })
 
   async function toggleFullscreen() {
     // Capacitor's default WebChromeClient immediately closes browser fullscreen.
-    // Use the app's accessible dialog instead, retaining the selected slide.
+    // The native viewer hides system bars and handles its own slide gestures.
     if (import.meta.env.VITE_NATIVE_APP === "true") {
       setIsFullscreen((old) => !old);
       return;
@@ -144,30 +155,16 @@ export function PresentationSlides({ id, title }: { id: number; title: string })
     mode === "ready" && slides.length ? (
       <div
         ref={container}
-        className={
-          import.meta.env.VITE_NATIVE_APP === "true" && isFullscreen
-            ? "flex h-full min-h-0 flex-col gap-3 bg-background p-2 pt-10"
-            : "space-y-3 rounded-xl border bg-background p-2 sm:p-4"
-        }
+        className="space-y-3 rounded-xl border bg-background p-2 sm:p-4"
         tabIndex={0}
         onKeyDown={(event) => {
           if (event.key === "ArrowLeft") setIndex((old) => Math.max(0, old - 1));
           if (event.key === "ArrowRight") setIndex((old) => Math.min(slides.length - 1, old + 1));
         }}
       >
-        <div
-          className={
-            import.meta.env.VITE_NATIVE_APP === "true" && isFullscreen
-              ? "flex min-h-0 flex-1 items-center justify-center bg-black/5"
-              : "flex min-h-48 items-center justify-center bg-black/5"
-          }
-        >
+        <div className="flex min-h-48 items-center justify-center bg-black/5">
           <img
-            className={
-              import.meta.env.VITE_NATIVE_APP === "true" && isFullscreen
-                ? "h-full min-h-0 w-full object-contain"
-                : "aspect-video max-h-[78vh] w-full object-contain"
-            }
+            className="aspect-video max-h-[78vh] w-full object-contain"
             src={slides[index].url}
             alt={"Slide " + (index + 1) + " of " + slides.length + " — " + title}
             referrerPolicy="no-referrer"
@@ -251,19 +248,21 @@ export function PresentationSlides({ id, title }: { id: number; title: string })
         </div>
       ) : null}
 
-      {import.meta.env.VITE_NATIVE_APP === "true" && isFullscreen ? (
-        <Dialog open onOpenChange={setIsFullscreen}>
-          <DialogContent
-            className="left-0 top-0 flex h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-0 p-0 sm:rounded-none"
-            aria-describedby={undefined}
-          >
-            <DialogTitle className="sr-only">{title}</DialogTitle>
-            {viewer}
-          </DialogContent>
-        </Dialog>
-      ) : (
-        viewer
-      )}
+      {viewer}
+      {import.meta.env.VITE_NATIVE_APP === "true" &&
+      isFullscreen &&
+      mode === "ready" &&
+      slides.length ? (
+        <NativePresentationViewer
+          title={title}
+          slides={slides}
+          index={index}
+          refreshing={slidesLoading}
+          onIndexChange={setIndex}
+          onClose={() => setIsFullscreen(false)}
+          onRefresh={() => void loadSlides(true)}
+        />
+      ) : null}
 
       {mode === "error" ? (
         <Button variant="outline" type="button" onClick={() => void loadSlides()}>

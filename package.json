@@ -16,7 +16,7 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "test:auth": "node --test tests/auth-response-errors.test.mjs",
-    "test:native": "node --test tests/native-interactive-links.test.mjs",
+    "test:native": "node --test tests/native-interactive-links.test.mjs tests/native-presentation-gestures.test.mjs",
     "start": "node .output/server/index.mjs"
   },
   "dependencies": {

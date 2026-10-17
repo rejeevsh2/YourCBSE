@@ -75,13 +75,30 @@ disables mock login/data. Do not put secrets in any frontend build variable.
 
 ## First phone test
 
+Version 0.1.4 adds an immersive slide viewer. A local Android plugin hides the
+status and navigation bars, uses black surroundings, re-applies immersion after
+rotation/resume, and restores the prior bar state when the viewer closes.
+Slides keep their proportions and use the whole available area; small controls
+overlay the image and hide after three seconds.
+
+- Swipe left/right at normal zoom to change slides.
+- Pinch with two fingers to zoom from 1x to 5x; drag with one finger while zoomed.
+- Double-tap to zoom in or return to the whole slide. The percentage button also
+  resets zoom; plus/minus buttons provide an alternative to pinching.
+- Tap the image to show/hide controls. Exit fullscreen or Android Back returns
+  to the same lesson and selected slide. System edge swipes can reveal the
+  phone bars temporarily, as required by Android.
+- Rotate the phone for wide slides. No orientation lock is forced.
+
+Retest on a phone: status/navigation bars hide; both orientations maximize the
+slide; pinch never changes slides; panning stops at image edges; slide changes
+reset zoom; Exit/Back and switching away/returning restore the expected bars.
+Automated gesture and DOM checks do not replace this device test.
+
 Version 0.1.3 incorporates main commit `203119f`: private R2 lesson attachments,
 the in-page PowerPoint slide viewer, Resource Library links to that viewer, and
-the Fullscreen / Exit fullscreen toggle. On Android, fullscreen uses a dialog
-that fills the app viewport because Capacitor's default WebChromeClient closes
-browser fullscreen requests. The dialog preserves the slide selection and
-keeps the navigation controls visible in portrait or landscape. Android Back exits fullscreen before
-navigating away. Private PDFs and original-file actions use Android browser tabs
+the Fullscreen / Exit fullscreen toggle. Its viewport-only fullscreen has been
+replaced by v0.1.4's immersive viewer. Private PDFs and original-file actions use Android browser tabs
 instead of desktop popup windows; slide images stay inside the lesson.
 
 Open a converted presentation from both a lesson and the Resource Library.
