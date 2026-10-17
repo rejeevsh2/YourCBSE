@@ -77,7 +77,10 @@ disables mock login/data. Do not put secrets in any frontend build variable.
 
 Version 0.1.3 incorporates main commit `203119f`: private R2 lesson attachments,
 the in-page PowerPoint slide viewer, Resource Library links to that viewer, and
-the Fullscreen / Exit fullscreen toggle. Android Back exits fullscreen before
+the Fullscreen / Exit fullscreen toggle. On Android, fullscreen uses a dialog
+that fills the app viewport because Capacitor's default WebChromeClient closes
+browser fullscreen requests. The dialog preserves the slide selection and
+keeps the navigation controls visible in portrait or landscape. Android Back exits fullscreen before
 navigating away. Private PDFs and original-file actions use Android browser tabs
 instead of desktop popup windows; slide images stay inside the lesson.
 
