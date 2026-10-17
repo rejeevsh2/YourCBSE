@@ -50,9 +50,9 @@ function InteractiveAppLaunch() {
           const data = await result.json().catch(() => null);
           throw new Error(
             data?.message ||
-            (result.status === 403
-              ? "Your account does not have access to this lesson or app."
-              : "Could not launch this app."),
+              (result.status === 403
+                ? "Your account does not have access to this lesson or app."
+                : "Could not launch this app."),
           );
         }
 
@@ -65,7 +65,18 @@ function InteractiveAppLaunch() {
 
         if (!canceled) {
           setMessage("Opening your interactive app…");
-          window.location.replace(launch.href);
+          if (import.meta.env.VITE_NATIVE_APP === "true") {
+            const { openExternalResource } = await import("@/lib/native/resources");
+            if (canceled) return;
+            // Exchange the one-use ticket in the activity's own browser tab.
+            // Its protected files can then use that tab's HttpOnly app cookie.
+            await openExternalResource(launch.href);
+            if (!canceled) {
+              setMessage("Your interactive app was opened. Use Back to return to your lesson.");
+            }
+          } else {
+            window.location.replace(launch.href);
+          }
         }
       } catch (error) {
         if (!canceled) {
@@ -75,14 +86,18 @@ function InteractiveAppLaunch() {
     }
 
     void launch();
-    return () => { canceled = true; };
+    return () => {
+      canceled = true;
+    };
   }, [appId]);
 
   return (
     <main className="mx-auto flex min-h-[60vh] max-w-lg flex-col items-center justify-center gap-4 p-6 text-center">
       <h1 className="text-xl font-semibold">YourSchool Interactive App</h1>
       <p role="status">{message}</p>
-      <a className="text-primary underline" href="/">Return to YourSchool</a>
+      <a className="text-primary underline" href="/">
+        Return to YourSchool
+      </a>
     </main>
   );
 }

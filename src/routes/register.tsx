@@ -184,7 +184,7 @@ function RegisterPage() {
         "Your account is waiting for administrator approval before you can sign in.",
     });
 
-    await navigate({ to: "/login" });
+    await navigate({ to: "/account-pending" });
   }
 
   return (

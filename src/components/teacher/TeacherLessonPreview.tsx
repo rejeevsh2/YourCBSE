@@ -12,6 +12,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { PrivateLessonAttachment } from "@/components/lessons/PrivateLessonAttachment";
 import { Button } from "@/components/ui/button";
+import { YouTubeVideo } from "@/components/lessons/YouTubeVideo";
+import { parseYouTubeVideo } from "@/lib/youtube";
 import { API_BASE_URL } from "@/lib/auth/http";
 
 export type TeacherLessonContent = {
@@ -82,66 +84,6 @@ function resolveUrl(
 
   return `${API_ORIGIN}/storage/${value}`;
 }
-function youtubeEmbedUrl(
-  url: string,
-) {
-  try {
-    const parsed = new URL(url);
-
-    if (
-      parsed.hostname === "youtu.be" ||
-      parsed.hostname === "www.youtu.be"
-    ) {
-      const id =
-        parsed.pathname
-          .replace("/", "")
-          .trim();
-
-      return id
-        ? `https://www.youtube.com/embed/${id}`
-        : null;
-    }
-
-    if (
-      parsed.hostname.includes(
-        "youtube.com",
-      )
-    ) {
-      if (
-        parsed.pathname.startsWith(
-          "/embed/",
-        )
-      ) {
-        return url;
-      }
-
-      if (
-        parsed.pathname.startsWith(
-          "/shorts/",
-        )
-      ) {
-        const id =
-          parsed.pathname.split("/")[2];
-
-        return id
-          ? `https://www.youtube.com/embed/${id}`
-          : null;
-      }
-
-      const id =
-        parsed.searchParams.get("v");
-
-      return id
-        ? `https://www.youtube.com/embed/${id}`
-        : null;
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
-}
-
 function typeLabel(
   type: TeacherLessonContent["content_type"],
 ) {
@@ -367,21 +309,10 @@ function VideoPreview({
   url: string;
   title: string;
 }) {
-  const youtube =
-    youtubeEmbedUrl(url);
+  const youtube = parseYouTubeVideo(url);
 
   if (youtube) {
-    return (
-      <div className="aspect-video overflow-hidden rounded-xl border bg-black">
-        <iframe
-          src={youtube}
-          title={title}
-          className="h-full w-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        />
-      </div>
-    );
+    return <YouTubeVideo key={url} video={youtube} title={title} />;
   }
 
   if (

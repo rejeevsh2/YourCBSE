@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountCreatedRouteImport } from './routes/account-created'
 import { Route as AccountLockedRouteImport } from './routes/account-locked'
+import { Route as AccountPendingRouteImport } from './routes/account-pending'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as ComingSoonRouteImport } from './routes/coming-soon'
@@ -75,9 +76,9 @@ import { Route as AdminWorksheetsRouteImport } from './routes/admin.worksheets'
 import { Route as BlogSlugRouteImport } from './routes/blog_.$slug'
 import { Route as ChapterChapterIdRouteImport } from './routes/chapter.$chapterId'
 import { Route as ErrorCodeRouteImport } from './routes/error.$code'
+import { Route as InteractiveAppAppIdRouteImport } from './routes/interactive-app.$appId'
 import { Route as LearnChapterSlugRouteImport } from './routes/learn.$chapterSlug'
 import { Route as LessonLessonIdRouteImport } from './routes/lesson.$lessonId'
-import { Route as InteractiveAppAppIdRouteImport } from './routes/interactive-app.$appId'
 import { Route as LibraryIndexRouteImport } from './routes/library.index'
 import { Route as LibraryDownloadsRouteImport } from './routes/library.downloads'
 import { Route as LibraryFavoritesRouteImport } from './routes/library.favorites'
@@ -162,6 +163,11 @@ const AccountCreatedRoute = AccountCreatedRouteImport.update({
 const AccountLockedRoute = AccountLockedRouteImport.update({
   id: '/account-locked',
   path: '/account-locked',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountPendingRoute = AccountPendingRouteImport.update({
+  id: '/account-pending',
+  path: '/account-pending',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -474,6 +480,11 @@ const ErrorCodeRoute = ErrorCodeRouteImport.update({
   path: '/error/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InteractiveAppAppIdRoute = InteractiveAppAppIdRouteImport.update({
+  id: '/interactive-app/$appId',
+  path: '/interactive-app/$appId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LearnChapterSlugRoute = LearnChapterSlugRouteImport.update({
   id: '/learn/$chapterSlug',
   path: '/learn/$chapterSlug',
@@ -482,11 +493,6 @@ const LearnChapterSlugRoute = LearnChapterSlugRouteImport.update({
 const LessonLessonIdRoute = LessonLessonIdRouteImport.update({
   id: '/lesson/$lessonId',
   path: '/lesson/$lessonId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InteractiveAppAppIdRoute = InteractiveAppAppIdRouteImport.update({
-  id: '/interactive-app/$appId',
-  path: '/interactive-app/$appId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LibraryIndexRoute = LibraryIndexRouteImport.update({
@@ -828,6 +834,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/account-created': typeof AccountCreatedRoute
   '/account-locked': typeof AccountLockedRoute
+  '/account-pending': typeof AccountPendingRoute
   '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRoute
   '/coming-soon': typeof ComingSoonRoute
@@ -889,9 +896,9 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/chapter/$chapterId': typeof ChapterChapterIdRoute
   '/error/$code': typeof ErrorCodeRoute
+  '/interactive-app/$appId': typeof InteractiveAppAppIdRoute
   '/learn/$chapterSlug': typeof LearnChapterSlugRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
-  '/interactive-app/$appId': typeof InteractiveAppAppIdRoute
   '/library/downloads': typeof LibraryDownloadsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
   '/library/recent': typeof LibraryRecentRoute
@@ -964,6 +971,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/account-created': typeof AccountCreatedRoute
   '/account-locked': typeof AccountLockedRoute
+  '/account-pending': typeof AccountPendingRoute
   '/blog': typeof BlogRoute
   '/coming-soon': typeof ComingSoonRoute
   '/contact': typeof ContactRoute
@@ -1021,9 +1029,9 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/chapter/$chapterId': typeof ChapterChapterIdRoute
   '/error/$code': typeof ErrorCodeRoute
+  '/interactive-app/$appId': typeof InteractiveAppAppIdRoute
   '/learn/$chapterSlug': typeof LearnChapterSlugRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
-  '/interactive-app/$appId': typeof InteractiveAppAppIdRoute
   '/library/downloads': typeof LibraryDownloadsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
   '/library/recent': typeof LibraryRecentRoute
@@ -1097,6 +1105,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/account-created': typeof AccountCreatedRoute
   '/account-locked': typeof AccountLockedRoute
+  '/account-pending': typeof AccountPendingRoute
   '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRoute
   '/coming-soon': typeof ComingSoonRoute
@@ -1158,9 +1167,9 @@ export interface FileRoutesById {
   '/blog_/$slug': typeof BlogSlugRoute
   '/chapter/$chapterId': typeof ChapterChapterIdRoute
   '/error/$code': typeof ErrorCodeRoute
+  '/interactive-app/$appId': typeof InteractiveAppAppIdRoute
   '/learn/$chapterSlug': typeof LearnChapterSlugRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
-  '/interactive-app/$appId': typeof InteractiveAppAppIdRoute
   '/library/downloads': typeof LibraryDownloadsRoute
   '/library/favorites': typeof LibraryFavoritesRoute
   '/library/recent': typeof LibraryRecentRoute
@@ -1235,6 +1244,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/account-created'
     | '/account-locked'
+    | '/account-pending'
     | '/admin'
     | '/blog'
     | '/coming-soon'
@@ -1296,9 +1306,9 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/chapter/$chapterId'
     | '/error/$code'
+    | '/interactive-app/$appId'
     | '/learn/$chapterSlug'
     | '/lesson/$lessonId'
-    | '/interactive-app/$appId'
     | '/library/downloads'
     | '/library/favorites'
     | '/library/recent'
@@ -1371,6 +1381,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/account-created'
     | '/account-locked'
+    | '/account-pending'
     | '/blog'
     | '/coming-soon'
     | '/contact'
@@ -1428,9 +1439,9 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/chapter/$chapterId'
     | '/error/$code'
+    | '/interactive-app/$appId'
     | '/learn/$chapterSlug'
     | '/lesson/$lessonId'
-    | '/interactive-app/$appId'
     | '/library/downloads'
     | '/library/favorites'
     | '/library/recent'
@@ -1503,6 +1514,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/account-created'
     | '/account-locked'
+    | '/account-pending'
     | '/admin'
     | '/blog'
     | '/coming-soon'
@@ -1564,9 +1576,9 @@ export interface FileRouteTypes {
     | '/blog_/$slug'
     | '/chapter/$chapterId'
     | '/error/$code'
+    | '/interactive-app/$appId'
     | '/learn/$chapterSlug'
     | '/lesson/$lessonId'
-    | '/interactive-app/$appId'
     | '/library/downloads'
     | '/library/favorites'
     | '/library/recent'
@@ -1640,6 +1652,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AccountCreatedRoute: typeof AccountCreatedRoute
   AccountLockedRoute: typeof AccountLockedRoute
+  AccountPendingRoute: typeof AccountPendingRoute
   AdminRoute: typeof AdminRouteWithChildren
   BlogRoute: typeof BlogRoute
   ComingSoonRoute: typeof ComingSoonRoute
@@ -1668,9 +1681,9 @@ export interface RootRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
   ChapterChapterIdRoute: typeof ChapterChapterIdRoute
   ErrorCodeRoute: typeof ErrorCodeRoute
+  InteractiveAppAppIdRoute: typeof InteractiveAppAppIdRoute
   LearnChapterSlugRoute: typeof LearnChapterSlugRoute
   LessonLessonIdRoute: typeof LessonLessonIdRoute
-  InteractiveAppAppIdRoute: typeof InteractiveAppAppIdRoute
   PlayerChapterSlugRoute: typeof PlayerChapterSlugRoute
   SubjectSubjectIdRoute: typeof SubjectSubjectIdRoute
   UnitUnitIdRoute: typeof UnitUnitIdRoute
@@ -1704,6 +1717,13 @@ declare module '@tanstack/react-router' {
       path: '/account-locked'
       fullPath: '/account-locked'
       preLoaderRoute: typeof AccountLockedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account-pending': {
+      id: '/account-pending'
+      path: '/account-pending'
+      fullPath: '/account-pending'
+      preLoaderRoute: typeof AccountPendingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -2140,6 +2160,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ErrorCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/interactive-app/$appId': {
+      id: '/interactive-app/$appId'
+      path: '/interactive-app/$appId'
+      fullPath: '/interactive-app/$appId'
+      preLoaderRoute: typeof InteractiveAppAppIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/learn/$chapterSlug': {
       id: '/learn/$chapterSlug'
       path: '/learn/$chapterSlug'
@@ -2152,13 +2179,6 @@ declare module '@tanstack/react-router' {
       path: '/lesson/$lessonId'
       fullPath: '/lesson/$lessonId'
       preLoaderRoute: typeof LessonLessonIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/interactive-app/$appId': {
-      id: '/interactive-app/$appId'
-      path: '/interactive-app/$appId'
-      fullPath: '/interactive-app/$appId'
-      preLoaderRoute: typeof InteractiveAppAppIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/library/': {
@@ -2851,6 +2871,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AccountCreatedRoute: AccountCreatedRoute,
   AccountLockedRoute: AccountLockedRoute,
+  AccountPendingRoute: AccountPendingRoute,
   AdminRoute: AdminRouteWithChildren,
   BlogRoute: BlogRoute,
   ComingSoonRoute: ComingSoonRoute,
@@ -2879,9 +2900,9 @@ const rootRouteChildren: RootRouteChildren = {
   BlogSlugRoute: BlogSlugRoute,
   ChapterChapterIdRoute: ChapterChapterIdRoute,
   ErrorCodeRoute: ErrorCodeRoute,
+  InteractiveAppAppIdRoute: InteractiveAppAppIdRoute,
   LearnChapterSlugRoute: LearnChapterSlugRoute,
   LessonLessonIdRoute: LessonLessonIdRoute,
-  InteractiveAppAppIdRoute: InteractiveAppAppIdRoute,
   PlayerChapterSlugRoute: PlayerChapterSlugRoute,
   SubjectSubjectIdRoute: SubjectSubjectIdRoute,
   UnitUnitIdRoute: UnitUnitIdRoute,

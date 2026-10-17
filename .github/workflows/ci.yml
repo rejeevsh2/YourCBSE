@@ -67,6 +67,12 @@ jobs:
       - name: Check TypeScript
         run: npm run typecheck
 
+      - name: Check registration error handling
+        run: npm run test:auth
+
+      - name: Check native links, gestures and video playback
+        run: npm run test:native
+
       - name: Build frontend
         run: npm run build
 

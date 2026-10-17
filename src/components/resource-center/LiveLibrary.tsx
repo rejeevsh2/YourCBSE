@@ -66,6 +66,11 @@ async function openResourceFile(
       (data.type === "external" || data.type === "signed") &&
       data.url
     ) {
+      if (import.meta.env.VITE_NATIVE_APP === "true") {
+        const { openExternalResource } = await import("@/lib/native/resources");
+        await openExternalResource(data.url);
+        return;
+      }
       window.open(
         data.url,
         "_blank",
@@ -108,6 +113,12 @@ async function openResourceFile(
           "",
         );
     }
+  }
+
+  if (import.meta.env.VITE_NATIVE_APP === "true") {
+    const { shareNativeFile } = await import("@/lib/native/resources");
+    await shareNativeFile(blob, filename);
+    return;
   }
 
   const objectUrl =

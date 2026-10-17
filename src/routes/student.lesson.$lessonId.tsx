@@ -23,6 +23,8 @@ import {
 import { PortalPage } from "@/components/layout/PortalPage";
 import { PrivateLessonAttachment } from "@/components/lessons/PrivateLessonAttachment";
 import { Button } from "@/components/ui/button";
+import { YouTubeVideo } from "@/components/lessons/YouTubeVideo";
+import { parseYouTubeVideo } from "@/lib/youtube";
 import { Badge } from "@/components/ui/badge";
 import { getAuthToken } from "@/lib/auth";
 
@@ -1023,7 +1025,7 @@ function VideoContent({
     );
   }
 
-  const youtubeEmbedUrl = getYouTubeEmbedUrl(url);
+  const youtube = parseYouTubeVideo(url);
 
   const isDirectVideo =
     /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
@@ -1036,18 +1038,8 @@ function VideoContent({
         </p>
       ) : null}
 
-      {youtubeEmbedUrl ? (
-        <div className="overflow-hidden rounded-2xl border bg-black">
-          <div className="aspect-video">
-            <iframe
-              src={youtubeEmbedUrl}
-              title={item.title}
-              className="h-full w-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-          </div>
-        </div>
+      {youtube ? (
+        <YouTubeVideo key={url} video={youtube} title={item.title} />
       ) : isDirectVideo ? (
         <div className="overflow-hidden rounded-2xl border bg-black">
           <video
@@ -1068,20 +1060,22 @@ function VideoContent({
         </div>
       )}
 
-      <Button
-        variant="outline"
-        className="rounded-2xl"
-        asChild
-      >
-        <a
-          href={url}
-          target="_blank"
-          rel="noreferrer"
+      {!youtube ? (
+        <Button
+          variant="outline"
+          className="rounded-2xl"
+          asChild
         >
-          <ExternalLink className="size-4" />
-          Open video
-        </a>
-      </Button>
+          <a
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <ExternalLink className="size-4" />
+            Open video
+          </a>
+        </Button>
+      ) : null}
     </div>
   );
 }
@@ -1191,7 +1185,7 @@ function FileContent({
         </p>
       ) : null}
 
-      {isPdf ? (
+      {isPdf && import.meta.env.VITE_NATIVE_APP !== "true" ? (
         <div className="overflow-hidden rounded-2xl border bg-background">
           <iframe
             src={url}
@@ -1241,7 +1235,7 @@ function GeneralContent({
 
       {fileUrl ? (
         <>
-          {/\.pdf(\?.*)?$/i.test(fileUrl) ? (
+          {/\.pdf(\?.*)?$/i.test(fileUrl) && import.meta.env.VITE_NATIVE_APP !== "true" ? (
             <div className="overflow-hidden rounded-2xl border bg-background">
               <iframe
                 src={fileUrl}
@@ -1372,48 +1366,5 @@ function getContentIcon(
 
     default:
       return FileText;
-  }
-}
-
-function getYouTubeEmbedUrl(url: string) {
-  try {
-    const parsed = new URL(url);
-
-    if (
-      parsed.hostname === "youtu.be" ||
-      parsed.hostname === "www.youtu.be"
-    ) {
-      const videoId = parsed.pathname
-        .replace("/", "")
-        .trim();
-
-      return videoId
-        ? `https://www.youtube.com/embed/${videoId}`
-        : null;
-    }
-
-    if (parsed.hostname.includes("youtube.com")) {
-      if (parsed.pathname.startsWith("/embed/")) {
-        return url;
-      }
-
-      if (parsed.pathname.startsWith("/shorts/")) {
-        const videoId = parsed.pathname.split("/")[2];
-
-        return videoId
-          ? `https://www.youtube.com/embed/${videoId}`
-          : null;
-      }
-
-      const videoId = parsed.searchParams.get("v");
-
-      return videoId
-        ? `https://www.youtube.com/embed/${videoId}`
-        : null;
-    }
-
-    return null;
-  } catch {
-    return null;
   }
 }

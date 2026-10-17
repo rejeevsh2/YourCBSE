@@ -90,7 +90,7 @@ function StandardPrivateLessonAttachment({ item }: { item: PrivateLessonItem }) 
         </Button>
       ) : (
         <>
-          {pdf ? (
+          {pdf && import.meta.env.VITE_NATIVE_APP !== "true" ? (
             <iframe src={url} title={item.title} className="h-[680px] w-full rounded-xl border" referrerPolicy="no-referrer" />
           ) : image ? (
             <img src={url} alt={item.title} className="max-h-[650px] w-full rounded-xl border object-contain" referrerPolicy="no-referrer" />
@@ -128,6 +128,11 @@ function StandardPrivateLessonAttachment({ item }: { item: PrivateLessonItem }) 
 
 /** Direct launch from admin tables or resource menus; no persistent URL storage. */
 export async function openPrivateAttachmentInNewTab(id: number): Promise<void> {
+  if (import.meta.env.VITE_NATIVE_APP === "true") {
+    const { openExternalResource } = await import("@/lib/native/resources");
+    await openExternalResource(await getSignedUrl(id));
+    return;
+  }
   const tab = window.open("about:blank", "_blank");
   if (tab) tab.opener = null;
 
@@ -153,8 +158,9 @@ export function PrivateLessonOpenAction({ id, title }: { id: number; title: stri
 
   async function open() {
     if (loading) return;
-    // A tab opened inside the click event is usually permitted by the browser.
-    const tab = window.open("about:blank", "_blank");
+    // Reserve a popup on the website; Android opens its browser after authorization.
+    const native = import.meta.env.VITE_NATIVE_APP === "true";
+    const tab = native ? null : window.open("about:blank", "_blank");
     if (tab) tab.opener = null;
 
     setLoading(true);
@@ -162,7 +168,10 @@ export function PrivateLessonOpenAction({ id, title }: { id: number; title: stri
     setError("");
     try {
       const link = await getSignedUrl(id);
-      if (tab && !tab.closed) {
+      if (native) {
+        const { openExternalResource } = await import("@/lib/native/resources");
+        await openExternalResource(link);
+      } else if (tab && !tab.closed) {
         tab.location.replace(link);
       } else {
         setFallbackUrl(link);

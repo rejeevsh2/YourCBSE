@@ -154,6 +154,11 @@ function LoginPage() {
     }
 
     if (!result.ok) {
+      if (result.code === "account-pending-approval") {
+        await navigate({ to: "/account-pending" });
+        return;
+      }
+
       if (result.code === "account-locked") {
         await navigate({
           to: "/account-locked",

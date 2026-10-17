@@ -6,14 +6,26 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
+    "build:android": "vite build --config vite.android.config.ts --mode android",
+    "android:sync": "npm run build:android && cap sync android",
+    "android:open": "cap open android",
+    "android:run": "npm run android:sync && cap run android",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
+    "test:auth": "node --test tests/auth-response-errors.test.mjs",
+    "test:native": "node --test tests/native-interactive-links.test.mjs tests/native-presentation-gestures.test.mjs tests/youtube-player.test.mjs",
     "start": "node .output/server/index.mjs"
   },
   "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/browser": "8.0.5",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/filesystem": "8.1.4",
+    "@capacitor/share": "8.0.3",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -68,6 +80,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@capacitor/cli": "8.5.3",
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-tanstack-config": "2.8.2",
     "@types/node": "^22.16.5",

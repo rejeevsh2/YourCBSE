@@ -3,9 +3,9 @@
  */
 
 import { getAuthToken } from "./session";
+import { statusToCode, type LaravelErrorBody } from "./response-errors";
 import {
   authFailure,
-  type AuthErrorCode,
   type AuthResult,
   type FieldErrors,
 } from "./types";
@@ -32,12 +32,6 @@ interface RequestOptions {
   signal?: AbortSignal;
 }
 
-interface LaravelErrorBody {
-  message?: string;
-  errors?: Record<string, string[]>;
-  code?: string;
-}
-
 export function toFieldErrors(
   errors?: Record<string, string[]>,
 ): FieldErrors | undefined {
@@ -56,43 +50,6 @@ function toCamelCase(value: string) {
     /_([a-z])/g,
     (_, char: string) => char.toUpperCase(),
   );
-}
-
-function statusToCode(
-  status: number,
-  body: LaravelErrorBody,
-): AuthErrorCode {
-  if (body.code && isAuthErrorCode(body.code)) {
-    return body.code;
-  }
-
-  if (status === 422) return "validation-error";
-  if (status === 401) return "invalid-credentials";
-  if (status === 403) return "email-not-verified";
-  if (status === 423 || status === 429) return "account-locked";
-
-  return "server-error";
-}
-
-function isAuthErrorCode(
-  value: string,
-): value is AuthErrorCode {
-  return [
-    "wrong-email",
-    "wrong-password",
-    "invalid-credentials",
-    "email-taken",
-    "invalid-otp",
-    "otp-expired",
-    "validation-error",
-    "network-error",
-    "server-error",
-    "email-not-verified",
-    "account-locked",
-    "account-pending-approval",
-    "account-rejected",
-    "account-paused",
-  ].includes(value);
 }
 
 export async function authenticatedFetch(
