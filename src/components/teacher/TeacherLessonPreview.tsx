@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { PrivateLessonAttachment } from "@/components/lessons/PrivateLessonAttachment";
 import { Button } from "@/components/ui/button";
 import { API_BASE_URL } from "@/lib/auth/http";
 
@@ -29,6 +30,8 @@ export type TeacherLessonContent = {
     | "activity";
   content?: string | null;
   file_path?: string | null;
+  has_uploaded_file?: boolean;
+  file_mime_type?: string | null;
   external_url?: string | null;
   display_order?: number | null;
   is_free?: boolean;
@@ -266,6 +269,9 @@ function ContentBlock({
       </header>
 
       <div className="space-y-4 p-5">
+        {item.has_uploaded_file && !item.file_path ? (
+          <PrivateLessonAttachment item={item} />
+        ) : null}
         {item.content ? (
           <div className="whitespace-pre-wrap text-sm leading-7">
             {item.content}
@@ -342,7 +348,8 @@ function ContentBlock({
         ) : null}
 
         {!item.content &&
-        !resourceUrl ? (
+        !resourceUrl &&
+        !item.has_uploaded_file ? (
           <p className="text-sm text-muted-foreground">
             No content has been added to
             this section yet.

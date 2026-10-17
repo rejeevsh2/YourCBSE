@@ -1,3 +1,4 @@
+import { openPrivateAttachmentInNewTab } from "@/components/lessons/PrivateLessonAttachment";
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import {
@@ -50,6 +51,7 @@ type LessonContent = {
   content_type: string;
   content: string | null;
   file_path: string | null;
+  has_uploaded_file?: boolean;
   external_url: string | null;
   display_order: number | null;
   is_free: boolean;
@@ -98,7 +100,7 @@ function getResourceUrl(
 function getSourceLabel(
   item: LessonContent,
 ) {
-  if (item.file_path) {
+  if (item.file_path || item.has_uploaded_file) {
     return "Uploaded file";
   }
 
@@ -221,7 +223,7 @@ function AdminResourcesPage() {
           !item.is_active);
 
       const source =
-        item.file_path
+        (item.file_path || item.has_uploaded_file)
           ? "uploaded"
           : item.external_url
             ? "external"
@@ -256,7 +258,7 @@ function AdminResourcesPage() {
   const uploadedFileCount =
     items.filter(
       (item) =>
-        Boolean(item.file_path),
+        Boolean(item.file_path || item.has_uploaded_file),
     ).length;
 
   const activeCount =
@@ -267,6 +269,13 @@ function AdminResourcesPage() {
   function openResource(
     item: LessonContent,
   ) {
+    if (item.has_uploaded_file && !item.file_path) {
+      void openPrivateAttachmentInNewTab(item.id).catch((error: unknown) =>
+        toast.error(error instanceof Error ? error.message : "Could not open private file."),
+      );
+      return;
+    }
+
     const url = getResourceUrl(item);
 
     if (!url) {

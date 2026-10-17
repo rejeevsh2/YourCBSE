@@ -15,6 +15,12 @@ export function NativeAppSupport() {
     let backListener: PluginListenerHandle | undefined;
 
     void App.addListener("backButton", ({ canGoBack }) => {
+      if (document.fullscreenElement) {
+        void document
+          .exitFullscreen()
+          .catch(() => toast.error("Use Exit fullscreen to return to your lesson."));
+        return;
+      }
       // Let open dialogs and menus close before navigating out of the page.
       const dialog = document.querySelector(
         '[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"], [role="menu"][data-state="open"]',

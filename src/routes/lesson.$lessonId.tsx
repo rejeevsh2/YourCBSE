@@ -1,6 +1,7 @@
 import { API_BASE_URL, authenticatedFetch } from "@/lib/auth/http";
 import { createFileRoute } from "@tanstack/react-router";
 import { BookOpen, Clock } from "lucide-react";
+import { PrivateLessonAttachment } from "@/components/lessons/PrivateLessonAttachment";
 import { PublicLayout, PublicPageShell } from "@/components/layout/PublicLayout";
 import { PageHeader } from "@/components/common/PageHeader";
 
@@ -11,6 +12,8 @@ interface LessonContent {
   content_type: string;
   content: string | null;
   file_path: string | null;
+  has_uploaded_file?: boolean;
+  file_mime_type?: string | null;
   external_url: string | null;
   display_order: number;
   is_free: boolean;
@@ -107,7 +110,24 @@ function LessonPage() {
                 </div>
               ) : null}
 
-              {item.external_url ? (
+              {item.content_type === "ppt" ? (
+                item.has_uploaded_file && !item.file_path ? (
+                  <PrivateLessonAttachment item={item} />
+                ) : (
+                  <p className="mt-4 rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
+                    This PowerPoint needs to be uploaded to YourSchool private storage
+                    before it can be viewed as online slides. Ask your teacher to re-upload it.
+                  </p>
+                )
+              ) : item.has_uploaded_file && !item.file_path ? (
+                <PrivateLessonAttachment item={item} />
+              ) : item.file_path ? (
+                <a href={item.file_path} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block font-medium text-primary hover:underline">
+                  Open uploaded file
+                </a>
+              ) : null}
+
+              {item.content_type !== "ppt" && item.external_url ? (
                 <a
                   href={item.external_url}
                   target="_blank"
